@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>diff-virtual-layer</title>
-    <link
-      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <style>
       body,
       html {
@@ -72,7 +69,7 @@
       // 在`VirtualLayer`图层中渲染内容
       const buildLayerDOM = (editor, dom, ranges, color) => {
         dom.innerText = ""; // 清理`DOM`
-        ranges.forEach((range) => {
+        ranges.forEach(range => {
           // 获取边界位置
           const startRect = editor.getBounds(range.index, 0);
           const endRect = editor.getBounds(range.index + range.length, 0);
@@ -125,10 +122,10 @@
         const prevContent = prev.getContents();
         const nextContent = next.getContents();
         // 按行计算索引位置
-        const buildLines = (content) => {
-          const text = content.ops.map((op) => op.insert || "").join("");
+        const buildLines = content => {
+          const text = content.ops.map(op => op.insert || "").join("");
           let index = 0;
-          const lines = text.split("\n").map((str) => {
+          const lines = text.split("\n").map(str => {
             const length = str.length + 1;
             const line = { start: index, length };
             index = index + length;
@@ -147,10 +144,7 @@
                 break;
               }
               // 迭代行 通过行索引构造`Range`
-              if (
-                index < line.start + line.length &&
-                line.start <= index + traceLength
-              ) {
+              if (index < line.start + line.length && line.start <= index + traceLength) {
                 const nextIndex = Math.max(line.start, index);
                 const nextLength = Math.min(
                   traceLength,

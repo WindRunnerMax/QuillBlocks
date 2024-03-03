@@ -23,7 +23,7 @@ module.exports = {
     commonjs: true,
     es2021: true,
   },
-  ignorePatterns: ["node_modules", "build", "dist", "coverage", "public"],
+  ignorePatterns: ["node_modules", "build", "dist", "coverage", "public", "*.html"],
   rules: {
     // 分号
     "semi": "error",
