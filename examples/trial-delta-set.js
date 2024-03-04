@@ -43,4 +43,13 @@ const ops = [
 ];
 
 const delta = new Delta(ops);
-console.log("delta :>> ", delta);
+/**
+ * @type {{
+ * attrs: Record<string, boolean | string>,
+ * ops: (typeof Delta.Op)[]
+ * }[]}
+ */
+const group = [];
+delta.eachLine((line, attributes) => {
+  group.push({ attrs: attributes, ops: line.ops });
+});
