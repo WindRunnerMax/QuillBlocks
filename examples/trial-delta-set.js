@@ -1,4 +1,6 @@
 const Delta = require("../packages/core/node_modules/quill-delta/dist/Delta");
+const { getUniqueId } = require("../packages/utils/node_modules/laser-utils/dist/lib/uuid");
+
 const ops = [
   { insert: "标题" },
   {
@@ -45,7 +47,7 @@ const ops = [
 const delta = new Delta(ops);
 /**
  * @type {{
- * attrs: Record<string, boolean | string>,
+ * attrs: Record<string, boolean | string | number>,
  * ops: (typeof Delta.Op)[]
  * }[]}
  */
@@ -53,3 +55,4 @@ const group = [];
 delta.eachLine((line, attributes) => {
   group.push({ attrs: attributes, ops: line.ops });
 });
+console.log("getUniqueId() :>> ", getUniqueId());

@@ -110,6 +110,10 @@ importers:
         version: 29.0.5(@babel/core@7.20.12)(babel-jest@29.4.1)(jest@29.4.1)(typescript@5.3.2)
 
   packages/utils:
+    dependencies:
+      laser-utils:
+        specifier: 0.0.2-alpha.13
+        version: 0.0.2-alpha.13
     devDependencies:
       '@babel/core':
         specifier: 7.20.12
@@ -4175,6 +4179,10 @@ packages:
   /known-css-properties@0.24.0:
     resolution: {integrity: sha512-RTSoaUAfLvpR357vWzAz/50Q/BmHfmE6ETSWfutT0AJiw10e6CmcdYRQJlLRd95B53D0Y2aD1jSxD3V3ySF+PA==}
     dev: true
+
+  /laser-utils@0.0.2-alpha.13:
+    resolution: {integrity: sha512-9Ke74rX3URh6V6XRI2E4sjQCohlZsgN4ELls8Uh/nOiTa5ko9hLXswjBeD70N1JXbmFdRlflzlsqtW1VKzlQEQ==}
+    dev: false
 
   /leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
