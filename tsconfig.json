@@ -20,13 +20,16 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "paths": { 
+    "paths": {
       "blocks-kit-core": ["./packages/core/src"],
       "blocks-kit-plugin": ["./packages/plugin/src"],
       "blocks-kit-utils": ["./packages/utils/src"]
-    },
+    }
   },
-  "include": [
-    "packages/*/src"
-  ]
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
+  "include": ["packages/*/src"]
 }

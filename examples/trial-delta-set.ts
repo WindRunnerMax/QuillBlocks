@@ -1,5 +1,6 @@
-const Delta = require("../packages/core/node_modules/quill-delta/dist/Delta");
-const { getUniqueId } = require("../packages/utils/node_modules/laser-utils/dist/lib/uuid");
+import Delta from "../packages/core/node_modules/quill-delta/dist/Delta";
+import type Op from "../packages/core/node_modules/quill-delta/dist/Op";
+import { getUniqueId } from "../packages/utils/node_modules/laser-utils/dist/lib/uuid";
 
 const ops = [
   { insert: "标题" },
@@ -49,35 +50,32 @@ const ROOT_ZONE = "ROOT";
 const CODE_BLOCK_KEY = "code-block";
 // 构造`Delta`实例
 const delta = new Delta(ops);
-/**
- * @type {{
- * attrs: Record<string, boolean | string | number>,
- * ops: (typeof Delta.Op)[]
- * }[]}
- */
 // 将`Delta`转换为`Line`的数据表达
-const group = [];
+type Line = {
+  attrs: Record<string, boolean | string | number>;
+  ops: Op[];
+};
+const group: Line[] = [];
 delta.eachLine((line, attributes) => {
   group.push({ attrs: attributes || {}, ops: line.ops });
 });
 // 用于对齐`Word`的数据表达
 // 同时为了方便处理嵌套关系 将数据结构拍平
-/** @type { Record<string, typeof group> } */
-const deltaSet = {};
+class DeltaSet {
+  private deltas: Record<string, Line[]> = {};
+  push(id: string, line: Line) {
+    if (!this.deltas[id]) this.deltas[id] = [];
+    this.deltas[id].push(line);
+  }
+}
+const deltaSet = new DeltaSet();
 // 标记当前正在处理的的`ZoneId`
 // 实际情况下可能会存在多层嵌套 此时需要用`stack`来处理
-/**@type { string } */
-let currentZone = ROOT_ZONE;
-/**@type { "NORMAL" | "CODEBLOCK" } */
+let currentZone: string = ROOT_ZONE;
 // 标记当前处理的类型 如果存在多种类型时会用得到
-let currentMode = "NORMAL";
-// 方便将`Line`置于`DeltaSet`
-deltaSet.push = function (id, line) {
-  if (!this[id]) this[id] = [];
-  this[id].push(line);
-};
+let currentMode: "NORMAL" | "CODEBLOCK" = "NORMAL";
 // 用于判断当前`Line`是否为`CodeBlock`
-const isCodeBlockLine = line => line && !!line.attrs[CODE_BLOCK_KEY];
+const isCodeBlockLine = (line: Line) => line && !!line.attrs[CODE_BLOCK_KEY];
 // 遍历`Line`的数据表达 构造`DeltaSet`
 for (let i = 0; i < group.length; ++i) {
   const prev = group[i - 1];
@@ -86,9 +84,8 @@ for (let i = 0; i < group.length; ++i) {
   // 代码块结构的起始
   if (!isCodeBlockLine(prev) && isCodeBlockLine(line)) {
     const newZoneId = getUniqueId();
-    /** @type { (typeof group)[number] } */
     // 存在嵌套关系 构造新的索引
-    const codeBlockLine = {
+    const codeBlockLine: Line = {
       attrs: {},
       ops: [{ insert: " ", attributes: { [CODE_BLOCK_KEY]: "true", zoneId: newZoneId } }],
     };
