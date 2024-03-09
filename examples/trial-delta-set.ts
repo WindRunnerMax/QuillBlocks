@@ -63,6 +63,11 @@ delta.eachLine((line, attributes) => {
 // 同时为了方便处理嵌套关系 将数据结构拍平
 class DeltaSet {
   private deltas: Record<string, Line[]> = {};
+
+  get(zoneId: string) {
+    return this.deltas[zoneId] || null;
+  }
+
   push(id: string, line: Line) {
     if (!this.deltas[id]) this.deltas[id] = [];
     this.deltas[id].push(line);
@@ -79,10 +84,10 @@ const isCodeBlockLine = (line: Line) => line && !!line.attrs[CODE_BLOCK_KEY];
 // 遍历`Line`的数据表达 构造`DeltaSet`
 for (let i = 0; i < group.length; ++i) {
   const prev = group[i - 1];
-  const line = group[i];
+  const current = group[i];
   const next = group[i + 1];
   // 代码块结构的起始
-  if (!isCodeBlockLine(prev) && isCodeBlockLine(line)) {
+  if (!isCodeBlockLine(prev) && isCodeBlockLine(current)) {
     const newZoneId = getUniqueId();
     // 存在嵌套关系 构造新的索引
     const codeBlockLine: Line = {
@@ -97,9 +102,153 @@ for (let i = 0; i < group.length; ++i) {
   // 将`Line`置入当前要处理的`Zone`
   deltaSet.push(currentZone, group[i]);
   // 代码块结构的结束
-  if (currentMode === "CODEBLOCK" && isCodeBlockLine(line) && !isCodeBlockLine(next)) {
+  if (currentMode === "CODEBLOCK" && isCodeBlockLine(current) && !isCodeBlockLine(next)) {
     currentZone = ROOT_ZONE;
     currentMode = "NORMAL";
   }
 }
-console.log(JSON.stringify(deltaSet));
+
+type Result = {
+  prefix?: string;
+  suffix?: string;
+  last?: boolean;
+};
+type Tag = {
+  isHTML?: boolean;
+};
+type LineOptions = {
+  prev: Line | null;
+  current: Line;
+  next: Line | null;
+  tag: Tag;
+};
+type LinePlugin = {
+  key: string; // 插件重载
+  match: (line: Line) => boolean; // 匹配`Line`规则
+  processor: (options: LineOptions) => Promise<Result | null>; // 处理函数
+};
+type LeafOptions = {
+  prev: Op | null;
+  current: Op;
+  next: Op | null;
+  tag: Tag;
+};
+type LeafPlugin = {
+  key: string; // 插件重载
+  match: (op: Op) => boolean; // 匹配`Op`规则
+  processor: (options: LeafOptions) => Promise<Result | null>; // 处理函数
+};
+
+const LINE_PLUGINS: LinePlugin[] = [];
+const LEAF_PLUGINS: LeafPlugin[] = [];
+const parseZoneContent = async (
+  zoneId: string,
+  options: { defaultZoneTag?: Tag; wrap?: string }
+): Promise<string | null> => {
+  const { defaultZoneTag = {}, wrap: cut = "\n\n" } = options;
+  const lines = deltaSet.get(zoneId);
+  if (!lines) return null;
+  const result: string[] = [];
+  for (let i = 0; i < lines.length; ++i) {
+    const prevLine = lines[i - 1] || null;
+    const currentLine = lines[i];
+    const nextLine = lines[i + 1] || null;
+    const prefixLineGroup: string[] = [];
+    const suffixLineGroup: string[] = [];
+    const tag: Tag = { ...defaultZoneTag }; // 不能影响外部传递的`Tag`
+    // 先处理行内容
+    for (const linePlugin of LINE_PLUGINS) {
+      if (!linePlugin.match(currentLine)) continue;
+      const result = await linePlugin.processor({
+        prev: prevLine,
+        current: currentLine,
+        next: nextLine,
+        tag: tag,
+      });
+      if (!result) continue;
+      result.prefix && prefixLineGroup.push(result.prefix);
+      result.suffix && suffixLineGroup.push(result.suffix);
+    }
+    const ops = currentLine.ops;
+    // 处理节点内容
+    for (let k = 0; k < ops.length; ++k) {
+      const prevOp = ops[k - 1] || null;
+      const currentOp = ops[k];
+      const nextOp = ops[k + 1] || null;
+      const prefixOpGroup: string[] = [];
+      const suffixOpGroup: string[] = [];
+      let last = false;
+      for (const leafPlugin of LEAF_PLUGINS) {
+        if (!leafPlugin.match(currentOp)) continue;
+        const result = await leafPlugin.processor({
+          prev: prevOp,
+          current: currentOp,
+          next: nextOp,
+          tag: { ...tag },
+        });
+        if (!result) continue;
+        result.prefix && prefixOpGroup.push(result.prefix);
+        result.suffix && suffixOpGroup.unshift(result.suffix);
+        if (result.last) {
+          last = true;
+          break;
+        }
+      }
+      if (!last && currentOp.insert) {
+        prefixOpGroup.push(currentOp.insert as string);
+      }
+      prefixLineGroup.push(prefixOpGroup.join("") + suffixOpGroup.join(""));
+    }
+    result.push(prefixLineGroup.join("") + suffixLineGroup.join(""));
+  }
+  return result.join(cut);
+};
+
+const BoldPlugin: LeafPlugin = {
+  key: "BOLD",
+  match: op => op.attributes && op.attributes.bold,
+  processor: async options => {
+    if (options.tag.isHTML) {
+      options.tag.isHTML = true;
+      return { prefix: "<strong>", suffix: "</strong>" };
+    } else {
+      return { prefix: "**", suffix: "**" };
+    }
+  },
+};
+LEAF_PLUGINS.push(BoldPlugin);
+
+const ItalicPlugin: LeafPlugin = {
+  key: "ITALIC",
+  match: op => op.attributes && op.attributes.italic,
+  processor: async options => {
+    if (options.tag.isHTML) {
+      options.tag.isHTML = true;
+      return { prefix: "<em>", suffix: "</em>" };
+    } else {
+      return { prefix: "_", suffix: "_" };
+    }
+  },
+};
+LEAF_PLUGINS.push(ItalicPlugin);
+
+const UnderlinePlugin: LeafPlugin = {
+  key: "UNDERLINE",
+  match: op => op.attributes && op.attributes.underline,
+  processor: async options => {
+    if (options.tag.isHTML) {
+      options.tag.isHTML = true;
+      return { prefix: "<ins>", suffix: "</ins>" };
+    } else {
+      return { prefix: "++", suffix: "++" };
+    }
+  },
+};
+LEAF_PLUGINS.push(UnderlinePlugin);
+
+const main = async () => {
+  // console.log(JSON.stringify(deltaSet));
+  const result = await parseZoneContent(ROOT_ZONE, {});
+  console.log(result);
+};
+main();
