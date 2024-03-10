@@ -2,6 +2,8 @@
 
 # log
 *.log
+*.docx
+*.pdf
 
 # dependencies
 node_modules
