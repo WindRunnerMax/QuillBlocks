@@ -1,6 +1,6 @@
 import Delta from "../packages/core/node_modules/quill-delta/dist/Delta";
 import type Op from "../packages/core/node_modules/quill-delta/dist/Op";
-import { getUniqueId } from "../packages/utils/node_modules/laser-utils/dist/lib/uuid";
+import { getUniqueId, isString } from "../packages/utils/node_modules/laser-utils";
 
 const ops = [
   { insert: "标题" },
@@ -45,6 +45,7 @@ const ops = [
   },
 ];
 
+/** 转换为`DeltaSet` */
 // 常量
 const ROOT_ZONE = "ROOT";
 const CODE_BLOCK_KEY = "code-block";
@@ -108,6 +109,7 @@ for (let i = 0; i < group.length; ++i) {
   }
 }
 
+/** `MarkDown`转换调度 */
 type Result = {
   prefix?: string;
   suffix?: string;
@@ -125,7 +127,7 @@ type LineOptions = {
 type LinePlugin = {
   key: string; // 插件重载
   match: (line: Line) => boolean; // 匹配`Line`规则
-  processor: (options: LineOptions) => Promise<Result | null>; // 处理函数
+  processor: (options: LineOptions) => Promise<Omit<Result, "last"> | null>; // 处理函数
 };
 type LeafOptions = {
   prev: Op | null;
@@ -195,7 +197,7 @@ const parseZoneContent = async (
         }
       }
       if (!last && currentOp.insert) {
-        prefixOpGroup.push(currentOp.insert as string);
+        isString(currentOp.insert) && prefixOpGroup.push(currentOp.insert);
       }
       prefixLineGroup.push(prefixOpGroup.join("") + suffixOpGroup.join(""));
     }
@@ -203,6 +205,25 @@ const parseZoneContent = async (
   }
   return result.join(cut);
 };
+
+/** 注册插件 */
+const HeadingPlugin: LinePlugin = {
+  key: "HEADING",
+  match: line => !!line.attrs.header,
+  processor: async options => {
+    if (options.tag.isHTML) {
+      options.tag.isHTML = true;
+      return {
+        prefix: `<h${options.current.attrs.header}>`,
+        suffix: `</h${options.current.attrs.header}>`,
+      };
+    } else {
+      const repeat = Number(options.current.attrs.header);
+      return { prefix: "#".repeat(repeat) + " " };
+    }
+  },
+};
+LINE_PLUGINS.push(HeadingPlugin);
 
 const BoldPlugin: LeafPlugin = {
   key: "BOLD",
@@ -245,6 +266,45 @@ const UnderlinePlugin: LeafPlugin = {
   },
 };
 LEAF_PLUGINS.push(UnderlinePlugin);
+
+const ImagePlugin: LeafPlugin = {
+  key: "IMAGE",
+  match: op => !!(op.insert && (op.insert as Record<string, unknown>).image),
+  processor: async options => {
+    const src = (options.current.insert as Record<string, string>).image;
+    if (options.tag.isHTML) {
+      options.tag.isHTML = true;
+      return { prefix: `<img src="${src}" />`, last: true };
+    } else {
+      // 在`Quill`默认实现中`Image`是行内元素 实际使用需要适配这个问题
+      return { prefix: `![Image](${src})`, last: true };
+    }
+  },
+};
+LEAF_PLUGINS.push(ImagePlugin);
+
+const CodeBlockPlugin: LeafPlugin = {
+  key: "CODEBLOCK",
+  match: op => !!(op.attributes && op.attributes[CODE_BLOCK_KEY]),
+  processor: async options => {
+    const zoneId = options.current.attributes?.zoneId as string | undefined;
+    const zone = zoneId && deltaSet.get(zoneId);
+    if (!zone) return null;
+    // 在`CodeBlock`中需要抹除所有格式信息
+    const lines = zone.map(line => line.ops.map(op => op.insert).join(""));
+    const code = lines.join("\n");
+    if (options.tag.isHTML) {
+      options.tag.isHTML = true;
+      return {
+        prefix: `<pre><code>${code}</code></pre>`,
+        last: true,
+      };
+    } else {
+      return { prefix: "```\n" + code, suffix: "\n```", last: true };
+    }
+  },
+};
+LEAF_PLUGINS.push(CodeBlockPlugin);
 
 const main = async () => {
   // console.log(JSON.stringify(deltaSet));
