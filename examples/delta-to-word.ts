@@ -1,6 +1,11 @@
 import fs from "fs";
 
-import type { IParagraphStyleOptions } from "../packages/plugin/node_modules/docx";
+import type {
+  ExternalHyperlink,
+  IParagraphStyleOptions,
+  Run,
+  Table,
+} from "../packages/plugin/node_modules/docx";
 import {
   BorderStyle,
   Document,
@@ -12,6 +17,7 @@ import {
   PageBreak,
   PageNumber,
   Paragraph,
+  sectionPageSizeDefaults,
   SimpleField,
   StyleLevel,
   Tab,
@@ -25,6 +31,11 @@ import {
 // https://github.com/dolanmiu/docx/issues/283
 // https://stackoverflow.com/questions/14360183/default-wordml-unit-measurement-pixel-or-point-or-inches
 
+/** 基准全局配置 */
+const PAGE_SIZE = {
+  WIDTH: sectionPageSizeDefaults.WIDTH - 1440 * 2,
+  HEIGHT: sectionPageSizeDefaults.HEIGHT - 1440 * 2,
+};
 const DEFAULT_FORMAT_TYPE = {
   H1: "H1",
   H2: "H2",
@@ -33,13 +44,13 @@ const DEFAULT_FORMAT_TYPE = {
   HF: "HF",
 };
 const DEFAULT_LINE_SPACING_FORMAT = {
-  before: 12 * 0.5 * 20,
-  after: 12 * 0.5 * 20,
-  line: 20 * 20,
+  before: 6 * 20, // 6 PT
+  after: 6 * 20, // 6 PT
+  line: 20 * 20, // 20 PT
   lineRule: LineRuleType.EXACT,
 };
 const DEFAULT_FONT_FORMAT = { ascii: "Times New Roman", eastAsia: "宋体" };
-const DEFAULT_TEXT_FORMAT = { size: 24, color: "000000", font: DEFAULT_FONT_FORMAT };
+const DEFAULT_TEXT_FORMAT = { size: 24 /** 12 PT */, color: "000000", font: DEFAULT_FONT_FORMAT };
 
 const PRESET_SCHEME_LIST: IParagraphStyleOptions[] = [
   {
@@ -103,6 +114,18 @@ const PRESET_SCHEME_LIST: IParagraphStyleOptions[] = [
   },
 ];
 
+/** `Word`转换调度 */
+type LineBlock = Table | Paragraph;
+type LeafBlock = Run | Table | ExternalHyperlink;
+type Tag = {
+  isInZone?: boolean;
+  width: number;
+};
+const makeZoneBlock = (zoneId: string) => {
+  // ...
+};
+
+/** 组装`Office Open XML` */
 const HeaderSection = new Header({
   children: [
     new Paragraph({
@@ -204,7 +227,7 @@ const doc = new Document({
   },
 });
 
-// Used to export the file into a .docx file
+// 生成`.docx`文件
 Packer.toBuffer(doc).then(buffer => {
   fs.writeFileSync(__dirname + "/word.docx", buffer);
 });
