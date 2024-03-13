@@ -4,13 +4,14 @@ import DeltaSet from "./delta-set";
 const { CODE_BLOCK_KEY, deltaSet, ROOT_ZONE } = DeltaSet;
 
 /** `MarkDown`转换调度 */
-type Result = {
+type Output = {
   prefix?: string;
   suffix?: string;
   last?: boolean;
 };
 type Tag = {
   isHTML?: boolean;
+  isInZone?: boolean;
 };
 type LineOptions = {
   prev: Line | null;
@@ -21,7 +22,7 @@ type LineOptions = {
 type LinePlugin = {
   key: string; // 插件重载
   match: (line: Line) => boolean; // 匹配`Line`规则
-  processor: (options: LineOptions) => Promise<Omit<Result, "last"> | null>; // 处理函数
+  processor: (options: LineOptions) => Promise<Omit<Output, "last"> | null>; // 处理函数
 };
 type LeafOptions = {
   prev: Op | null;
@@ -32,7 +33,7 @@ type LeafOptions = {
 type LeafPlugin = {
   key: string; // 插件重载
   match: (op: Op) => boolean; // 匹配`Op`规则
-  processor: (options: LeafOptions) => Promise<Result | null>; // 处理函数
+  processor: (options: LeafOptions) => Promise<Output | null>; // 处理函数
 };
 
 const LINE_PLUGINS: LinePlugin[] = [];
@@ -52,7 +53,7 @@ const parseZoneContent = async (
     const prefixLineGroup: string[] = [];
     const suffixLineGroup: string[] = [];
     const tag: Tag = { ...defaultZoneTag }; // 不能影响外部传递的`Tag`
-    // 先处理行内容
+    // 先处理行内容 // 需要先处理行格式
     for (const linePlugin of LINE_PLUGINS) {
       if (!linePlugin.match(currentLine)) continue;
       const result = await linePlugin.processor({
