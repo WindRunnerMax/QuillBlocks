@@ -21,6 +21,7 @@ type LineOptions = {
 };
 type LinePlugin = {
   key: string; // 插件重载
+  priority?: number; // 插件优先级
   match: (line: Line) => boolean; // 匹配`Line`规则
   processor: (options: LineOptions) => Promise<Omit<Output, "last"> | null>; // 处理函数
 };
@@ -32,6 +33,7 @@ type LeafOptions = {
 };
 type LeafPlugin = {
   key: string; // 插件重载
+  priority?: number; // 插件优先级
   match: (op: Op) => boolean; // 匹配`Op`规则
   processor: (options: LeafOptions) => Promise<Output | null>; // 处理函数
 };
