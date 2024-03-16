@@ -54,7 +54,8 @@ const parseZoneContent = async (
     const nextLine = lines[i + 1] || null;
     const prefixLineGroup: string[] = [];
     const suffixLineGroup: string[] = [];
-    const tag: Tag = { ...defaultZoneTag }; // 不能影响外部传递的`Tag`
+    // 不能影响外部传递的`Tag`
+    const tag: Tag = { ...defaultZoneTag };
     // 先处理行内容 // 需要先处理行格式
     for (const linePlugin of LINE_PLUGINS) {
       if (!linePlugin.match(currentLine)) continue;
