@@ -6,12 +6,12 @@ import type {
   IParagraphOptions,
   IParagraphStyleOptions,
   IRunOptions,
+  ISpacingProperties,
   ITableCellOptions,
   ITableOptions,
   ITableRowOptions,
   Run,
 } from "../packages/utils/node_modules/docx";
-import { Table } from "../packages/utils/node_modules/docx";
 import {
   BorderStyle,
   Document,
@@ -27,6 +27,7 @@ import {
   SimpleField,
   StyleLevel,
   Tab,
+  Table,
   TableCell,
   TableLayoutType,
   TableOfContents,
@@ -144,6 +145,7 @@ type Tag = {
   width: number;
   fontSize?: number;
   fontColor?: string;
+  spacing?: ISpacingProperties;
   paragraphFormat?: string;
   isInZone?: boolean;
   isInCodeBlock?: boolean;
@@ -259,15 +261,15 @@ const ImagePlugin: LeafPlugin = {
   key: "IMAGE",
   match: (op: Op) => !!(op.insert && (op.insert as Record<string, unknown>).image),
   processor: async (options: LeafOptions) => {
-    const { current } = options;
+    const { current, tag } = options;
     const src = (current.insert as Record<string, unknown>)?.image as string;
     if (!src) return null;
-    options.tag.paragraphFormat = DEFAULT_FORMAT_TYPE.IMAGE;
+    tag.paragraphFormat = DEFAULT_FORMAT_TYPE.IMAGE;
     const base64 = src.split(",")[1];
     const buffer = Buffer.from(base64, "base64");
     const { width = 100, height = 100 } = imageSize(buffer);
     const scale = height / width;
-    const targetWidth = Math.min(options.tag.width, daxToPixel(width));
+    const targetWidth = Math.min(daxToPixel(tag.width), width);
     const targetHeight = targetWidth * scale;
     const config: WithDefaultOption<IImageOptions> = {
       data: buffer,
@@ -294,6 +296,7 @@ const CodeBlockPlugin: LeafPlugin = {
         isInCodeBlock: true,
         fontSize: 20,
         width: options.tag.width - MARGIN * 2,
+        spacing: { ...DEFAULT_LINE_SPACING_FORMAT, after: 0, before: 0 },
       },
     });
     const border = { size: 1, style: BorderStyle.SINGLE, color: "#e5e6eb" };
@@ -337,32 +340,38 @@ const TextPlugin: LeafPlugin = {
 };
 LEAF_PLUGINS.push(TextPlugin);
 
+const HeadingPlugin: LinePlugin = {
+  key: "HEADING",
+  match: (line: Line) => !!(line.attrs && line.attrs.header),
+  processor: async (options: LineOptions) => {
+    const { current, leaves } = options;
+    const attrs = current.attrs;
+    const level = Number(attrs.header);
+    const config: WithDefaultOption<IParagraphOptions> = {};
+    switch (level) {
+      case 1:
+        config.style = DEFAULT_FORMAT_TYPE.H1;
+        break;
+      case 2:
+        config.style = DEFAULT_FORMAT_TYPE.H2;
+        break;
+    }
+    config.children = leaves;
+    return new Paragraph(config);
+  },
+};
+LINE_PLUGINS.push(HeadingPlugin);
+
 const ParagraphPlugin: LinePlugin = {
   key: "PARAGRAPH",
   match: () => true,
   processor: async (options: LineOptions) => {
-    const { current, leaves, tag } = options;
-    const attrs = current.attrs;
+    const { leaves, tag } = options;
     const config: WithDefaultOption<IParagraphOptions> = {};
     const isBlockNode = leaves.some(leaf => leaf instanceof Table);
     config.style = tag.paragraphFormat || DEFAULT_FORMAT_TYPE.CONTENT;
     if (!isBlockNode) {
-      if (attrs.header) {
-        // 处理标题格式
-        const level = Number(attrs.header);
-        switch (level) {
-          case 1:
-            config.style = DEFAULT_FORMAT_TYPE.H1;
-            break;
-          case 2:
-            config.style = DEFAULT_FORMAT_TYPE.H2;
-            break;
-        }
-      }
-      if (tag.isInCodeBlock) {
-        // `CodeBlock`需要调整行间距
-        config.spacing = { ...DEFAULT_LINE_SPACING_FORMAT, after: 0, before: 0 };
-      }
+      if (tag.spacing) config.spacing = tag.spacing;
       config.children = leaves;
       return new Paragraph(config);
     } else {
