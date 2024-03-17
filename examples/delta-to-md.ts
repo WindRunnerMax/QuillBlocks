@@ -1,7 +1,8 @@
 import { isString } from "../packages/utils/node_modules/laser-utils";
 import type { Line, Op } from "./delta-set";
 import DeltaSet from "./delta-set";
-const { CODE_BLOCK_KEY, deltaSet, ROOT_ZONE } = DeltaSet;
+const { CODE_BLOCK_KEY, ops, opsToDeltaSet, ROOT_ZONE } = DeltaSet;
+const deltaSet = opsToDeltaSet(ops);
 
 /** `MarkDown`转换调度 */
 type Output = {

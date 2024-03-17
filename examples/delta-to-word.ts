@@ -41,11 +41,8 @@ import imageSize from "../packages/utils/node_modules/image-size";
 import { isString } from "../packages/utils/node_modules/laser-utils";
 import type { Line, Op } from "./delta-set";
 import DeltaSet from "./delta-set";
-const { deltaSet, ROOT_ZONE, CODE_BLOCK_KEY } = DeltaSet;
-
-// https://docx.js.org/
-// https://github.com/dolanmiu/docx/issues/283
-// https://stackoverflow.com/questions/14360183/default-wordml-unit-measurement-pixel-or-point-or-inches
+const { CODE_BLOCK_KEY, ops, opsToDeltaSet, ROOT_ZONE } = DeltaSet;
+const deltaSet = opsToDeltaSet(ops);
 
 /** 基准全局配置 */
 const PAGE_SIZE = {
@@ -469,3 +466,7 @@ const main = async () => {
   });
 };
 main();
+
+// https://docx.js.org/
+// https://github.com/dolanmiu/docx/issues/283
+// https://stackoverflow.com/questions/14360183/default-wordml-unit-measurement-pixel-or-point-or-inches
