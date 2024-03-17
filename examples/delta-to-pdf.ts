@@ -110,7 +110,7 @@ const DEFAULT_FORMAT: Style = {
   fontSize: 14,
 };
 
-/** `Word`转换调度 */
+/** `PDF`转换调度 */
 type LineBlock = Content;
 type LeafBlock = ContentText | ContentTable | ContentImage;
 type Tag = {

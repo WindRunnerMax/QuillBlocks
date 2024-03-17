@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>delta-to-word</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+    <style>
+      body,
+      html {
+        background-color: #eee;
+        font-size: 14px;
+      }
+
+      .editor-container {
+        margin: 0 auto;
+        width: 700px;
+        background-color: #fff;
+      }
+      .editor-container > .ql-toolbar {
+        border: unset;
+        border-bottom: 1px solid #eee;
+      }
+      #editor {
+        background-color: #fff;
+        border: unset;
+      }
+      .export {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px;
+        color: #fff;
+        background-color: #165dff;
+        border-radius: 3px;
+        cursor: pointer;
+        user-select: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root">
+      <div class="editor-container">
+        <div id="editor"></div>
+      </div>
+    </div>
+    <div class="export" onClick="exportWord()">导出Word</div>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      const dom = document.getElementById("editor");
+      const editor = new Quill(dom, {
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, false] }],
+            ["bold", "italic", "underline"],
+            ["image", "code-block"],
+          ],
+        },
+        placeholder: "Enter Text...",
+        theme: "snow",
+      });
+      window.editor = editor;
+      editor.setContents([
+        { insert: "Heading" },
+        {
+          insert: "\n",
+          attributes: { header: 1 },
+        },
+        { insert: "Warning: only supports English!", attributes: { bold: true } },
+        { insert: "\n" },
+        { insert: "First Line " },
+        {
+          insert: "Bold",
+          attributes: { bold: true },
+        },
+        { insert: ", " },
+        {
+          insert: "Italic",
+          attributes: { italic: true },
+        },
+        { insert: ", " },
+        {
+          insert: "Underline",
+          attributes: { underline: true },
+        },
+        { insert: ", " },
+        {
+          insert: "Compose",
+          attributes: { underline: true, italic: true, bold: true },
+        },
+        { insert: "." },
+        { insert: "\nCodeBlock" },
+        {
+          insert: "\n",
+          attributes: { header: 2 },
+        },
+        { insert: 'const a = "Hello World";' },
+        {
+          insert: "\n",
+          attributes: { "code-block": "plain" },
+        },
+        { insert: "console.log(a);" },
+        {
+          insert: "\n",
+          attributes: { "code-block": "plain" },
+        },
+        { insert: "\n" },
+      ]);
+    </script>
+    <script>
+      const Delta = Quill.import("delta");
+      const opt = Object.prototype.toString;
+      const isString = value => {
+        return opt.call(value) === "[object String]";
+      };
+      const CHARTS = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm0123456789";
+      const getUniqueId = (len = 10) => {
+        const chars = new Array(len - 1).fill("");
+        return (
+          CHARTS[Math.floor(Math.random() * 52)] +
+          chars.map(() => CHARTS[Math.floor(Math.random() * CHARTS.length)]).join("")
+        );
+      };
+      // 常量
+      const ROOT_ZONE = "ROOT";
+      const CODE_BLOCK_KEY = "code-block";
+      /** 转换为`DeltaSet` */
+      const transformToDeltaSet = () => {
+        const delta = editor.getContents();
+        // 构造`Delta`实例
+        // 将`Delta`转换为`Line`的数据表达
+        const group = [];
+        delta.eachLine((line, attributes) => {
+          group.push({ attrs: attributes || {}, ops: line.ops });
+        });
+        // 用于对齐`Word`的数据表达
+        // 同时为了方便处理嵌套关系 将数据结构拍平
+        class DeltaSet {
+          deltas = {};
+          get(zoneId) {
+            return this.deltas[zoneId] || null;
+          }
+          push(id, line) {
+            if (!this.deltas[id]) this.deltas[id] = [];
+            this.deltas[id].push(line);
+          }
+        }
+        const deltaSet = new DeltaSet();
+        // 标记当前正在处理的的`ZoneId`
+        // 实际情况下可能会存在多层嵌套 此时需要用`stack`来处理
+        let currentZone = ROOT_ZONE;
+        // 标记当前处理的类型 如果存在多种类型时会用得到
+        let currentMode = "NORMAL";
+        // 用于判断当前`Line`是否为`CodeBlock`
+        const isCodeBlockLine = line => line && !!line.attrs[CODE_BLOCK_KEY];
+        // 遍历`Line`的数据表达 构造`DeltaSet`
+        for (let i = 0; i < group.length; ++i) {
+          const prev = group[i - 1];
+          const current = group[i];
+          const next = group[i + 1];
+          // 代码块结构的起始
+          if (!isCodeBlockLine(prev) && isCodeBlockLine(current)) {
+            const newZoneId = getUniqueId();
+            // 存在嵌套关系 构造新的索引
+            const codeBlockLine = {
+              attrs: {},
+              ops: [{ insert: " ", attributes: { [CODE_BLOCK_KEY]: "true", zoneId: newZoneId } }],
+            };
+            // 需要在当前`Zone`加入指向新`Zone`的索引`Line`
+            deltaSet.push(currentZone, codeBlockLine);
+            currentZone = newZoneId;
+            currentMode = "CODEBLOCK";
+          }
+          // 将`Line`置入当前要处理的`Zone`
+          deltaSet.push(currentZone, group[i]);
+          // 代码块结构的结束
+          if (currentMode === "CODEBLOCK" && isCodeBlockLine(current) && !isCodeBlockLine(next)) {
+            currentZone = ROOT_ZONE;
+            currentMode = "NORMAL";
+          }
+        }
+        // `DeltaSet`实例
+        console.log(deltaSet);
+        return deltaSet;
+      };
+      /** 导出`Word` */
+      const exportWord = () => {
+        if (!window.pdfMake) {
+          alert("需要等待模块加载完成");
+          return;
+        }
+        const deltaSet = transformToDeltaSet();
+        /** 基准全局配置 */
+        const FORMAT_TYPE = {
+          H1: "H1",
+          H2: "H2",
+        };
+        const PRESET_FORMAT = {
+          [FORMAT_TYPE.H1]: {
+            fontSize: 22,
+            bold: true,
+          },
+          [FORMAT_TYPE.H2]: {
+            fontSize: 18,
+            bold: true,
+          },
+        };
+        const DEFAULT_FORMAT = {
+          fontSize: 14,
+        };
+
+        /** `PDF`转换调度 */
+        const LEAF_PLUGINS = [];
+        const LINE_PLUGINS = [];
+        const parseZoneContent = async (zoneId, options) => {
+          const { defaultZoneTag = {} } = options;
+          const lines = deltaSet.get(zoneId);
+          if (!lines) return null;
+          const target = [];
+          for (let i = 0; i < lines.length; ++i) {
+            const prevLine = lines[i - 1] || null;
+            const currentLine = lines[i];
+            const nextLine = lines[i + 1] || null;
+            // 不能影响外部传递的`Tag`
+            const tag = { ...defaultZoneTag };
+            // 处理节点内容
+            const ops = currentLine.ops;
+            const leaves = [];
+            for (let k = 0; k < ops.length; ++k) {
+              const prevOp = ops[k - 1] || null;
+              const currentOp = ops[k];
+              const nextOp = ops[k + 1] || null;
+              const hit = LEAF_PLUGINS.find(leafPlugin => leafPlugin.match(currentOp));
+              if (hit) {
+                const result = await hit.processor({
+                  prev: prevOp,
+                  current: currentOp,
+                  next: nextOp,
+                  tag: tag,
+                });
+                result && leaves.push(result);
+              }
+            }
+            // 处理行内容
+            const hit = LINE_PLUGINS.find(linePlugin => linePlugin.match(currentLine));
+            if (hit) {
+              const result = await hit.processor({
+                prev: prevLine,
+                current: currentLine,
+                next: nextLine,
+                tag: tag,
+                leaves: leaves,
+              });
+              result && target.push(result);
+            }
+          }
+          return target;
+        };
+
+        /** 注册插件 */
+        const makeZoneBlock = async (config = {}) => {
+          const { width = "*", children = [], fill } = config;
+          const cell = { stack: children, fillColor: fill };
+          return {
+            table: { headerRows: 0, widths: [width], body: [[cell]] },
+          };
+        };
+
+        const ImagePlugin = {
+          key: "IMAGE",
+          match: op => !!(op.insert && op.insert.image),
+          processor: async options => {
+            const { current } = options;
+            const src = current.insert && current.insert.image;
+            if (!src) return null;
+            return { image: src };
+          },
+        };
+        LEAF_PLUGINS.push(ImagePlugin);
+
+        const CodeBlockPlugin = {
+          key: "CODEBLOCK",
+          match: op => !!(op.attributes && op.attributes[CODE_BLOCK_KEY]),
+          processor: async options => {
+            const { current, tag } = options;
+            const zoneId = current.attributes?.zoneId;
+            const zone = zoneId && deltaSet.get(zoneId);
+            if (!zone) return null;
+            const content = await parseZoneContent(zoneId, {
+              defaultZoneTag: {
+                ...tag,
+                isInZone: true,
+                isInCodeBlock: true,
+                fontSize: 12,
+              },
+            });
+            const block = makeZoneBlock({
+              fill: "#f2f3f5",
+              children: content || [],
+            });
+            return block;
+          },
+        };
+        LEAF_PLUGINS.push(CodeBlockPlugin);
+
+        const TextPlugin = {
+          key: "TEXT",
+          match: () => true,
+          processor: async options => {
+            const { current, tag } = options;
+            if (!isString(current.insert)) return null;
+            const config = {
+              text: current.insert,
+            };
+            const attrs = current.attributes || {};
+            if (attrs.bold) config.bold = true;
+            if (attrs.italic) config.italics = true;
+            if (attrs.underline) config.decoration = "underline";
+            if (tag.fontSize) config.fontSize = tag.fontSize;
+            return config;
+          },
+        };
+        LEAF_PLUGINS.push(TextPlugin);
+
+        const HeadingPlugin = {
+          key: "HEADING",
+          match: line => !!(line.attrs && line.attrs.header),
+          processor: async options => {
+            const { current, leaves } = options;
+            const attrs = current.attrs;
+            const level = Number(attrs.header);
+            const config = { text: leaves };
+            switch (level) {
+              case 1:
+                config.style = FORMAT_TYPE.H1;
+                break;
+              case 2:
+                config.style = FORMAT_TYPE.H2;
+                break;
+            }
+            return config;
+          },
+        };
+        LINE_PLUGINS.push(HeadingPlugin);
+
+        const ParagraphPlugin = {
+          key: "PARAGRAPH",
+          match: () => true,
+          processor: async options => {
+            const { leaves } = options;
+            if (leaves.length === 1 && !leaves[0].text) {
+              // 单个`Zone`不需要包裹 通常是独立的块元素
+              return leaves[0];
+            } else {
+              const isContainBlock = leaves.some(leaf => !leaf.text);
+              if (isContainBlock) {
+                // 需要包裹组合嵌套`BlockStack`
+                return { layout: "noBorders", table: { headerRows: 0, body: [leaves] } };
+              } else {
+                return { text: leaves };
+              }
+            }
+          },
+        };
+        LINE_PLUGINS.push(ParagraphPlugin);
+
+        /** 组装`PDF`数据 */
+        const main = async () => {
+          const content = (await parseZoneContent(ROOT_ZONE, {})) || [];
+          const doc = {
+            content: content,
+            styles: PRESET_FORMAT,
+            defaultStyle: DEFAULT_FORMAT,
+          };
+          pdfMake.createPdf(doc).download();
+        };
+        main();
+      };
+    </script>
+    <script defer src="https://unpkg.com/pdfmake@0.2.10/build/pdfmake.min.js"></script>
+    <script defer src="https://unpkg.com/pdfmake@0.2.10/build/vfs_fonts.js"></script>
+  </body>
+</html>
