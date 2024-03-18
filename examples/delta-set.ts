@@ -71,7 +71,7 @@ const opsToDeltaSet = (ops: Op[]) => {
   delta.eachLine((line, attributes) => {
     group.push({ attrs: attributes || {}, ops: line.ops });
   });
-  // 用于对齐`Word`的数据表达
+  // 用于对齐渲染时的数据表达
   // 同时为了方便处理嵌套关系 将数据结构拍平
   class DeltaSet {
     private deltas: Record<string, Line[]> = {};

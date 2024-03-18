@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>delta-to-word</title>
+    <title>delta-to-pdf</title>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <style>
       body,
@@ -45,7 +45,7 @@
         <div id="editor"></div>
       </div>
     </div>
-    <div class="export" onClick="exportWord()">导出Word</div>
+    <div class="export" onClick="exportPDF()">导出PDF</div>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
       const dom = document.getElementById("editor");
@@ -67,7 +67,7 @@
           insert: "\n",
           attributes: { header: 1 },
         },
-        { insert: "Warning: only supports English!", attributes: { bold: true } },
+        { insert: "Warning: only support English!", attributes: { bold: true } },
         { insert: "\n" },
         { insert: "First Line " },
         {
@@ -134,7 +134,7 @@
         delta.eachLine((line, attributes) => {
           group.push({ attrs: attributes || {}, ops: line.ops });
         });
-        // 用于对齐`Word`的数据表达
+        // 用于对齐`PDF`的数据表达
         // 同时为了方便处理嵌套关系 将数据结构拍平
         class DeltaSet {
           deltas = {};
@@ -184,8 +184,8 @@
         console.log(deltaSet);
         return deltaSet;
       };
-      /** 导出`Word` */
-      const exportWord = () => {
+      /** 导出`PDF` */
+      const exportPDF = () => {
         if (!window.pdfMake) {
           alert("需要等待模块加载完成");
           return;
@@ -258,7 +258,6 @@
           return target;
         };
 
-        /** 注册插件 */
         const makeZoneBlock = async (config = {}) => {
           const { width = "*", children = [], fill } = config;
           const cell = { stack: children, fillColor: fill };
@@ -267,6 +266,24 @@
           };
         };
 
+        const composeParagraph = leaves => {
+          if (leaves.length === 0) {
+            return { text: "\n" };
+          } else if (leaves.length === 1 && !leaves[0].text) {
+            // 单个`Zone`不需要包裹 通常是独立的块元素
+            return leaves[0];
+          } else {
+            const isContainBlock = leaves.some(leaf => !leaf.text);
+            if (isContainBlock) {
+              // 需要包裹组合嵌套`BlockStack`
+              return { layout: "noBorders", table: { headerRows: 0, body: [leaves] } };
+            } else {
+              return { text: leaves };
+            }
+          }
+        };
+
+        /** 注册插件 */
         const ImagePlugin = {
           key: "IMAGE",
           match: op => !!(op.insert && op.insert.image),
@@ -274,7 +291,15 @@
             const { current } = options;
             const src = current.insert && current.insert.image;
             if (!src) return null;
-            return { image: src };
+            return new Promise(resolve => {
+              const img = new Image();
+              img.onload = () => {
+                const width =Math.min(img.naturalWidth || 100, 500);
+                resolve({ image: src, width });
+              };
+              img.onerror = () => resolve(null);
+              img.src = src;
+            });
           },
         };
         LEAF_PLUGINS.push(ImagePlugin);
@@ -330,7 +355,7 @@
             const { current, leaves } = options;
             const attrs = current.attrs;
             const level = Number(attrs.header);
-            const config = { text: leaves };
+            const config = composeParagraph(leaves);
             switch (level) {
               case 1:
                 config.style = FORMAT_TYPE.H1;
@@ -349,18 +374,7 @@
           match: () => true,
           processor: async options => {
             const { leaves } = options;
-            if (leaves.length === 1 && !leaves[0].text) {
-              // 单个`Zone`不需要包裹 通常是独立的块元素
-              return leaves[0];
-            } else {
-              const isContainBlock = leaves.some(leaf => !leaf.text);
-              if (isContainBlock) {
-                // 需要包裹组合嵌套`BlockStack`
-                return { layout: "noBorders", table: { headerRows: 0, body: [leaves] } };
-              } else {
-                return { text: leaves };
-              }
-            }
+            return composeParagraph(leaves);
           },
         };
         LINE_PLUGINS.push(ParagraphPlugin);

@@ -196,7 +196,6 @@ const parseZoneContent = async (
   return target;
 };
 
-/** 注册插件 */
 const makeZoneBlock = async (
   config: {
     fill?: string;
@@ -211,6 +210,25 @@ const makeZoneBlock = async (
   };
 };
 
+const composeParagraph = (leaves: LeafBlock[]): LeafBlock => {
+  if (leaves.length === 0) {
+    // 空行需要兜底
+    return { text: "\n" };
+  } else if (leaves.length === 1 && !leaves[0].text) {
+    // 单个`Zone`不需要包裹 通常是独立的块元素
+    return leaves[0];
+  } else {
+    const isContainBlock = leaves.some(leaf => !leaf.text);
+    if (isContainBlock) {
+      // 需要包裹组合嵌套`BlockTable` // 实际还需要计算宽度避免越界
+      return { layout: "noBorders", table: { headerRows: 0, body: [leaves] } };
+    } else {
+      return { text: leaves };
+    }
+  }
+};
+
+/** 注册插件 */
 const ImagePlugin: LeafPlugin = {
   key: "IMAGE",
   match: (op: Op) => !!(op.insert && (op.insert as Record<string, unknown>).image),
@@ -274,7 +292,7 @@ const HeadingPlugin: LinePlugin = {
     const { current, leaves } = options;
     const attrs = current.attrs;
     const level = Number(attrs.header);
-    const config: ContentText = { text: leaves };
+    const config = composeParagraph(leaves);
     switch (level) {
       case 1:
         config.style = FORMAT_TYPE.H1;
@@ -293,18 +311,7 @@ const ParagraphPlugin: LinePlugin = {
   match: () => true,
   processor: async (options: LineOptions) => {
     const { leaves } = options;
-    if (leaves.length === 1 && !leaves[0].text) {
-      // 单个`Zone`不需要包裹 通常是独立的块元素
-      return leaves[0];
-    } else {
-      const isContainBlock = leaves.some(leaf => !leaf.text);
-      if (isContainBlock) {
-        // 需要包裹组合嵌套`BlockStack`
-        return { layout: "noBorders", table: { headerRows: 0, body: [leaves] } };
-      } else {
-        return { text: leaves };
-      }
-    }
+    return composeParagraph(leaves);
   },
 };
 LINE_PLUGINS.push(ParagraphPlugin);

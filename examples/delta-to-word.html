@@ -372,7 +372,7 @@
           key: "IMAGE",
           match: op => !!(op.insert && op.insert.image),
           processor: async options => {
-            const { current,tag } = options;
+            const { current, tag } = options;
             const src = current.insert && current.insert.image;
             if (!src) return null;
             tag.paragraphFormat = DEFAULT_FORMAT_TYPE.IMAGE;
@@ -391,7 +391,7 @@
                 };
                 resolve(new ImageRun(config));
               };
-              img.onerror = () =>  resolve(null);
+              img.onerror = () => resolve(null);
               img.src = src;
             });
           },
