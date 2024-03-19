@@ -85,6 +85,7 @@ const main = async () => {
   header1Map.set(PDFName.of("Title"), PDFHexString.fromText("HEADER1"));
   header1Map.set(PDFName.of("Dest"), PDFName.of("Hash1"));
   header1Map.set(PDFName.of("Parent"), root);
+  header1Map.set(PDFName.of("Next"), header2);
   header1Map.set(PDFName.of("First"), header11);
   header1Map.set(PDFName.of("Last"), header12);
   header1Map.set(PDFName.of("Count"), PDFNumber.of(2));
@@ -134,8 +135,8 @@ const main = async () => {
   rootMap.set(PDFName.of("Last"), header2);
   rootMap.set(PDFName.of("Count"), PDFNumber.of(6));
   context.assign(root, PDFDict.fromMapWithContext(rootMap, context));
-
   pdf.catalog.set(PDFName.of("Outlines"), root);
+
   const pdfBytes = await pdf.save();
   fs.writeFileSync(__dirname + "/doc-with-outline.pdf", pdfBytes);
 };
