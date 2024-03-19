@@ -63,13 +63,14 @@ const main = async () => {
     next();
   };
   pdfDoc.pipe(writableStream);
-  pdfDoc.end();
   const buffer = await new Promise<Buffer>(resolve => {
-    writableStream.on("finish", async () => {
+    writableStream.on("finish", () => {
       const data = Buffer.concat(slice);
       resolve(data);
     });
   });
+  pdfDoc.end();
+
   const pdf = await PDFDocument.load(buffer);
   const context = pdf.context;
 
