@@ -18,7 +18,7 @@ import type { Line, Op } from "./delta-set";
 import DeltaSet from "./delta-set";
 const PdfPrinter = pdfMake as typeof PDF;
 
-// ! 注意: 需要指定字体 可以考虑思源宋体 + 江城斜宋体
+// !: 注意需要指定字体 可以考虑思源宋体 + 江城斜宋体
 // https://github.com/RollDevil/SourceHanSerifSC
 const FONT_PATH = "/Users/czy/Library/Fonts/";
 const FONTS = {
