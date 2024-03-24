@@ -95,8 +95,8 @@ const parseZoneContent = async (
           break;
         }
       }
-      if (!last && currentOp.insert) {
-        isString(currentOp.insert) && prefixOpGroup.push(currentOp.insert);
+      if (!last && currentOp.insert && isString(currentOp.insert)) {
+        prefixOpGroup.push(currentOp.insert);
       }
       prefixLineGroup.push(prefixOpGroup.join("") + suffixOpGroup.join(""));
     }
