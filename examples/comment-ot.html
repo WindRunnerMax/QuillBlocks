@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>comment-ot</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+    <style>
+      body,
+      html {
+        background-color: #eee;
+        font-size: 14px;
+      }
+      .editor-container {
+        margin: 0 auto;
+        width: 700px;
+        background-color: #fff;
+      }
+      .editor-container > .ql-toolbar {
+        border: unset;
+        border-bottom: 1px solid #eee;
+      }
+      #editor {
+        background-color: #fff;
+        border: unset;
+      }
+      .apply-comment {
+        width: auto !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root">
+      <div class="editor-container">
+        <div id="toolbar" style="display: none">
+          <select class="ql-header"></select>
+          <button class="ql-bold"></button>
+          <button class="ql-italic"></button>
+          <button class="ql-underline"></button>
+          <button class="apply-comment">评论</button>
+        </div>
+        <div id="editor"></div>
+      </div>
+    </div>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      const dom = document.getElementById("editor");
+      const toolbar = document.getElementById("toolbar");
+      const editor = new Quill(dom, {
+        modules: {
+          toolbar: toolbar,
+        },
+        placeholder: "Enter Text...",
+        theme: "snow",
+      });
+      toolbar.style.display = "block";
+      window.editor = editor;
+      editor.setContents([
+        { insert: "为了演示实际效果，此处的评论是使用虚拟图层的方式实现的。" },
+        { insert: "\n" },
+      ]);
+    </script>
+    <script>
+      const applyComment = document.querySelector(".apply-comment");
+      applyComment.onmousedown = e => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      applyComment.onclick = e => {
+        const selection = editor.getSelection();
+        if (selection) {
+          console.log("添加评论:", selection);
+        }
+      };
+      const Delta = Quill.import("delta");
+    </script>
+  </body>
+</html>

@@ -1,14 +1,16 @@
 # QuillBlocks
 
 ## Blog
-[初探富文本之富文本概述](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之富文本概述.md)     
-[初探富文本之编辑器引擎](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之编辑器引擎.md)     
-[初探富文本之OT协同算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之OT协同算法.md)      
-[初探富文本之OT协同实例](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之OT协同实例.md)     
-[初探富文本之CRDT协同算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之CRDT协同算法.md)     
-[初探富文本之OT协同实例](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之OT协同实例.md)      
-[初探富文本之文档diff算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之文档diff算法.md)   
-[初探富文本之在线文档交付](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之在线文档交付.md)   
+
+* [初探富文本之富文本概述](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之富文本概述.md)
+* [初探富文本之编辑器引擎](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之编辑器引擎.md)
+* [初探富文本之OT协同算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之OT协同算法.md)
+* [初探富文本之OT协同实例](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之OT协同实例.md)
+* [初探富文本之CRDT协同算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之CRDT协同算法.md)
+* [初探富文本之CRDT协同实例](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之CRDT协同实例.md) 
+* [初探富文本之React实时预览](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之React实时预览.md) 
+* [初探富文本之文档diff算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之文档diff算法.md)  
+* [初探富文本之在线文档交付](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之在线文档交付.md)   
 
 ## Example
 
