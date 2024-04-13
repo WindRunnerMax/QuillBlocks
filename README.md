@@ -11,6 +11,7 @@
 * [初探富文本之React实时预览](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之React实时预览.md) 
 * [初探富文本之文档diff算法](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之文档diff算法.md)  
 * [初探富文本之在线文档交付](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之在线文档交付.md)   
+* [初探富文本之划词评论能力](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之划词评论能力.md)   
 
 ## Example
 
