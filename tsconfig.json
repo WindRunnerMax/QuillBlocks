@@ -22,7 +22,9 @@
     "jsx": "react-jsx",
     "paths": {
       "blocks-kit-core": ["./packages/core/src"],
+      "blocks-kit-delta": ["./packages/delta/src"],
       "blocks-kit-plugin": ["./packages/plugin/src"],
+      "blocks-kit-shared": ["./packages/shared/src"],
       "blocks-kit-utils": ["./packages/utils/src"]
     }
   },
