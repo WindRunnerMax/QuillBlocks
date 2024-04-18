@@ -15,7 +15,7 @@
   "dependencies": {
     "docx": "7.8.2",
     "image-size": "1.1.1",
-    "laser-utils": "0.0.2-alpha.13",
+    "blocks-kit-utils": "workspace: *",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.10"
   },
