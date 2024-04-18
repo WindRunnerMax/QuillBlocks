@@ -1,18 +1,18 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const pdfMake = require("../packages/utils/node_modules/pdfmake");
+const pdfMake = require("../packages/tools/node_modules/pdfmake");
 import fs from "fs";
 import { Stream } from "stream";
 
-import type PDF from "../packages/utils/node_modules/@types/pdfmake";
-import type { TDocumentDefinitions } from "../packages/utils/node_modules/@types/pdfmake/interfaces";
+import type PDF from "../packages/tools/node_modules/@types/pdfmake";
+import type { TDocumentDefinitions } from "../packages/tools/node_modules/@types/pdfmake/interfaces";
 import {
   PDFDict,
   PDFDocument,
   PDFHexString,
   PDFName,
   PDFNumber,
-} from "../packages/utils/node_modules/pdf-lib";
-import type { DictMap } from "../packages/utils/node_modules/pdf-lib/src/core/objects/PDFDict";
+} from "../packages/tools/node_modules/pdf-lib";
+import type { DictMap } from "../packages/tools/node_modules/pdf-lib/src/core/objects/PDFDict";
 const PdfPrinter = pdfMake as typeof PDF;
 
 const FONT_PATH = "/Users/czy/Library/Fonts/";
