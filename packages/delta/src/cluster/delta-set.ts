@@ -1,15 +1,15 @@
 import { isString } from "blocks-kit-utils";
 
+import { DeltaBlock } from "./delta-block";
 import type { DeltaSetOption } from "./interface";
-import { BlockDelta } from "./zone-delta";
 
 export class DeltaSet {
-  private _deltas: Record<string, BlockDelta>;
+  private _deltas: Record<string, DeltaBlock>;
 
   constructor(deltas: DeltaSetOption = {}) {
     this._deltas = Object.keys(deltas).reduce(
-      (acc, blockId) => ({ ...acc, [blockId]: new BlockDelta(deltas[blockId]) }),
-      {} as Record<string, BlockDelta>
+      (acc, blockId) => ({ ...acc, [blockId]: new DeltaBlock(deltas[blockId]) }),
+      {} as Record<string, DeltaBlock>
     );
   }
 
@@ -17,7 +17,7 @@ export class DeltaSet {
     return this._deltas;
   }
 
-  get(zoneId: string): BlockDelta | null {
+  get(zoneId: string): DeltaBlock | null {
     return this._deltas[zoneId] || null;
   }
 
@@ -26,9 +26,9 @@ export class DeltaSet {
     return this;
   }
 
-  add(params: BlockDelta): this;
-  add(params: string, BlockDelta: BlockDelta): this;
-  add(params: BlockDelta | string, BlockDelta?: BlockDelta): this {
+  add(params: DeltaBlock): this;
+  add(params: string, BlockDelta: DeltaBlock): this;
+  add(params: DeltaBlock | string, BlockDelta?: DeltaBlock): this {
     if (isString(params)) {
       const delta = BlockDelta;
       if (!delta) {
@@ -46,11 +46,11 @@ export class DeltaSet {
     return this;
   }
 
-  replace(zoneId: string, BlockDelta: BlockDelta): this {
+  replace(zoneId: string, BlockDelta: DeltaBlock): this {
     return this.delete(zoneId).add(BlockDelta.blockId, BlockDelta);
   }
 
-  forEach(cb: (zoneId: string, BlockDelta: BlockDelta) => void) {
+  forEach(cb: (zoneId: string, BlockDelta: DeltaBlock) => void) {
     for (const [zoneId, BlockDelta] of Object.entries(this._deltas)) {
       cb(zoneId, BlockDelta);
     }

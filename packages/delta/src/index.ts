@@ -1,8 +1,8 @@
 export type { AttributeMap } from "./attributes/interface";
+export { DeltaBlock } from "./cluster/delta-block";
 export { DeltaSet } from "./cluster/delta-set";
 export type { BlockDeltaLike, DeltaSetLike } from "./cluster/interface";
 export { BLOCK_TYPE } from "./cluster/interface";
-export { BlockDelta } from "./cluster/zone-delta";
 export { Delta } from "./delta/delta";
 export type { DeleteOp, InsertOp, Op, Ops, RetainOp } from "./delta/interface";
 export { OpIterator } from "./delta/iterator";

@@ -1,13 +1,13 @@
 import type { Ops } from "../delta/interface";
 
-export type BlockDeltaOption = {
+export type DeltaBlockOption = {
   ops?: Ops;
   blockId?: string;
   blockType?: string;
 };
-export type DeltaSetOption = Record<string, BlockDeltaOption>;
+export type DeltaSetOption = Record<string, DeltaBlockOption>;
 
-export type BlockDeltaLike = Required<BlockDeltaOption>;
+export type BlockDeltaLike = Required<DeltaBlockOption>;
 export type DeltaSetLike = Record<string, BlockDeltaLike>;
 export type DeltaLike = Omit<BlockDeltaLike, "zoneId" | "parentId">;
 

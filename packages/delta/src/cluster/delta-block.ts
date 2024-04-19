@@ -2,38 +2,38 @@ import { getUniqueId, isNumber } from "blocks-kit-utils";
 
 import { Delta } from "../delta/delta";
 import { cloneOps } from "../utils/clone";
-import type { BlockDeltaOption } from "./interface";
+import type { DeltaBlockOption } from "./interface";
 import { BLOCK_TYPE } from "./interface";
 
-export class BlockDelta extends Delta {
+export class DeltaBlock extends Delta {
   public readonly blockId: string;
   public readonly blockType: string;
 
-  constructor(options?: BlockDeltaOption) {
+  constructor(options?: DeltaBlockOption) {
     const { ops = [], blockId = getUniqueId() } = options || {};
     super(ops);
     this.blockId = blockId;
     this.blockType = BLOCK_TYPE.Z;
   }
 
-  slice(start = 0, end = Infinity): BlockDelta {
+  slice(start = 0, end = Infinity): DeltaBlock {
     const delta = super.slice(start, end);
-    return BlockDelta.combine(this, delta);
+    return DeltaBlock.combine(this, delta);
   }
 
-  compose(other: Delta): BlockDelta {
+  compose(other: Delta): DeltaBlock {
     const delta = super.compose(other);
-    return BlockDelta.combine(this, delta);
+    return DeltaBlock.combine(this, delta);
   }
 
-  concat(other: Delta): BlockDelta {
+  concat(other: Delta): DeltaBlock {
     const delta = super.concat(other);
-    return BlockDelta.combine(this, delta);
+    return DeltaBlock.combine(this, delta);
   }
 
-  invert(base: Delta): BlockDelta {
+  invert(base: Delta): DeltaBlock {
     const delta = super.invert(base);
-    return BlockDelta.combine(this, delta);
+    return DeltaBlock.combine(this, delta);
   }
 
   transform(index: number, priority?: boolean): number;
@@ -42,17 +42,17 @@ export class BlockDelta extends Delta {
   transform(arg: number | Delta, priority = false): typeof arg {
     const rtn = super.transform(arg, priority);
     if (isNumber(rtn)) return rtn;
-    else return BlockDelta.combine(this, rtn);
+    else return DeltaBlock.combine(this, rtn);
   }
 
-  static combine(base: BlockDelta, delta: Delta) {
+  static combine(base: DeltaBlock, delta: Delta) {
     const { ops } = delta;
     const { blockId, blockType } = base;
-    return new BlockDelta({ ops, blockId, blockType });
+    return new DeltaBlock({ ops, blockId, blockType });
   }
 
-  clone(): BlockDelta {
-    return new BlockDelta({
+  clone(): DeltaBlock {
+    return new DeltaBlock({
       blockId: this.blockId,
       blockType: this.blockType,
       ops: cloneOps(this.ops),

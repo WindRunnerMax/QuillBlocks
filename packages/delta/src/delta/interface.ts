@@ -7,7 +7,7 @@ export const OP_TYPES = {
 };
 
 export interface Op {
-  // only one property out of { insert, delete, retain } will be present
+  // Only one property out of { insert, delete, retain } will be present
   insert?: string;
   delete?: number;
   retain?: number;
