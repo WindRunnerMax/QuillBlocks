@@ -1,7 +1,7 @@
 import { isEmptyValue } from "blocks-kit-utils";
 
 import type { AttributeMap } from "../attributes/interface";
-import type { DeltaLike, DeltaSetLike, ZoneDeltaLike } from "../cluster/interface";
+import type { BlockDeltaLike, DeltaLike, DeltaSetLike } from "../cluster/interface";
 import type { Op, Ops } from "../delta/interface";
 
 export const cloneAttributes = (attrs: AttributeMap): AttributeMap => {
@@ -29,7 +29,7 @@ export const cloneDeltaLike = (delta: DeltaLike): DeltaLike => {
   return { ...delta, ops: cloneOps(delta.ops) };
 };
 
-export const cloneZoneDeltaLike = (delta: ZoneDeltaLike): ZoneDeltaLike => {
+export const cloneZoneDeltaLike = (delta: BlockDeltaLike): BlockDeltaLike => {
   return { ...delta, ops: cloneOps(delta.ops) };
 };
 

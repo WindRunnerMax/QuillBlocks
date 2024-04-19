@@ -1,18 +1,18 @@
 import type { Ops } from "../delta/interface";
 
-export type ZoneDeltaOption = {
+export type BlockDeltaOption = {
   ops?: Ops;
-  zoneId?: string;
-  parentId?: string | null;
+  blockId?: string;
+  blockType?: string;
 };
-export type DeltaSetOption = Record<string, ZoneDeltaOption>;
+export type DeltaSetOption = Record<string, BlockDeltaOption>;
 
-export type ZoneDeltaLike = Required<ZoneDeltaOption>;
-export type DeltaSetLike = Record<string, ZoneDeltaLike>;
-export type DeltaLike = Omit<ZoneDeltaLike, "zoneId" | "parentId">;
+export type BlockDeltaLike = Required<BlockDeltaOption>;
+export type DeltaSetLike = Record<string, BlockDeltaLike>;
+export type DeltaLike = Omit<BlockDeltaLike, "zoneId" | "parentId">;
 
-export const DELTA_TYPE = {
-  Z: "Z", // Zone
+export const BLOCK_TYPE = {
   C: "C", // Col
   R: "R", // Row
+  Z: "Z", // Zone
 } as const;

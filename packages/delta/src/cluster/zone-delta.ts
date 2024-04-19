@@ -2,39 +2,38 @@ import { getUniqueId, isNumber } from "blocks-kit-utils";
 
 import { Delta } from "../delta/delta";
 import { cloneOps } from "../utils/clone";
-import type { ZoneDeltaOption } from "./interface";
-import { DELTA_TYPE } from "./interface";
+import type { BlockDeltaOption } from "./interface";
+import { BLOCK_TYPE } from "./interface";
 
-export class ZoneDelta extends Delta {
-  public zoneId: string;
-  public parentId: string | null;
-  public readonly type = DELTA_TYPE.Z;
+export class BlockDelta extends Delta {
+  public readonly blockId: string;
+  public readonly blockType: string;
 
-  constructor(options?: ZoneDeltaOption) {
-    const { ops = [], zoneId = getUniqueId(), parentId = null } = options || {};
+  constructor(options?: BlockDeltaOption) {
+    const { ops = [], blockId = getUniqueId() } = options || {};
     super(ops);
-    this.zoneId = zoneId;
-    this.parentId = parentId;
+    this.blockId = blockId;
+    this.blockType = BLOCK_TYPE.Z;
   }
 
-  slice(start = 0, end = Infinity): ZoneDelta {
+  slice(start = 0, end = Infinity): BlockDelta {
     const delta = super.slice(start, end);
-    return ZoneDelta.combine(this, delta);
+    return BlockDelta.combine(this, delta);
   }
 
-  compose(other: Delta): ZoneDelta {
+  compose(other: Delta): BlockDelta {
     const delta = super.compose(other);
-    return ZoneDelta.combine(this, delta);
+    return BlockDelta.combine(this, delta);
   }
 
-  concat(other: Delta): ZoneDelta {
+  concat(other: Delta): BlockDelta {
     const delta = super.concat(other);
-    return ZoneDelta.combine(this, delta);
+    return BlockDelta.combine(this, delta);
   }
 
-  invert(base: Delta): ZoneDelta {
+  invert(base: Delta): BlockDelta {
     const delta = super.invert(base);
-    return ZoneDelta.combine(this, delta);
+    return BlockDelta.combine(this, delta);
   }
 
   transform(index: number, priority?: boolean): number;
@@ -43,19 +42,19 @@ export class ZoneDelta extends Delta {
   transform(arg: number | Delta, priority = false): typeof arg {
     const rtn = super.transform(arg, priority);
     if (isNumber(rtn)) return rtn;
-    else return ZoneDelta.combine(this, rtn);
+    else return BlockDelta.combine(this, rtn);
   }
 
-  static combine(base: ZoneDelta, delta: Delta) {
+  static combine(base: BlockDelta, delta: Delta) {
     const { ops } = delta;
-    const { zoneId, parentId } = base;
-    return new ZoneDelta({ ops, zoneId, parentId });
+    const { blockId, blockType } = base;
+    return new BlockDelta({ ops, blockId, blockType });
   }
 
-  clone(): ZoneDelta {
-    return new ZoneDelta({
-      zoneId: this.zoneId,
-      parentId: this.parentId,
+  clone(): BlockDelta {
+    return new BlockDelta({
+      blockId: this.blockId,
+      blockType: this.blockType,
       ops: cloneOps(this.ops),
     });
   }

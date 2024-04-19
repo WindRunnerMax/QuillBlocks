@@ -9,4 +9,4 @@ export type {
   QuillOptions,
 } from "quill/core";
 export { default as Block } from "quill/core";
-export { AttributeMap, Delta, Op, OpIterator, Parchment, Range } from "quill/core";
+export { AttributeMap, Delta as BasicDelta, Op, OpIterator, Parchment, Range } from "quill/core";
