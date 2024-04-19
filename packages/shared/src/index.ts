@@ -8,5 +8,5 @@ export type {
   ExpandedQuillOptions,
   QuillOptions,
 } from "quill/core";
-export { default as Editor } from "quill/core";
+export { default as Block } from "quill/core";
 export { AttributeMap, Delta, Op, OpIterator, Parchment, Range } from "quill/core";

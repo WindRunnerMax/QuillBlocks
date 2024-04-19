@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/jest':
+        specifier: 29.4.0
+        version: 29.4.0
       '@types/node':
         specifier: ^20.11.25
         version: 20.11.25
@@ -216,15 +219,15 @@ importers:
 
   packages/tools:
     dependencies:
+      blocks-kit-utils:
+        specifier: 'workspace: *'
+        version: link:../utils
       docx:
         specifier: 7.8.2
         version: 7.8.2
       image-size:
         specifier: 1.1.1
         version: 1.1.1
-      laser-utils:
-        specifier: 0.0.2-alpha.13
-        version: 0.0.2-alpha.13
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
