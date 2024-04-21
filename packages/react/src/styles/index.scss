@@ -1,0 +1,15 @@
+.blocks-editor {
+  outline: none;
+  overflow-wrap: break-word;
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  [contentEditable='true'] {
+    outline: none;
+  }
+
+  .ql-editor > p {
+    margin: 0;
+  }
+}

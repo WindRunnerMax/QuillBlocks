@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "description": "",
   "sideEffects": false,
-  "scripts": {},
+  "scripts": {
+    "dev": "rspack serve --config ./rspack.config.js",
+    "build": "rspack build --config ./rspack.config.js",
+    "analyze": "rspack build --config ./rspack.config.js --analyze"
+  },
   "keywords": [],
   "author": "",
   "license": "MIT",

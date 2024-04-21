@@ -1,15 +1,15 @@
 import { isString } from "blocks-kit-utils";
 
-import { DeltaBlock } from "../cluster/delta-block";
+import { Block } from "./block";
 import type { BlockSetOption } from "./interface";
 
 export class BlockSet {
-  private _blocks: Record<string, DeltaBlock>;
+  private _blocks: Record<string, Block>;
 
   constructor(deltas: BlockSetOption = {}) {
     this._blocks = Object.keys(deltas).reduce(
-      (acc, blockId) => ({ ...acc, [blockId]: new DeltaBlock(deltas[blockId]) }),
-      {} as Record<string, DeltaBlock>
+      (acc, blockId) => ({ ...acc, [blockId]: new Block(deltas[blockId]) }),
+      {} as Record<string, Block>
     );
   }
 
@@ -17,7 +17,7 @@ export class BlockSet {
     return this._blocks;
   }
 
-  get(zoneId: string): DeltaBlock | null {
+  get(zoneId: string): Block | null {
     return this._blocks[zoneId] || null;
   }
 
@@ -26,31 +26,31 @@ export class BlockSet {
     return this;
   }
 
-  add(params: DeltaBlock): this;
-  add(params: string, deltaBlock: DeltaBlock): this;
-  add(params: DeltaBlock | string, deltaBlock?: DeltaBlock): this {
+  add(params: Block): this;
+  add(params: string, block: Block): this;
+  add(params: Block | string, block?: Block): this {
     if (isString(params)) {
-      const delta = deltaBlock;
+      const delta = block;
       if (!delta) {
         console.error("DeltaBlock is not defined:", params);
         return this;
       }
-      if (delta.blockId !== params) {
-        console.error("BlockId is not equal:", params, delta.blockId);
+      if (delta.id !== params) {
+        console.error("BlockId is not equal:", params, delta.id);
         return this;
       }
       this._blocks[params] = delta;
     } else {
-      this._blocks[params.blockId] = params;
+      this._blocks[params.id] = params;
     }
     return this;
   }
 
-  replace(zoneId: string, deltaBlock: DeltaBlock): this {
-    return this.delete(zoneId).add(deltaBlock.blockId, deltaBlock);
+  replace(zoneId: string, block: Block): this {
+    return this.delete(zoneId).add(block.id, block);
   }
 
-  forEach(cb: (zoneId: string, deltaBlock: DeltaBlock) => void) {
+  forEach(cb: (zoneId: string, block: Block) => void) {
     for (const [zoneId, deltaBlock] of Object.entries(this._blocks)) {
       cb(zoneId, deltaBlock);
     }

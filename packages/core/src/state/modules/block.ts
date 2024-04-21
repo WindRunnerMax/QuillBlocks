@@ -1,1 +1,58 @@
-export class BlockState {}
+import type { Block } from "blocks-kit-delta";
+import { Editable } from "blocks-kit-shared";
+
+import type { EditorState } from "../index";
+import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, EDITABLE_KEY } from "../utils/constant";
+
+export class BlockState {
+  public editor: Editable | null;
+  public readonly id: string;
+  public _parent: BlockState | null;
+  public readonly children: BlockState[];
+  constructor(private engine: EditorState, private readonly block: Block) {
+    this.editor = null;
+    this.id = block.id;
+    this._parent = null;
+    this.children = [];
+  }
+
+  public getRaw() {
+    return this.block;
+  }
+
+  public get parent() {
+    return this._parent;
+  }
+
+  public setParent(parent: BlockState | null) {
+    this._parent = parent;
+  }
+
+  public addChild(child: BlockState) {
+    child.setParent(this);
+    this.children.push(child);
+  }
+
+  public getAttr(key: string): string | null {
+    return this.block.attributes[key] || null;
+  }
+
+  public render() {
+    const div = document.createElement("div");
+    div.setAttribute(DATA_BLOCK_KEY, "true");
+    div.setAttribute(DATA_BLOCK_ID_KEY, this.id);
+    this.engine.model.setBlockModel(this, div);
+    if (this.children.length) {
+      div.setAttribute(EDITABLE_KEY, "false");
+      for (const child of this.children) {
+        const dom = child.render();
+        div.appendChild(dom);
+      }
+    } else {
+      // !: Need registry
+      this.editor = new Editable(div);
+      this.editor.setContents(this.block.ops);
+    }
+    return div;
+  }
+}
