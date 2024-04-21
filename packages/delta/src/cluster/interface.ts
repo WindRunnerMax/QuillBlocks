@@ -7,9 +7,9 @@ export type DeltaBlockOption = {
 };
 export type DeltaSetOption = Record<string, DeltaBlockOption>;
 
-export type BlockDeltaLike = Required<DeltaBlockOption>;
-export type DeltaSetLike = Record<string, BlockDeltaLike>;
-export type DeltaLike = Omit<BlockDeltaLike, "zoneId" | "parentId">;
+export type DeltaBlockLike = Required<DeltaBlockOption>;
+export type DeltaSetLike = Record<string, DeltaBlockLike>;
+export type DeltaLike = Omit<DeltaBlockLike, "blockId" | "blockType">;
 
 export const BLOCK_TYPE = {
   C: "C", // Col

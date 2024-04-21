@@ -8,7 +8,9 @@
     "files": [
       "dist"
     ],
-    "scripts": {},
+    "scripts": {
+      "build": "tsc --project tsconfig.build.json"
+    },
     "keywords": [],
     "author": "",
     "license": "MIT",

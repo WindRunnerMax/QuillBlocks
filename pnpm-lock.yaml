@@ -12,7 +12,7 @@ importers:
         specifier: 29.4.0
         version: 29.4.0
       '@types/node':
-        specifier: ^20.11.25
+        specifier: 20.11.25
         version: 20.11.25
       '@typescript-eslint/eslint-plugin':
         specifier: 6.12.0
@@ -60,7 +60,7 @@ importers:
         specifier: 25.0.0
         version: 25.0.0(stylelint@14.7.1)
       ts-node:
-        specifier: ^10.9.2
+        specifier: 10.9.2
         version: 10.9.2(@types/node@20.11.25)(typescript@5.3.2)
       typescript:
         specifier: 5.3.2
@@ -68,9 +68,12 @@ importers:
 
   packages/core:
     dependencies:
-      quill-delta:
-        specifier: 4.2.2
-        version: 4.2.2
+      blocks-kit-delta:
+        specifier: 'workspace: *'
+        version: link:../delta
+      blocks-kit-utils:
+        specifier: 'workspace: *'
+        version: link:../utils
     devDependencies:
       '@babel/core':
         specifier: 7.20.12
@@ -7203,14 +7206,6 @@ packages:
     resolution: {integrity: sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g==}
     engines: {node: '>=8'}
     dev: true
-
-  /quill-delta@4.2.2:
-    resolution: {integrity: sha512-qjbn82b/yJzOjstBgkhtBjN2TNK+ZHP/BgUQO+j6bRhWQQdmj2lH6hXG7+nwwLF41Xgn//7/83lxs9n2BkTtTg==}
-    dependencies:
-      fast-diff: 1.2.0
-      lodash.clonedeep: 4.5.0
-      lodash.isequal: 4.5.0
-    dev: false
 
   /quill-delta@5.1.0:
     resolution: {integrity: sha512-X74oCeRI4/p0ucjb5Ma8adTXd9Scumz367kkMK5V/IatcX6A0vlgLgKbzXWy5nZmCGeNJm2oQX0d2Eqj+ZIlCA==}

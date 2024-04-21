@@ -27,12 +27,12 @@ export class DeltaSet {
   }
 
   add(params: DeltaBlock): this;
-  add(params: string, BlockDelta: DeltaBlock): this;
-  add(params: DeltaBlock | string, BlockDelta?: DeltaBlock): this {
+  add(params: string, deltaBlock: DeltaBlock): this;
+  add(params: DeltaBlock | string, deltaBlock?: DeltaBlock): this {
     if (isString(params)) {
-      const delta = BlockDelta;
+      const delta = deltaBlock;
       if (!delta) {
-        console.error("BlockDelta is not defined:", params);
+        console.error("DeltaBlock is not defined:", params);
         return this;
       }
       if (delta.blockId !== params) {
@@ -46,13 +46,13 @@ export class DeltaSet {
     return this;
   }
 
-  replace(zoneId: string, BlockDelta: DeltaBlock): this {
-    return this.delete(zoneId).add(BlockDelta.blockId, BlockDelta);
+  replace(zoneId: string, deltaBlock: DeltaBlock): this {
+    return this.delete(zoneId).add(deltaBlock.blockId, deltaBlock);
   }
 
-  forEach(cb: (zoneId: string, BlockDelta: DeltaBlock) => void) {
-    for (const [zoneId, BlockDelta] of Object.entries(this._deltas)) {
-      cb(zoneId, BlockDelta);
+  forEach(cb: (zoneId: string, deltaBlock: DeltaBlock) => void) {
+    for (const [zoneId, deltaBlock] of Object.entries(this._deltas)) {
+      cb(zoneId, deltaBlock);
     }
   }
 
