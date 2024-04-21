@@ -1,4 +1,7 @@
 export type { AttributeMap } from "./attributes/interface";
+export { Block } from "./blocks/block";
+export { BlockSet } from "./blocks/block-set";
+export type { BlockLike, BlockOption, BlockSetLike, BlockSetOption } from "./blocks/interface";
 export { DeltaBlock } from "./cluster/delta-block";
 export { DeltaSet } from "./cluster/delta-set";
 export type { DeltaBlockLike, DeltaSetLike } from "./cluster/interface";

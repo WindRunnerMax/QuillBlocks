@@ -5,9 +5,9 @@ import { ROOT_BLOCK } from "blocks-kit-utils";
 export const EMPTY_BLOCK_SET_LIKE: BlockSetLike = {
   [ROOT_BLOCK]: {
     id: ROOT_BLOCK,
-    type: BLOCK_TYPE.Z,
     ops: [],
     children: [],
     attributes: {},
+    type: BLOCK_TYPE.Z,
   },
 };
