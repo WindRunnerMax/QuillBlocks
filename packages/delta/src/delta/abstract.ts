@@ -253,7 +253,9 @@ export class AbstractDelta {
         .join("");
     });
     const retDelta = new AbstractDelta();
-    const diffResult = diff(strings[0], strings[1], cursor);
+    // Parameter `cleanup` help maintain semantics
+    // May incur some computational performance loss
+    const diffResult = diff(strings[0], strings[1], cursor, true);
     const thisIter = iterator(this.ops);
     const otherIter = iterator(other.ops);
     diffResult.forEach((component: diff.Diff) => {

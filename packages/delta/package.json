@@ -16,7 +16,7 @@
     "license": "MIT",
     "dependencies": {
       "blocks-kit-utils": "workspace: *",
-      "fast-diff": "1.2.0"
+      "fast-diff": "1.3.0"
     },
     "devDependencies": {
       "@babel/core": "7.20.12",
