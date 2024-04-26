@@ -2,7 +2,10 @@
   "name": "blocks-kit",
   "description": "Quill Editor Blocks Kit",
   "version": "1.0.0",
-  "scripts": {},
+  "scripts": {
+    "bootstrap": "pnpm install --frozen-lockfile",
+    "dev:react": "pnpm --filter blocks-kit-react run dev"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/WindrunnerMax/BlocksKit.git"

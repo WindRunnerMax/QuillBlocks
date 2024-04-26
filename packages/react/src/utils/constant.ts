@@ -7,19 +7,19 @@ export const DEFAULT_BLOCKS_DATA: BlockSetLike = {
   [ROOT_BLOCK]: {
     id: ROOT_BLOCK,
     ops: [],
-    children: ["LINE-1", "LINE-2"],
+    children: ["xxx", "yyy"],
     type: BLOCK_TYPE.Z,
     attributes: {},
   },
-  "LINE-1": {
-    id: "LINE-1",
+  xxx: {
+    id: "xxx",
     ops: [],
     children: [],
     type: BLOCK_TYPE.Z,
     attributes: {},
   },
-  "LINE-2": {
-    id: "LINE-2",
+  yyy: {
+    id: "yyy",
     ops: [],
     children: [],
     type: BLOCK_TYPE.Z,

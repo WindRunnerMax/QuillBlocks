@@ -2,7 +2,7 @@ import type { Block } from "blocks-kit-delta";
 import { Editable } from "blocks-kit-shared";
 
 import type { EditorState } from "../index";
-import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, EDITABLE_KEY } from "../utils/constant";
+import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, DATA_LINE_KEY, EDITABLE_KEY } from "../utils/constant";
 
 export class BlockState {
   public editor: Editable | null;
@@ -39,16 +39,17 @@ export class BlockState {
 
   public render() {
     const div = document.createElement("div");
-    div.setAttribute(DATA_BLOCK_KEY, "true");
     div.setAttribute(DATA_BLOCK_ID_KEY, this.id);
     this.engine.model.setBlockModel(this, div);
     if (this.children.length) {
+      div.setAttribute(DATA_BLOCK_KEY, "true");
       div.setAttribute(EDITABLE_KEY, "false");
       for (const child of this.children) {
         const dom = child.render();
         div.appendChild(dom);
       }
     } else {
+      div.setAttribute(DATA_LINE_KEY, "true");
       // !: Need registry
       this.editor = new Editable(div);
       this.editor.setContents(this.block.ops);
