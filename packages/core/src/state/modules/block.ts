@@ -5,23 +5,33 @@ import type { EditorState } from "../index";
 import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, DATA_LINE_KEY, EDITABLE_KEY } from "../utils/constant";
 
 export class BlockState {
+  public start: number;
   public editor: Editable | null;
   public readonly id: string;
   public _parent: BlockState | null;
   public readonly children: BlockState[];
   constructor(private engine: EditorState, private readonly block: Block) {
+    this.start = 0;
     this.editor = null;
     this.id = block.id;
     this._parent = null;
     this.children = [];
   }
 
+  public get parent() {
+    return this._parent;
+  }
+
   public getRaw() {
     return this.block;
   }
 
-  public get parent() {
-    return this._parent;
+  public getLine(index: number): BlockState | null {
+    return this.children[index];
+  }
+
+  public getLines() {
+    return this.children;
   }
 
   public setParent(parent: BlockState | null) {
