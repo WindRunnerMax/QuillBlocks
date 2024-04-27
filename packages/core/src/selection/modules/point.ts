@@ -1,35 +1,31 @@
 import type { Editor } from "../../editor";
-import { RawPoint } from "./raw";
 
 export class Point {
-  constructor(public line: number, public offset: number, public zoneId: string) {}
+  constructor(public readonly offset: number, public readonly blockId: string) {}
 
   clone() {
-    return new Point(this.line, this.offset, this.zoneId);
+    return new Point(this.offset, this.blockId);
   }
 
-  static isEqual(origin: Point | null, target: Point | null): boolean {
+  public static from(offset: number, blockId: string) {
+    return new Point(offset, blockId);
+  }
+
+  public static isEqual(origin: Point | null, target: Point | null): boolean {
     if (origin === target) return true;
     if (!origin || !target) return false;
-    return (
-      origin.line === target.line &&
-      origin.offset === target.offset &&
-      origin.zoneId === target.zoneId
-    );
+    return origin.offset === target.offset && origin.blockId === target.blockId;
   }
 
-  static toRaw(editor: Editor, point: Point | null): RawPoint | null {
-    if (!point) return null;
-    const zone = editor.state.getBlockState(point.zoneId);
-    if (!zone) {
-      editor.logger.warning("Zone Not Found", point.zoneId);
-      return null;
+  public static isBackward(origin: Point | null, target: Point | null, editor?: Editor): boolean {
+    if (!origin || !target) return false;
+    if (origin.blockId === target.blockId) {
+      return origin.offset > target.offset;
     }
-    const line = zone.getLine(point.line);
-    if (!line) {
-      editor.logger.warning("Line Not Found", point.line);
-      return null;
-    }
-    return new RawPoint(line.start + point.offset, point.zoneId);
+    if (!editor) return false;
+    const startBlock = editor.state.getBlockState(origin.blockId);
+    const endBlock = editor.state.getBlockState(target.blockId);
+    if (!startBlock || !endBlock) return false;
+    return startBlock.index > endBlock.index;
   }
 }

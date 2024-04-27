@@ -5,13 +5,13 @@ import type { EditorState } from "../index";
 import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, DATA_LINE_KEY, EDITABLE_KEY } from "../utils/constant";
 
 export class BlockState {
-  public start: number;
+  public index: number;
   public editor: Editable | null;
   public readonly id: string;
   public _parent: BlockState | null;
   public readonly children: BlockState[];
   constructor(private engine: EditorState, private readonly block: Block) {
-    this.start = 0;
+    this.index = 0;
     this.editor = null;
     this.id = block.id;
     this._parent = null;
