@@ -1,8 +1,13 @@
 import type { Block } from "blocks-kit-delta";
 
 import { BlockModel } from "../../model";
+import {
+  DATA_BLOCK_ID_KEY,
+  DATA_BLOCK_KEY,
+  DATA_LINE_KEY,
+  EDITABLE_KEY,
+} from "../../model/modules/property";
 import type { EditorState } from "../index";
-import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, DATA_LINE_KEY, EDITABLE_KEY } from "../utils/constant";
 
 export class BlockState {
   public index: number;
@@ -50,8 +55,8 @@ export class BlockState {
 
   public render() {
     const div = document.createElement("div");
-    div.setAttribute(DATA_BLOCK_ID_KEY, this.id);
     this.model.setDOMNode(div);
+    div.setAttribute(DATA_BLOCK_ID_KEY, this.id);
     this.engine.editor.reflect.setBlockModel(this, div);
     if (this.children.length) {
       div.setAttribute(DATA_BLOCK_KEY, "true");

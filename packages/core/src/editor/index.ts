@@ -2,9 +2,10 @@ import { BlockSet } from "blocks-kit-delta";
 
 import { Event } from "../event";
 import { LOG_LEVEL, Logger } from "../log";
+import { DATA_TYPE_KEY } from "../model/modules/property";
 import { Reflect } from "../reflect";
 import { EditorState } from "../state";
-import { DATA_TYPE_KEY, EDITOR_STATE } from "../state/utils/constant";
+import { EDITOR_STATE } from "../state/utils/constant";
 import { DEFAULT_BLOCK_SET_LIKE } from "./constant";
 import type { EditorOptions } from "./types";
 

@@ -31,7 +31,15 @@ export class BlockModel {
       }
       const dom = this.dom || document.createElement("div");
       // !: 需要根据`Block Type`来决定注册的`Module`
-      this.editable = new Editable(dom);
+      this.editable = new Editable(dom, {
+        modules: {
+          keyboard: {
+            bindings: {
+              ENTER: { key: "Enter", handler: this.event.onInputEnter },
+            },
+          },
+        },
+      });
       // !: 需要观察在`Block`销毁时是否会发生内存泄漏
       this.editable.on("selection-change", this.event.onSelectionChange);
     }
