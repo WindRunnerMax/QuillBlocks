@@ -92,7 +92,7 @@ export class NativeEvent {
     container.addEventListener(NATIVE_EVENTS.KEY_UP, this.onKeyup);
     container.addEventListener(NATIVE_EVENTS.FOCUS, this.onFocus);
     container.addEventListener(NATIVE_EVENTS.BLUR, this.onBlur);
-    window.document.addEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
+    document.addEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
     container.addEventListener(NATIVE_EVENTS.MOUSE_DOWN, this.onMouseDown);
     container.addEventListener(NATIVE_EVENTS.MOUSE_UP, this.onMouseUp);
   }
@@ -112,10 +112,7 @@ export class NativeEvent {
     container.removeEventListener(NATIVE_EVENTS.KEY_UP, this.onKeyup);
     container.removeEventListener(NATIVE_EVENTS.FOCUS, this.onFocus);
     container.removeEventListener(NATIVE_EVENTS.BLUR, this.onBlur);
-    window.document.removeEventListener(
-      NATIVE_EVENTS.SELECTION_CHANGE_NATIVE,
-      this.onSelectionChange
-    );
+    document.removeEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
     container.removeEventListener(NATIVE_EVENTS.MOUSE_DOWN, this.onMouseDown);
     container.removeEventListener(NATIVE_EVENTS.MOUSE_UP, this.onMouseUp);
   }

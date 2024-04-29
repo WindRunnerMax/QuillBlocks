@@ -1,5 +1,6 @@
 import { BlockSet } from "blocks-kit-delta";
 
+import { Event } from "../event";
 import { LOG_LEVEL, Logger } from "../log";
 import { Reflect } from "../reflect";
 import { EditorState } from "../state";
@@ -9,19 +10,21 @@ import type { EditorOptions } from "./types";
 
 export class Editor {
   public blockSet: BlockSet;
-  public readonly logger: Logger;
-  public readonly state: EditorState;
-  public readonly reflect: Reflect;
   private container: HTMLDivElement;
+  public readonly event: Event;
+  public readonly logger: Logger;
+  public readonly reflect: Reflect;
+  public readonly state: EditorState;
 
   constructor(options: EditorOptions) {
     const { blockSet = new BlockSet(DEFAULT_BLOCK_SET_LIKE), logLevel = LOG_LEVEL.ERROR } = options;
     this.blockSet = blockSet;
-    this.logger = new Logger(logLevel);
     this.container = document.createElement("div");
     this.container.setAttribute(DATA_TYPE_KEY, "placeholder");
-    this.state = new EditorState(this);
+    this.logger = new Logger(logLevel);
     this.reflect = new Reflect();
+    this.event = new Event(this);
+    this.state = new EditorState(this);
   }
 
   public onMount(container: HTMLDivElement) {
@@ -30,10 +33,12 @@ export class Editor {
       console.warn("Editor has been mounted, please destroy it before mount again.");
     }
     this.container.setAttribute(DATA_TYPE_KEY, "editable");
+    this.event.bind();
     this.state.renderEditableDOM();
   }
 
   public destroy() {
+    this.event.unbind();
     this.state.destroy();
   }
 

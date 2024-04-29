@@ -6,7 +6,7 @@ export class Event {
   private nativeEvent: NativeEvent;
   private bus: EventBus;
 
-  constructor(private editor: Editor) {
+  constructor(private readonly editor: Editor) {
     this.bus = new EventBus();
     this.nativeEvent = new NativeEvent(this.bus, this.editor);
   }

@@ -1,21 +1,22 @@
 import type { Block } from "blocks-kit-delta";
-import { Editable } from "blocks-kit-shared";
 
+import { BlockModel } from "../../model";
 import type { EditorState } from "../index";
 import { DATA_BLOCK_ID_KEY, DATA_BLOCK_KEY, DATA_LINE_KEY, EDITABLE_KEY } from "../utils/constant";
 
 export class BlockState {
   public index: number;
-  public editor: Editable | null;
   public readonly id: string;
   public _parent: BlockState | null;
+  public readonly model: BlockModel;
   public readonly children: BlockState[];
-  constructor(private engine: EditorState, private readonly block: Block) {
+
+  constructor(private readonly engine: EditorState, private readonly block: Block) {
     this.index = 0;
-    this.editor = null;
     this.id = block.id;
     this._parent = null;
     this.children = [];
+    this.model = new BlockModel(this.engine.editor, this);
   }
 
   public get parent() {
@@ -27,7 +28,7 @@ export class BlockState {
   }
 
   public getLine(index: number): BlockState | null {
-    return this.children[index];
+    return this.children[index] || null;
   }
 
   public getLines() {
@@ -50,7 +51,8 @@ export class BlockState {
   public render() {
     const div = document.createElement("div");
     div.setAttribute(DATA_BLOCK_ID_KEY, this.id);
-    this.engine.model.setBlockModel(this, div);
+    this.model.setDOMNode(div);
+    this.engine.editor.reflect.setBlockModel(this, div);
     if (this.children.length) {
       div.setAttribute(DATA_BLOCK_KEY, "true");
       div.setAttribute(EDITABLE_KEY, "false");
@@ -60,9 +62,7 @@ export class BlockState {
       }
     } else {
       div.setAttribute(DATA_LINE_KEY, "true");
-      // !: Need registry
-      this.editor = new Editable(div);
-      this.editor.setContents(this.block.ops);
+      this.model.setContent(this.block.ops);
     }
     return div;
   }

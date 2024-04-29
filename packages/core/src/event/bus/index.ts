@@ -38,14 +38,13 @@ export class EventBus {
   public off<T extends EventMapKeys>(key: T, listener: Listener<T>) {
     const handler = this.listeners[key];
     if (!handler) return void 0;
-    const index = handler.findIndex(item => item.listener === listener);
-    index > -1 && handler.splice(index, 1);
+    // COMPAT: 不能直接`splice` 可能会导致`trigger`时打断`forEach`
+    const next = handler.filter(item => item.listener !== listener);
+    (this.listeners[key] as Handler<T>[]) = next;
   }
 
   public trigger<T extends EventMapKeys>(key: T, value: EventMap[T]) {
     const handler = this.listeners[key];
-    // TODO: DELETE TEST EVENTS
-    // console.log(key, value);
     if (!handler) return void 0;
     handler.forEach(item => {
       item.listener(value);

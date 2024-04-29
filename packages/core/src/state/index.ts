@@ -1,22 +1,18 @@
-import type { BlockSet } from "blocks-kit-delta";
 import { Block } from "blocks-kit-delta";
 import { ROOT_BLOCK } from "blocks-kit-utils";
 
 import type { Editor } from "../editor";
 import { DEFAULT_BLOCK_LIKE } from "../editor/constant";
 import { BlockState } from "./modules/block";
-import { Model } from "./modules/model";
 import type { EDITOR_STATE } from "./utils/constant";
 
 export class EditorState {
   public entry: BlockState;
-  public readonly model: Model;
   private active = ROOT_BLOCK;
   private status: Map<string, boolean>;
   private blocks: Map<string, BlockState>;
 
-  constructor(private editor: Editor, private blockSet: BlockSet) {
-    this.model = new Model();
+  constructor(public readonly editor: Editor) {
     this.status = new Map();
     this.blocks = new Map();
     const entryDelta = this.editor.blockSet.get(ROOT_BLOCK);
