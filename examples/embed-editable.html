@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>editable-embed</title>
+    <link
+      href="https://registry.npmmirror.com/quill/2.0.0/files/dist/quill.core.css"
+      rel="stylesheet"
+    />
+    <style>
+      .ql-editor {
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="$root"></div>
+    <script src="https://registry.npmmirror.com/quill/2.0.0/files/dist/quill.core.js"></script>
+    <script>
+      const Block = Quill.import("blots/block");
+      const Container = Quill.import("blots/container");
+      const Break = Quill.import("blots/break");
+      const Cursor = Quill.import("blots/cursor");
+      const Inline = Quill.import("blots/inline");
+      const Scroll = Quill.import("blots/scroll");
+      const Text = Quill.import("blots/text");
+      const Parchment = Quill.import("parchment");
+      const BlockEmbed = Quill.import("blots/block/embed");
+
+      class EditableLine extends Block {
+        static blotName = "editable";
+        static tagName = "div";
+        static create(value) {
+          const node = super.create();
+          node.appendChild(document.createTextNode("\u200B"));
+          return node;
+        }
+      }
+
+      class EditableBlot extends BlockEmbed {
+        static blotName = "editable";
+        static tagName = "div";
+
+        static create(id) {
+          const node = super.create();
+          node.style.border = "1px solid #aaa";
+          node.style.margin = "10px 0";
+          // node.setAttribute("contenteditable", "false");
+          const registry = new Parchment.Registry();
+          registry.register(Scroll, Block, Break, Container, Cursor, Inline, Text);
+          registry.register(EditableLine);
+          const editable = new Quill(node, { registry });
+          editable.setContents([{ insert: "\n", attributes: { "editable": true } }]);
+          window.editable = editable;
+          return node;
+        }
+      }
+
+      const registry = new Parchment.Registry();
+      registry.register(Scroll, Block, Break, Container, Cursor, Inline, Text);
+      registry.register(EditableBlot);
+      const editor = new Quill($root, {
+        registry,
+        modules: { toolbar: false },
+      });
+      editor.setContents([
+        { insert: "Embed Editable:\n" },
+        { insert: { editable: "xxx" } },
+        { insert: { editable: "yyy" } },
+        { insert: "\n" },
+      ]);
+      window.editor = editor;
+    </script>
+  </body>
+</html>

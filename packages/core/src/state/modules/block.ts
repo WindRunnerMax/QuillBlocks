@@ -1,5 +1,6 @@
 import type { Block } from "blocks-kit-delta";
 
+import type { Editor } from "../../editor";
 import { BlockModel } from "../../model";
 import {
   DATA_BLOCK_ID_KEY,
@@ -11,6 +12,7 @@ import type { EditorState } from "../index";
 
 export class BlockState {
   public index: number;
+  private editor: Editor;
   public readonly id: string;
   public _parent: BlockState | null;
   public readonly model: BlockModel;
@@ -19,9 +21,10 @@ export class BlockState {
   constructor(private readonly engine: EditorState, private readonly block: Block) {
     this.index = 0;
     this.id = block.id;
-    this._parent = null;
     this.children = [];
-    this.model = new BlockModel(this.engine.editor, this);
+    this._parent = null;
+    this.editor = this.engine.editor;
+    this.model = new BlockModel(this.editor, this);
   }
 
   public get parent() {
@@ -55,18 +58,18 @@ export class BlockState {
 
   public render() {
     const div = document.createElement("div");
-    this.model.setDOMNode(div);
     div.setAttribute(DATA_BLOCK_ID_KEY, this.id);
-    this.engine.editor.reflect.setBlockModel(this, div);
+    this.editor.reflect.setBlockModel(this, div);
     if (this.children.length) {
-      div.setAttribute(DATA_BLOCK_KEY, "true");
       div.setAttribute(EDITABLE_KEY, "false");
+      div.setAttribute(DATA_BLOCK_KEY, "true");
       for (const child of this.children) {
         const dom = child.render();
         div.appendChild(dom);
       }
     } else {
       div.setAttribute(DATA_LINE_KEY, "true");
+      this.model.setDOMNode(div);
       this.model.setContent(this.block.ops);
     }
     return div;
