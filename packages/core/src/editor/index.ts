@@ -1,6 +1,7 @@
 import { BlockSet } from "blocks-kit-delta";
 
 import { LOG_LEVEL, Logger } from "../log";
+import { Reflect } from "../reflect";
 import { EditorState } from "../state";
 import { DATA_TYPE_KEY, EDITOR_STATE } from "../state/utils/constant";
 import { DEFAULT_BLOCK_SET_LIKE } from "./constant";
@@ -10,6 +11,7 @@ export class Editor {
   public blockSet: BlockSet;
   public readonly logger: Logger;
   public readonly state: EditorState;
+  public readonly reflect: Reflect;
   private container: HTMLDivElement;
 
   constructor(options: EditorOptions) {
@@ -18,7 +20,8 @@ export class Editor {
     this.logger = new Logger(logLevel);
     this.container = document.createElement("div");
     this.container.setAttribute(DATA_TYPE_KEY, "placeholder");
-    this.state = new EditorState(this, blockSet);
+    this.state = new EditorState(this);
+    this.reflect = new Reflect();
   }
 
   public onMount(container: HTMLDivElement) {

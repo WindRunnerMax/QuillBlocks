@@ -1,6 +1,6 @@
-import type { BlockState } from "./block";
+import type { BlockState } from "../state/modules/block";
 
-export class Model {
+export class Reflect {
   public readonly BLOCK_TO_DOM = new WeakMap<BlockState, HTMLElement>();
   public readonly DOM_TO_BLOCK = new WeakMap<HTMLElement, BlockState>();
 
