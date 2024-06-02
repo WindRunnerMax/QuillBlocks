@@ -38,7 +38,7 @@ import {
   WidthType,
 } from "../packages/tools/node_modules/docx";
 import imageSize from "../packages/tools/node_modules/image-size";
-import { isString } from "../packages/tools/node_modules/laser-utils";
+import { isString } from "../packages/utils/node_modules/laser-utils";
 import type { Line, Op } from "./delta-set";
 import DeltaSet from "./delta-set";
 const { CODE_BLOCK_KEY, ops, opsToDeltaSet, ROOT_ZONE } = DeltaSet;

@@ -13,7 +13,7 @@ import type {
   TableCell,
   TDocumentDefinitions,
 } from "../packages/tools/node_modules/@types/pdfmake/interfaces";
-import { isString } from "../packages/tools/node_modules/laser-utils";
+import { isString } from "../packages/utils/node_modules/laser-utils";
 import type { Line, Op } from "./delta-set";
 import DeltaSet from "./delta-set";
 const PdfPrinter = pdfMake as typeof PDF;

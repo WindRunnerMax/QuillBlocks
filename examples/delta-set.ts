@@ -1,6 +1,6 @@
-import Delta from "../packages/core/node_modules/quill-delta/dist/Delta";
-import type Op from "../packages/core/node_modules/quill-delta/dist/Op";
-import { getUniqueId } from "../packages/tools/node_modules/laser-utils";
+import Delta from "../packages/tools/node_modules/quill-delta/dist/Delta";
+import type Op from "../packages/tools/node_modules/quill-delta/dist/Op";
+import { getUniqueId } from "../packages/utils/node_modules/laser-utils";
 
 const ops = [
   { insert: "标题" },
