@@ -15,3 +15,29 @@
 
 我们的编辑器实际上是要完成类似于`slate`的架构，当前设计的架构的是`core`与视图分离，并且此时我们不容易入侵到`quill`编辑器的选区能力，所以最终相关的选区变换还是需要借助`DOM`与`Editor`实例完成，还需要考量在`core`中维护的`state`状态管理。在`DOM`中需要标记`Block`节点、`Line`节点、`Void`节点等等，然后在浏览器`onSelectionChange`事件中进行`Model`的映射。当然整个说起来容易，做起来就难了，这一套下来还是非常复杂的，需要大量时间不断调试才行。
 
+## DOM模型与浏览器选区
+浏览器中存在明确的选区策略，在`State 1`的`ContentEditable`状态下，无法做到从`Selection Line 1`选择到`Selection Line 2`，这是浏览器默认行为，而这种选区的默认策略就定染导致我无法基于这种模型实现`Blocks`。而如果是`Stage 2`的模型状态，是完全可以做到选区的正常操作的，在模型方面没有什么问题，但是我们此时的`Quill`选区又出现了问题，由于其在初始化时是会由`<br/>`产生到`div/p`状态的突变，导致其选区的`Range`发生异动，此时在浏览器中的光标是不正确的，而我们此时没有办法入侵到`Quill`中帮助其修正选区，且`DOM`上没有任何辅助我们修正选区的标记，所以这个方式也难以继续下去。因此在这种状态下，我们可能只能选取`Stage 3`策略的形式，并不实现完整的`Blocks`，而是将`Quill`作为嵌套结构的编辑器实例，在这种模型状态下编辑器不会出现选区的偏移问题，我们的嵌套结构也可以借助`Quill`的`Embed Blot`来实现插件扩展嵌套`Block`结构。
+
+```html
+<p>State 1</p>
+<div contenteditable="false" data-block>
+  <div contenteditable="true" data-line>Selection Line 1</div>
+  <div contenteditable="true" data-line>selection Line 2</div>
+</div>
+
+<p>State 2</p>
+<div contenteditable="true" data-block>
+  <div contenteditable="true" data-line>Selection Line 1</div>
+  <div contenteditable="true" data-line>selection Line 2</div>
+</div>
+
+<p>State 3</p>
+<div contenteditable="true" data-block>
+  <div data-line>Selection Line 1</div>
+  <div data-line>selection Line 2</div>
+  <div contenteditable="false" data-block>
+    <div contenteditable="true" data-line>Selection Line 1</div>
+    <div contenteditable="true" data-line>selection Line 2</div>
+  </div>
+</div>
+```
