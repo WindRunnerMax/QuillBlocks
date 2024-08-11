@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>comment-ot</title>
+    <title>Find Replace</title>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <style>
       body,
@@ -27,19 +27,72 @@
       .ql-container.ql-snow {
         border: unset;
       }
+      .ql-mention {
+        background-color: #eee;
+        border: 1px solid #eee;
+      }
+      .fr-modal {
+        position: fixed;
+        right: 20px;
+        top: 20px;
+        background-color: #fff;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        box-shadow: 0 0 4px #eee;
+      }
+      .fr-modal .fr-input,
+      .fr-modal .fr-footer {
+        margin: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fr-modal .fr-input span {
+        margin-right: 10px;
+      }
+      .fr-modal .fr-footer button {
+        margin-left: 10px;
+      }
     </style>
   </head>
 
   <body>
-    <div id="root">
-      <div class="editor-container">
-        <div id="$editor"></div>
+    <div class="editor-container">
+      <div id="$editor"></div>
+    </div>
+    <div class="fr-modal">
+      <div class="fr-input">
+        <span>查找</span>
+        <input id="$input1" type="text" />
+      </div>
+      <div class="fr-input">
+        <span>替换</span>
+        <input id="$input2" type="text" />
+      </div>
+      <div class="fr-footer">
+        <button>替换</button>
+        <button>替换全部</button>
       </div>
     </div>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-      const dom = $editor;
-      const editor = new Quill(dom, {
+      const Embed = Quill.import("blots/embed");
+      class Mention extends Embed {
+        static blotName = "mention";
+        static className = "ql-mention";
+        static tagName = "SPAN";
+        static create(value) {
+          const node = super.create(value);
+          node.innerHTML = `@${value}`;
+          node.setAttribute("data-value", value);
+          return node;
+        }
+        static value(domNode) {
+          return domNode.getAttribute("data-value");
+        }
+      }
+      Quill.register(Mention);
+      const editor = new Quill($editor, {
         modules: {
           toolbar: [[{ header: [1, 2, false] }], ["bold", "italic", "underline"], ["code-block"]],
         },
@@ -47,7 +100,7 @@
         theme: "snow",
       });
       window.editor = editor;
-      editor.setContents([{ insert: "\n" }]);
+      editor.setContents([{ insert: "123" }, { insert: { mention: "123" } }, { insert: "123\n" }]);
     </script>
   </body>
 </html>
