@@ -140,7 +140,7 @@
                 if (ignoreLineMarker) break;
                 // 行标识符
                 const payload = { index: line.start, length: line.length - 1 };
-                !ignoreLineMarker && payload.length > 0 && ranges.push(payload);
+                payload.length > 0 && ranges.push(payload);
                 break;
               }
               // 迭代行 通过行索引构造`Range`
@@ -158,7 +158,9 @@
                   payload.length--;
                 }
                 payload.length > 0 && ranges.push(payload);
-              } else if (line.start > index + length || traceLength <= 0) {
+                continue;
+              }
+              if (line.start > index + length || traceLength <= 0) {
                 break;
               }
             }

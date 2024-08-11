@@ -114,7 +114,7 @@
         });
       };
       editor.renderLayer = (origin, ignoreLineMarker = true) => {
-        /** @type {{start: number, length: number}} */
+        /** @type {{ start: number, length: number }[]} */
         const lines = [];
         let currentIndex = 0;
         editor.scroll.lines().forEach(line => {
@@ -122,6 +122,7 @@
           lines.push({ start: currentIndex, length });
           currentIndex = currentIndex + length;
         });
+        /** @type {{ index: number, length: number }[]} */
         const ranges = [];
         for (const item of origin) {
           const { index, length } = item;
@@ -130,7 +131,7 @@
             if (length === 1 && index + length === line.start + line.length) {
               if (ignoreLineMarker) break;
               const payload = { index: line.start, length: line.length - 1 };
-              !ignoreLineMarker && payload.length > 0 && ranges.push(payload);
+              payload.length > 0 && ranges.push(payload);
               break;
             }
             if (index < line.start + line.length && line.start <= index + traceLength) {
@@ -146,7 +147,9 @@
                 payload.length--;
               }
               payload.length > 0 && ranges.push(payload);
-            } else if (line.start > index + length || traceLength <= 0) {
+              continue;
+            } 
+            if (line.start > index + length || traceLength <= 0) {
               break;
             }
           }

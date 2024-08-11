@@ -30,6 +30,7 @@
       .ql-mention {
         background-color: #eee;
         border: 1px solid #eee;
+        border-radius: 3px;
       }
       .fr-modal {
         position: fixed;
@@ -63,20 +64,25 @@
     <div class="fr-modal">
       <div class="fr-input">
         <span>查找</span>
-        <input id="$input1" type="text" />
+        <input value="查找" id="$input1" type="text" />
       </div>
       <div class="fr-input">
         <span>替换</span>
         <input id="$input2" type="text" />
       </div>
       <div class="fr-footer">
-        <button>替换</button>
-        <button>替换全部</button>
+        <button id="$replace">替换全部</button>
       </div>
     </div>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script
+      src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-y/lodash.js/4.17.21/lodash.min.js"
+      type="application/javascript"
+    ></script>
     <script>
+      /** 编辑器实例 */
       const Embed = Quill.import("blots/embed");
+      const Delta = Quill.import("delta");
       class Mention extends Embed {
         static blotName = "mention";
         static className = "ql-mention";
@@ -100,7 +106,175 @@
         theme: "snow",
       });
       window.editor = editor;
-      editor.setContents([{ insert: "123" }, { insert: { mention: "123" } }, { insert: "123\n" }]);
+      window.Quill = Quill;
+      editor.setContents([
+        { "insert": "查找替换" },
+        { "attributes": { "header": 1 }, "insert": "\n" },
+        { "insert": "查找替换的富文本基本能力，除了基本的" },
+        { "attributes": { "bold": true }, "insert": "文本查找" },
+        { "insert": "之外，还有内嵌结构例如" },
+        { "attributes": { "italic": true }, "insert": "Mention" },
+        { "insert": "的" },
+        { "insert": { mention: "查找能力" } },
+        { "insert": "。\n" },
+      ]);
+    </script>
+    <script>
+      /** 虚拟图层 */
+      const rangeDOM = document.createElement("div");
+      rangeDOM.className = "ql-range virtual-layer";
+      $editor.appendChild(rangeDOM);
+      const COLOR = "rgba(0, 180, 42, 0.3)";
+      const renderVirtualLayer = (startRect, endRect) => {
+        const block = document.createElement("div");
+        block.style.position = "absolute";
+        block.style.width = "100%";
+        block.style.height = "0";
+        block.style.top = startRect.top + "px";
+        block.style.pointerEvents = "none";
+        const head = document.createElement("div");
+        const body = document.createElement("div");
+        const tail = document.createElement("div");
+        if (startRect.top === endRect.top || endRect.top < startRect.bottom) {
+          head.style.marginLeft = startRect.left + "px";
+          head.style.height = startRect.height + "px";
+          head.style.width = endRect.right - startRect.left + "px";
+          head.style.backgroundColor = COLOR;
+        } else if (endRect.top - startRect.bottom < startRect.height) {
+          head.style.marginLeft = startRect.left + "px";
+          head.style.height = startRect.height + "px";
+          head.style.width = startRect.width - startRect.left + "px";
+          head.style.backgroundColor = COLOR;
+          body.style.height = endRect.top - startRect.bottom + "px";
+          tail.style.width = endRect.right + "px";
+          tail.style.height = endRect.height + "px";
+          tail.style.backgroundColor = COLOR;
+        } else {
+          head.style.marginLeft = startRect.left + "px";
+          head.style.height = startRect.height + "px";
+          head.style.width = startRect.width - startRect.left + "px";
+          head.style.backgroundColor = COLOR;
+          body.style.width = "100%";
+          body.style.height = endRect.top - startRect.bottom + "px";
+          body.style.backgroundColor = COLOR;
+          tail.style.marginLeft = 0;
+          tail.style.height = endRect.height + "px";
+          tail.style.width = endRect.right + "px";
+          tail.style.backgroundColor = COLOR;
+        }
+        block.appendChild(head);
+        block.appendChild(body);
+        block.appendChild(tail);
+        return block;
+      };
+      const buildRangeLayer = ranges => {
+        rangeDOM.innerText = "";
+        ranges.forEach(range => {
+          const startRect = editor.getBounds(range.index, 0);
+          const endRect = editor.getBounds(range.index + range.length, 0);
+          rangeDOM.appendChild(renderVirtualLayer(startRect, endRect));
+        });
+      };
+    </script>
+    <script>
+      /** 查找替换 */
+      const duplicate = [];
+      const find = text => {
+        const delta = editor.getContents();
+        // 处理可替换的文本内容
+        const str = delta.ops
+          .map(op => (typeof op.insert === "string" ? op.insert : String.fromCharCode(0)))
+          .join("");
+        let index = str.indexOf(text, 0);
+        const ranges = [];
+        while (index >= 0) {
+          ranges.push({ index, length: text.length });
+          index = str.indexOf(text, index + text.length);
+        }
+        // 处理不可替换的`Embed`内容
+        const rects = [];
+        let iterated = 0;
+        delta.ops.forEach(op => {
+          if (typeof op.insert === "string") {
+            iterated = iterated + op.insert.length;
+            return void 0;
+          }
+          iterated = iterated + 1;
+          if (op.insert.mention) {
+            const value = op.insert.mention;
+            const mentionIndex = value.indexOf(text, 0);
+            if (mentionIndex === -1) return void 0;
+            // 完全覆盖`Mention`节点
+            // ranges.push({ index: iterated - 1, length: 1 });
+            const [leaf, offset] = editor.getLeaf(iterated);
+            if (
+              leaf &&
+              leaf.domNode &&
+              leaf.domNode.childNodes[1] &&
+              leaf.domNode.childNodes[1].firstChild
+            ) {
+              const textNode = leaf.domNode.childNodes[1].firstChild;
+              const startRange = document.createRange();
+              startRange.setStart(textNode, mentionIndex + 1);
+              startRange.setEnd(textNode, mentionIndex + 1);
+              const startRect = startRange.getBoundingClientRect();
+              const endRange = document.createRange();
+              endRange.setStart(textNode, mentionIndex + 1 + text.length);
+              endRange.setEnd(textNode, mentionIndex + 1 + text.length);
+              const endRect = endRange.getBoundingClientRect();
+              rects.push({ startRect, endRect });
+            }
+          }
+        });
+        // 渲染虚拟图层
+        buildRangeLayer(ranges);
+        duplicate.length = 0;
+        duplicate.push(...ranges);
+        rects.forEach(it => {
+          const editorRect = editor.container.getBoundingClientRect();
+          const startRect = {
+            bottom: it.startRect.bottom - editorRect.top,
+            height: it.startRect.height,
+            left: it.startRect.left - editorRect.left,
+            right: it.startRect.right - editorRect.left,
+            top: it.startRect.top - editorRect.top,
+            width: it.startRect.width,
+          };
+          const endRect = {
+            bottom: it.endRect.bottom - editorRect.top,
+            height: it.endRect.height,
+            left: it.endRect.left - editorRect.left,
+            right: it.endRect.right - editorRect.left,
+            top: it.endRect.top - editorRect.top,
+            width: it.endRect.width,
+          };
+          const block = renderVirtualLayer(startRect, endRect);
+          rangeDOM.appendChild(block);
+        });
+      };
+      const onFind = () => {
+        const text = $input1.value;
+        text && find(text);
+      };
+      const onReplace = () => {
+        const text = $input1.value;
+        const replace = $input2.value;
+        if (!text) return void 0;
+        const changes = new Delta();
+        let preIndex = 0;
+        duplicate.forEach(range => {
+          changes.retain(range.index - preIndex);
+          changes.delete(range.length);
+          changes.insert(replace);
+          preIndex = range.index + range.length;
+        });
+        editor.updateContents(changes);
+        onFind();
+      };
+      $input1.oninput = onFind;
+      $replace.onclick = onReplace;
+      window.onload = onFind;
+      editor.on("text-change", _.debounce(onFind, 100));
     </script>
   </body>
 </html>
