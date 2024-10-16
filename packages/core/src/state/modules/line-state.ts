@@ -74,6 +74,14 @@ export class LineState {
   }
 
   /**
+   * 获取行内最后一个节点
+   */
+  public getLastLeaf(): LeafState | null {
+    const leaves = this.getLeaves();
+    return leaves[leaves.length - 1] || null;
+  }
+
+  /**
    * 更新所有 Leaf 节点
    * @param leaves 叶子节点
    * @returns 行宽度
@@ -96,10 +104,10 @@ export class LineState {
   }
 
   /**
-   * 获取行 Ops
+   * 通过 Leaves 获取行 Ops
    */
   public getOps() {
-    return this.delta.ops;
+    return this.leaves.map(leaf => leaf.op);
   }
 
   /**

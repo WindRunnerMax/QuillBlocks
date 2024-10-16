@@ -1,7 +1,14 @@
 # NOTE
 
+## 笔记  
+我非常喜欢`slate`的`core react`这样分包的设计，但是并不太喜欢`slate`的`json`形式的数据结构，我个人认为扁平化才是大文档的解决方案。我也很喜欢`quill`的`delta`设计，这是一个扁平化的数据结构，但是我并不太喜欢`quill`自己实现的视图层，当然这也是一种解决方案，毕竟框架也是在不断发展更迭的。  
+
+那么我在想为什么不搞一个像是`slate`一样的分包设计，再配合上`quill`的`delta`数据结构，并且解决一些我认为是不太合适的设计，所以便有了这个项目，当然我也并没有指望整个项目有很多人用，更多的是满足自己的好奇心，如何从零做一套富文本编辑器。其实最初起名为`Blocks`目的是想做一套`canvas`的编辑器，但是成本太高了。所以我目前是想利用这种分包结构先做好`react`的，然后有机会先做仅渲染的`canvas`，这样成本应该会低很多。
+
+因为整个富文本编辑器还是非常复杂的，各大框架都是按年维护的，我也只是想做一下满足一下好奇心，这个文档就是随手记一些想法与设计上的思考。
+
 ## Blocks
-我思考了很长时间如何设计`Block`化的编辑器，除了对于交互上的设计比较难做之外，对于数据的设计也没有什么比较好的想法，特别是实际上是要管理一棵树形结构，并且同时还需要支持对富文本内容的描述。最开始我想如果直接通过`JSON`来处理嵌套的数据结构表达，但是想了想这岂不是又回到了`Slate`的设计，在这种设计方案下数据描述特别是数据处理会很麻烦。后来我又想分别管理树结构与引用关系，这样当然是没有问题的，只不过看起来并没有那么清晰，特别是还要设计完备的插件化类型支持，这部分可能就没有那么好做了。
+最开始我思考了很长时间如何设计`Block`化的编辑器，除了对于交互上的设计比较难做之外，对于数据的设计也没有什么比较好的想法，特别是实际上是要管理一棵树形结构，并且同时还需要支持对富文本内容的描述。最开始我想如果直接通过`JSON`来处理嵌套的数据结构表达，但是想了想这岂不是又回到了`Slate`的设计，在这种设计方案下数据描述特别是数据处理会很麻烦。后来我又想分别管理树结构与引用关系，这样当然是没有问题的，只不过看起来并没有那么清晰，特别是还要设计完备的插件化类型支持，这部分可能就没有那么好做了。
 
 后来，我想是不是可以单独将`Blocks`类型放在单独的包里，专门用来管理整棵树的描述，以及类型的扩展等等，而且在扩展类型时不会因为重新`declare module`导致不能实际引用原本的包结构，当然单独引用独立的模块用来做扩展也是可以的。此外，这里就不再单独维护树结构与引用关系了，每个块都会携带自己的引用关系，即父节点`parent`的`id`与子节点`children`的`id`，这里只存储节点的`id`而不是具体的对象引用，在运行时通过状态管理再来获取实际的引用。此外在编辑器的实际对象中也需要维护状态对象，在状态树里需要维护基本的数据操作，最终的操作还是需要映射到所存储的数据结构`BlockSet`。
 
@@ -41,3 +48,237 @@
   </div>
 </div>
 ```
+
+## 状态维护与视图刷新
+`core -> react`中使用`context/redux/mobx`是否可以避免自行维护各个状态对象，也可以达到局部刷新而不是刷新整个页面的效果。  
+
+想了想似乎不太行，就拿`context`来说，即使有`immer.js`似乎也做不到局部刷新，因为整个`delta`的数据结构不能够达到非常完整的与`react props`对应的效果，诚然我们可以根据`op & attributes`作为`props`再在组件内部做数据转换，但是这样似乎并不能避免维护一个状态对象，最基本的是应该要维护一个`LineState`对象，每个`op`可能与前一个或者后一个有状态关联，以及行属性需要处理，这样一个基础的`LineState`对象是必不可少的。  
+
+后边我又仔细想了想，毕竟现在没有实现就纯粹是空想，`LineState`对象是必不可少的，再加上是要做插件化的，那么给予`react`组件的`props`应该都实际上可以隐藏在插件里边处理，如果我使用`immer`的话，似乎只需要保证插件给予的参数是不变的即可，但是同样的每一个`LineState`都会重新调用一遍插件化的`render`方法(或者其他名字)，这样确实造成了一些浪费，即使能够保证数据不可变即不会再发生`re-render`，但是如果在插件中解构了这个对象或者做了一些处理，那么又会触发`react`函数执行，当然因为`react diff`的存在可能不会触发视图重绘罢了。
+
+那么既然`LineState`对象不可避免，如果再在这上边抽象出一层`ZoneState`来管理`LineState`，这样是不是会更简单一些，同样因为上边也说过目前是在`delta`的基础上又包了一层`zone`，那么就又需要一个`ContentState`来管理`ZoneState`了，当然这层`ContentState`也是可以直接放在`editor`对象里的，只不过`editor`对象包含了太多的模块，还是抽离出来更合适。通过`editor`的`Content Change`事件作为`bridge`，以及这种一层管理一层的方式，精确地更新每一行，减少性能损耗，甚至于因为我们能够比较精确的得知究竟是哪几个`op`更新了，做到精准更新也不是不可能。
+
+## LineState
+即然确定好是`Editor -> ContentState -> ZoneState -> LineState`的结构设计，那么`LineState`应该怎么设计才能让编辑器在`apply`的时候能够精确的修改`Line`的状态呢，因为咱们的数据结构是`delta`，是一个扁平化的结构，选区的设计是`start length`的结构，那么`LineState`最少要保存一个`start`和一个`offset`，考虑到执行更新的时候大概率是要处理这两个值的，所以这两个值应该与`Ops`和`line attrs`独立放置，或者直接在原对象上修改，保证数据不可变的状态，另外每层结构还需要传一个`parent`进去，方便处理父级信息。
+
+另外又想到一个问题，选区是一个很重要的点，所以通过选区来对应到指定状态也很重要，目前延续的设计是`{ start, length, zoneId }`的三元组，所以需要一个转换是很必要的，比如转换出来的位置需要有`{ zoneState, lineState }`这一些状态信息，当然也可以直接通过提供参数来取得这些状态信息，都是可行的。
+
+## Selection
+`Selection`选区，我思考了很长时间这部分应该如何表示，虽然最根本的思想就是从浏览器的选区映射到`Editor`自己维护的选区，以及可以反向将自己维护的选区再设置到浏览器上。浏览器的选区`API`挺多的，主要集中在`getSelection`、`onSelectionChange`上，虽然这些`API`我们不需要全部实现，但是基本的`Range`、`getSelection`、`setSelection`、`onSelectionChange`都需要有，还有焦点等一系列的状态需要处理。想一想，我们是通过插件的形式生成的`DOM`结构，那么`core`肯定是不能完全控制这些`DOM`节点的生成，那么怎么映射就是个复杂的问题。综上，选区将会是个非常复杂的模块。
+
+趁着五一假期我研究了下`quill`和`slate`的选区实现，实际上看的是似懂非懂的样子，感觉类似的东西还是需要实际操作才能真的明白，而且我看相关的实现会有大量的`case`需要特殊处理，当然这块主要是对于`ZeroSpace/Void`与浏览器的选区兼容的实现。当然我也总结了一些内容，因为是看的并不是很懂，所以可能并不是很正确，有可能后边在真的实现的时候会被推翻，但是目前来看还是有助于理解的。
+
+* 无论是`slate`还是`quill`都是更专注于处理点`Point`，当然`quill`的最后一步是将点做减法转化为`length`，但是在这一步之前，都是在处理`Point`这个概念的，我想这似乎是因为本身浏览器的选区也是通过`Anchor`与`Focus`这两个`Point`来实现的，所以转换也是需要继承这个实现。
+* 无论是`slate`还是`quill`也都会将浏览器选区进行一个`Normalize`化，这一块我没太看明白，似乎是为了将选区的内容打到`Text`节点上，并且再来计算`Text`节点的`offset`，毕竟富文本实际上专注的还是`Text`节点，各种富文本内容也是基于这个节点类似于`fake-text`来实现的。另外还有可能因为浏览器的选区可能不很合适，才需要这个规范化。
+* `quill`因为是自行实现的`View`层，所以其维护的节点都在`Blot`中，所以将浏览器的选区映射到`quill`的选区相对会简单一些。那么`slate`是借助于`React`实现的`View`层，那么映射的过程就变的复杂了起来，所以在`slate`当中可以看到大量的形似于`data-slate-leaf`的节点，这都是`slate`用来计算的标记，当然不仅仅是选区的标记。那么还有一个问题，在每次选区变换的时候，总不能将所有的节点都遍历一遍来找这些节点，再遍历一遍去计算每个点对应的位置来构造`Range`，所以实际上在渲染视图时就需要一个`Map`来做映射，将真实的`DOM`节点来映射一个对象，这个对象保存着这个节点的`key`，`offset`，`length`，`text`等信息，这样`WeakMap`对象就派上了用场，之后在计算的时候就可以直接通过`DOM`节点作为`key`来获取这个节点的信息，而不需要再去遍历一遍。
+
+那么其实看以上这几点，我们的编辑器实际上是要完成类似于`slate`的架构，因为我们希望的是`core`与视图分离，所以选区、渲染这方面的实现都需要在`react`这个包里实现，相关的`state`是在`core`里实现的，通过`onContentChange`来实现通信，在内容变化的时候通知`react`去`setState`进行渲染。当然整个说起来容易，做起来就难了，这一套下来还是非常复杂的，需要大量时间不断调试才行。
+
+## Input
+到这里，其实可以感觉到我们主要是用到了浏览器的`ContentEditable`编辑、选区以及`DOM`的能力，那么我们的编辑器最重要的一个能力就是输入，有了之前聊到的一些设计与抽象，我们似乎可以比较简单的设计整个流程: 
+
+* 通过选区映射到我们自行维护的`Range Model`，包括选区变换时根据`DOMRange`映射到`Model`，这一步需要比较多的查找和遍历，还需要借助我们之前聊的`WeakMap`对象来查找`Model`来计算位置。
+* 通过键盘进行输入，借助于浏览器的`BeforeInputEvent`以及`CompositionEvent`分别处理输入/删除与`IME`输入，基于输入构造`Delta Change`应用到`DeltaSet`上并且触发`ContentChange`，视图层由此进行更新。
+* 当视图层更新之后，需要根据浏览器的`DOM`以及我们维护的`Model`刷新选区，需要根据`Model`映射到`DOMRange`，再应用到浏览器的`selection`对象中，这其中也涉及了很多边界条件。
+
+实际上在完成上边整个流程的过程中，我遇到了两个非常麻烦的问题，而且也是在解决问题的过程中，慢慢地完善了整个流程的实现，路程还是比较曲折的。
+
+第一个遇到的问题是选区的的同步，此时我已经完成了第一步，也就是通过选区映射到我们自行维护的`Range Model`，接下来我想来处理输入，这时候还没有考虑到`IME`的问题，只是在处理英文的输入，那么对于输入部分当前其实就是劫持了`BeforeInputEvent`事件。那么当我进行输入操作的时候，问题来了，假设我们此时有两个`span`，最开始当前的DOM结构是`<span>DOM1</span><span>DO|M2</span>`，`|`表示光标位置，我要在第二个`span`的`DO`和`M2`字符之间插入内容`x`，此时无论是用代码`apply`还是用户输入的方式，都会使得`DOM2`这个`span`由于`apply`造成`ContentChange`继而`DOM`节点会刷新，也就是说就是第二个`span`已经不是原来的`span`而是创建了一个新对象，那由于这个`DOM`变了导致浏览器光标找不到原本的`DOM2`这个`span`结构了，那么此时光标就变成了`<span>DOM1|</span><span>DOxM2</span>`。本身我认为起码在输入的时候选区应该是会跟着变动的，实践证明这个方法是不行的，所以实际上在这里就是缺了一步根据我们的`Range Model`来更新`DOM Range`的操作，而且由于我们应该在`DOM`结构完成后尽早更新`DOM Range`，这个操作需要在`useLayoutEffect`中完成而不是`useEffect`中，也就对标了类组件的`componentDidUpdate`，更新`DOM Range`的操作应该是主动完成的，例如当前的`DOM`视图刷新，`Paste`事件等等。
+
+第二个遇到的问题是脏数据的问题，此时上边的三步操作都已经实现了，但是在输入的时候我遇到了一个问题，最开始当前的`DOM`结构是`<span>DOM1</span><bold>DOM2</bold>`，此时我在两个`div`的最后输入了中文，也就是唤起了`IME`输入，当我输入了 试试 这两个字(不追加样式)之后，此时的`DOM`结构变成了`<span>DOM1</span><bold>DOM2试试</bold><span>试试</span>`，很明显在`bold`标签里边的文字是异常的，我们此时的数据结构`Delta`内容上是没问题的。然而也就是因为这样造成了问题，我们的`Delta Model`没有改变，那么由我们维护的`Model`映射到`React`维护的`Fiber`时，由于`Model`没有变化那么`React`根据`VDOM diff`的结果发现没有改变于是原地复用了这个`DOM`结构，而实际上这个`DOM`结构由于我们的`IME`输入是已经被破坏了的，而由于英文输入时我们阻止了默认行为是不会去改变原本的`DOM`结构的，所以在这里我们需要进行脏数据检查，并且将脏数据进行修正，确保最后的数据是正常的，目前采取的一个方案是对于最基本的`Text`组件进行处理，在`ref`回调中检查当前的内容是否与`op.insert`一致，不一致要清理掉除第一个节点外的所有节点，并且将第一个节点的内容回归到原本的`text`内容上。
+
+其实曾经我也想通过自绘选区和光标的形式来完成，因为我发现通过`ContentEditable`来控制输入太难控制了，特别是在`IME`中很容易影响到当前的`DOM`结构，由此还需要进行脏数据检查，强行更新`DOM`结构，但是简单了解了下听说坑也不少，于是放弃了这个想法而依然选用了大多数`L1`编辑器都在用的`ContentEditable`。但是实际上`ContentEditable`的坑也很多，这其中有非常多的细节，我们很难把所有的边界条件都处理完成，如何检测`DOM`被破坏由此需要强制刷新，当我们将所有的边界`case`都处理到位了，那么代码复杂度就上来了，可能接下来就需要处理性能问题了，例如我们本身涉及`DOM`与`Model`的映射，所以有大量的计算，这部分也是需要考虑如何去进行优化的，特别是对于大文档来说。
+
+首先我们来聊聊输入部分，输入其实分为了好几种方法，一种是非受控的方法，采用这种方法的时候，我们需要`MutationObserver`来确定当前正在输入字符，之后通过解析`DOM`结构得到最新的`Text Model`，之后需要与原来的`Text Model`做`diff`，由此来得到`ops`，这样就可以应用到当前的`Model`中进行后续的工作了。一种是半受控的方法，通过`BeforeInputEvent`以及`CompositionEvent`分别处理输入/删除与`IME`输入，以及额外的`onKeyDown`、`onInput`事件来辅助完成这部分工作，通过这种方式就可以劫持用户的输入，由此构造`ops`来应用到当前的`Model`，当然对于类似`CompositionEvent`需要一些额外的处理，这也是当前主流的实现方法，当然由于浏览器的兼容性，通常会需要对`BeforeInputEvent`做兼容，例如借助`React`的合成事件或者`onKeyDown`来完成相关的兼容。还有一种是全受控的方法，当我们自绘选区的时候，就必须将所有的内容进行绘制，比如`IME`输入的时候，相关的字符需要记录并且分配`id`，当结束的时候将原来的内容删除并且构造为新的`Model`，全受控通常需要一个隐藏的输入框甚至是`iframe`来完成，这其中也有很多细节需要处理，例如在`CompositionEvent`时需要绘制内容但不能触发协同。
+
+在性能方面，除了上边提到的`WeakMap`可以算作是一种优化方案之外，我们还有很多值得优化的地方，例如因为`Delta`数据结构的关系，我们在这里需要维护一个`PointRange - RawRange`选区的相互变换，而在这其中由于我们对`LineState`的`start`和`size`有所记录，那么我们在变换查找的时候就可以考虑到用二分的方法，因为`start`必然是单向递增的。此外，由于我们实际上是完全可以推算出本次更新究竟是更新了什么内容，所以对于原本的`State`对象是可以通过计算来进行复用的，而不是每次更新都需要刷新所有的对象，当然这可能并不是非常好的操作，没有`immutable`增加了维护的细节和难度。还有一点，对于大文档来说扁平化的数据结构应该是比较好的，扁平化意味着没有那么复杂，例如现在的`Delta`就是扁平化的数据结构，但是随机访问的效率就有些棘手了，或许到了那时候需要结合一些数据存储的方案例如`PieceTable`，当然对于现在来说还是有点远，现在我们的编辑器也只是跑通了基本流程而已。
+
+## 内容导入导出
+这次想聊一下业务场景以及相关的技术细节，主要是关于富文本内容导入导出的，这个话题其实是非常大的因为细节会特别多，所以在这里也只是简述。
+
+在线文档会有很多场景需要用到导入导出，导入的场景比如从`Markdown`迁移到我们的富文本形式，这就需要解析`Markdown`转成我们的`ZoneDeltaSet`数据结构，这是一些做文档增量的重要环节。再比如一些文档需要外部供应商的修改，这就需要我们支持导出并且能够将其完备的导入回来，一个非常常见的场景就是文档翻译。在导出方面非常标准的场景就是私有化交付，这种情况下我们通常就需要导出`Word`，当然导出`Markdown`、`PDF`都是比较常见的私有化交付能力，但是对于要求比较高的客户文档还是要求导出`Word`会更正规一些，因为`Markdown`不能支持富文本的所有格式，`PDF`又不太容易编辑，而`Word`就相对能承载更加复杂场景并且拥有可以继续编辑的能力。
+
+导出`Word`实际上是个比较复杂的工作，在这种情况下我们就需要了解`OOXML(Office Open XML)`，`Office Word`的`.docx`文件就是使用`OOXML`标准实现的。如果简单了解下的话，就可以明显的感觉到`Word`的设计就很靠拢于`Quill-Delta`的设计，实际上会更加靠拢我们的`ZoneDeltaSet`设计，当然我们直接构造`OOXML`是很麻烦的，通常需要借助框架，在我个人调研过后能力比较完备的框架是`docx.js`，在研究这个框架之后可以发觉我们的`ZoneDeltaSet`设计是可以相对轻松地进行转换的，这同样也是我个人比较喜欢`quill-delta`而不是`slate-json`数据结构的一个原因。当然即使是使用了框架，我们的工作也是比较复杂的，因为使用`Word`需要比较大量的计算，比如嵌套和缩进的情况下计算宽度，然后`Zone`的嵌套设计是需要使用`Table`来实现的，整体来说还是比较复杂的。当然我们在这里探讨的都是需要非常定制化的场景，如果要求不高的话，直接使用`HTML - Word`就可以了，只不过我们要是实现在线文档私有化交付的话通常都是定制化要求比较高的，所以还是需要相关能力开发的。
+
+
+## 状态模型管理
+在先前的`State`模块更新文档内容时，我们是直接重建了所有的`LineState`以及`LeafState`对象，然后在`React`视图层的`BlockModel`中监听了`OnContentChange`事件，以此来将`BlockState`的更新应用到视图层。这种方式简单直接，全量更新状态能够保证在`React`的状态更新，然而这种方式的问题在于性能，当文档内容非常大的时候，全量计算将会导致大量的状态重建，并且其本身的改变也会导致`React`的`diff`差异进而全量更新文档视图，这样的性能开销通常是不可接受的。
+
+那么通常来说我们就需要基于`Changes`来确定状态的更新，首先我们需要确定更新的粒度，例如以行为基准则`retain`跨行的时候就直接复用原有的`LineState`，这当然是个合理的方法，相当于尽可能复用`Origin List`然后生成`Target List`，这样的方式自然可以避免部分状态的重建，尽可能复用原本的对象。整体思路大概是分别记录旧列表和新列表的`row`和`col`两个`index`值，然后更新时记录起始`row`，删除和新增自然是正常处理，对于更新则认为是先删后增，对于内容的处理则需要分别讨论单行和跨行的问题，最后可以将这部分增删`LineSatet`数据放置于`changes`中，就可以得到实际增删的`Ops`了，这部分数据在`apply`的`delta`中是不存在的，同样可以认为是数据的补充。
+
+那么这里实际上是存在非常需要关注的点是我们现在维护的是状态模型，那么也就是说所有的更新就不再是直接的`Delta.compose`，而是使用我们实现的`Mutate`，假如我们对于数据的处理存在偏差的话，那么就会导致状态出现问题，本质上我们是需要实现`Line`级别的`compose`方法。实际上我们可以重新考虑这个问题，如果我们整个行的`LeafState`都没有变化的话，是不是就可以意味着`LineState`就可以直接复用了，在`React`中`Immutable`是很常用的概念，那么我们完全可以重写`compose`等方法做到`Imuutable`，然后在更新的时候重新构建新的`Delta`，当行中`Ops`都没有发生变化的时候，我们就可以直接复用`LinState`，当然`LeafState`是完全可以直接复用的，这里我们将粒度精细到了`Op`级别。
+
+此外在调研了相关编辑器之后，我发现关于`key`值的管理也是个值的探讨的问题。先前我认为`Slate`生成的`key`跟节点是完全一一对应的关系，例如当`A`节点变化时，其代表的层级`key`必然会发生变化，然而在关注这个问题之后，我发现其在更新生成新的`Node`之后，会同步更新`Path`以及`PathRef`对应的`Node`节点所对应的`key`值，包括飞书的`Block`行状态管理也是这样实现的，飞书`Block`的叶子节点则更加抽象，`key`值是`stringify`化的`Op`属性值拼接其`Line`内的属性值`index`，用以处理重复的属性对象。我思考在这里`key`值应该是需要主动控制强制刷新的时候，以及完全是新节点才会用得到的，应该跟`React`以及`ContentEditable`非受控有关系，这个问题还是需要进一步的探讨。
+
+因此关于整个状态模型的管理，还有很多问题需要处理，例如我们即使需要重建`LineState`，也需要尽可能找到其原始的`LineState`以便于复用其`key`值，避免整个行的`ReMount`，当然即使复用了`key`值，因为重建了`State`实例，`React`也会继续后边的`ReRender`流程。说到这里，我们对于`ViewModel`的节点都补充了`React.memo`，以便于我们的`State`复用能够正常起到效果。但是，目前来说我们的重建方案效率是不如最开始提到的行方案的，因为此时我们相当于从结果反推，大概需要经过`O(3N)`的时间消耗，而同时`compose`以及复用`state`才是效率最高的方案，这里还存在比较大的优化空间，特别是在多行文档中只更改小部分行内容的情况下，实际上这也是最常见的形式。
+
+## 零宽字符 IME
+通常实现`Void/Embed`节点时，我们都需要在`Void`节点中实现一个零宽字符，用来处理选区的映射问题。通常我们都需要隐藏其本身显示的位置以隐藏光标，然而在特定条件下这里会存在吞`IME`输入的问题。
+
+```html
+<div contenteditable="true"><span contenteditable="false" style="background:#eee;">Void<span style="height: 0px; color: transparent; position: absolute;">&#xFEFF;</span></span><span>!</span></div>
+```
+
+处理这个问题的方式比较简单，我们只需要将零宽字符的标识放在`EmbedNode`之前即可，这样也不会影响到选区的查找。`https://github.com/ianstormtaylor/slate/pull/5685`。此外飞书文档的实现方式也是这样的，`ZeroNode`永远在`FakeNode`前。
+
+```html
+<div contenteditable="true"><span contenteditable="false" style="background:#eee;"><span style="height: 0px; color: transparent; position: absolute;">&#xFEFF;</span>Void</span><span>!</span></div>
+```
+
+## Void IME
+在这里我还发现了一个很有趣的事情，是关于`ContentEditable`以及`IME`的交互问题。在`slate`的`issue`中发现，如果最外层节点是`editable`的，然后子节点中某个节点是`not editable`的，然后其后续紧接着是`span`的文本节点，当前光标位于这两者中间，此时唤醒`IME`输入部分内容，如果按着键盘的左键将`IME`的编辑向左移动到最后，则会使整个编辑器失去焦点，`IME`以及输入的文本也会消失，此时如果在此唤醒`IME`则会重新出现之前的文本。这个现象只在`Chromium`中存在，在`Firefox/Safari`中则表现正常。
+
+```html
+<div contenteditable="true"><span contenteditable="false" style="background:#eee;">Void</span><span>!</span></div>
+```
+
+这个问题我在`https://github.com/ianstormtaylor/slate/pull/5736`中进行了修复，关键点是外层`span`标签有`display:inline-block`样式，子`div`标签有`contenteditable=false`属性。
+
+```html
+<div contenteditable="true"><span contenteditable="false" style="background: #eee; display: inline-block;"><div contenteditable="false">Void</div></span><span>!</span></div>
+```
+## 选区校正
+1. `Zero`节点选区位置前置。
+2. 方向键选区位置调整，目标预测`Next`状态，折叠/`shift`状态处理。
+
+```html
+<div id="$1" contenteditable style="outline: 1px solid #aaa">1234567890</div>
+<script>
+  const text = $1.firstChild;
+  class Range {
+    constructor(start, end, isBackward) {
+      [this.start, this.end] = start > end ? [end, start] : [start, end];
+      this.isBackward = isBackward;
+      this.isCollapsed = false;
+      if (start === end) {
+        this.isCollapsed = true;
+        this.isBackward = false;
+      }
+    }
+  }
+  let range = null;
+  document.addEventListener("selectionchange", () => {
+    const selection = window.getSelection();
+    if (selection.anchorNode !== text || selection.focusNode !== text || selection.rangeCount <= 0) {
+      return;
+    }
+    const sel = selection.getRangeAt(0);
+    range = new Range(sel.startOffset, sel.endOffset, selection.anchorOffset !== sel.startOffset);
+    console.log("Range :>> ", range);
+  });
+  $1.addEventListener("keydown", (event) => {
+    const leftArrow = event.key === "ArrowLeft";
+    const rightArrow = event.key === "ArrowRight";
+    if (leftArrow || (rightArrow && range)) {
+      event.preventDefault();
+      const focus = range.isBackward ? range.start : range.end;
+      const anchor = range.isBackward ? range.end : range.start;
+      let newRange = null;
+      if (!range.isCollapsed && !event.shiftKey) {
+        newRange = leftArrow
+          ? new Range(range.start, range.start, false)
+          : new Range(range.end, range.end, true);
+      }
+      if (leftArrow && !newRange) {
+        const newFocus = Math.max(0, focus - 1);
+        const isBackward = event.shiftKey && range.isCollapsed ? true : range.isBackward;
+        const newAnchor = event.shiftKey ? anchor : newFocus;
+        newRange = new Range(newAnchor, newFocus, isBackward);
+      }
+      if (rightArrow && !newRange) {
+        const newFocus = Math.min(text.length, focus + 1);
+        const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
+        const newAnchor = event.shiftKey ? anchor : newFocus;
+        newRange = new Range(newAnchor, newFocus, isBackward);
+      }
+      if (newRange) {
+        const sel = window.getSelection();
+        if (newRange.isBackward) {
+          sel.setBaseAndExtent(text, newRange.end, text, newRange.start);
+        } else {
+          sel.setBaseAndExtent(text, newRange.start, text, newRange.end);
+        }
+      }
+    }
+  });
+</script>
+```
+
+## Input Undo
+1. `BeforeInput`事件完全`PreventDefault`，则由于浏览器内置`Stack`永远为空，不会触发`historyUndo`的`InputType`。
+2. `KeyDown`事件完全接管`undo/redo`，则由于非`Firefox`会即使在非聚焦状态也会触发上次编辑的`undo/redo`，导致状态不同步。
+3. `Input`事件的`historyUndo/historyRedo`接管，则由于`BeforeInput`阻止默认行为，根本不会触发事件，但非聚焦状态的`undo`会触发。
+
+```html
+<div id="$1" contenteditable style="outline: 1px solid #aaa;"></div>
+<script>
+  $1.addEventListener("beforeinput", (event) => {
+    console.log("before input event :>> ", event);
+    event.preventDefault();
+  });
+  $1.addEventListener("input", (event) => {
+    console.log("input event :>> ", event);
+  });
+</script>
+```
+
+## History 模块设计
+
+```js
+// https://quilljs.com/playground/snow
+// https://www.npmjs.com/package/quill-delta#transform
+const Delta = Quill.imports.delta;
+let baseA = new Delta().insert("12");
+let baseB = new Delta().insert("12");
+const oa = new Delta().retain(2).insert("A");
+const ob = new Delta().retain(2).insert("B");
+baseA = baseA.compose(oa); // [{insert:"12A"}]
+baseB = baseB.compose(ob); // [{insert:"12B"}]
+const ob1 = oa.transform(ob, true); // [{retain:3},{insert:"B"}]
+const oa1 = ob.transform(oa); // [{retain:2},{insert:"A"}]
+baseA = baseA.compose(ob1); // [{insert:"12AB"}]
+baseB = baseB.compose(oa1); // [{insert:"12AB"}]
+```
+
+```js
+// https://www.npmjs.com/package/quill-delta#invert
+// https://github.com/slab/quill/blob/main/packages/quill/src/modules/history.ts
+const Delta = Quill.imports.delta;
+let base = new Delta();
+const op1 = new Delta().insert("1");
+const op2 = new Delta().retain(1).insert("2");
+base = base.compose(op1); // [{insert:"1"}]
+let invert1 = op1.invert(base); // [{delete:1}]
+base = base.compose(op2); // [{insert:"12"}]
+let invert2 = op2.invert(base); // [{retain:1},{delete:1}]
+let undoable = new Delta().retain(2).insert("3");
+base = base.compose(undoable); // [{insert:"123"}]
+invert2 = undoable.transform(invert2, true); // [{retain:1},{delete:1}]
+undoable = invert2.transform(undoable); // [{retain:1},{insert:"3"}]
+invert1 = undoable.transform(invert1, true); // [{delete:1}]
+```
+
+```js
+const Delta = Quill.imports.delta;
+let base = new Delta().insert("000000");
+const op1 = new Delta().retain(3).insert("1");
+const op2 = new Delta().retain(3).insert("2");
+base = base.compose(op1); // [{insert:"0001000"}]
+let invert1 = op1.invert(base); // [{retain:3},{delete:1}]
+base = base.compose(op2); // [{insert:"00021000"}]
+let invert2 = op2.invert(base); // [{retain: 3},{delete:1}]
+let undoable = new Delta().retain(4).insert("3");
+base = base.compose(undoable); // [{insert:"000231000"}]
+invert2 = undoable.transform(invert2, true); // [{retain:3},{delete:1}]
+undoable = invert2.transform(undoable); // [{retain:3},{insert:"3"}]
+invert1 = undoable.transform(invert1, true); // [{retain:4},{delete:1}]
+```
+
+## 状态/视图更新优化策略
+在最开始的时候，我们的状态管理形式是直接全量更新`Delta`，然后使用`EachLine`遍历重建所有的状态，并且实际上我们维护了`Delta`与`State`两个数据模型。但是这样的模型必然是耗费性能的，每次`Apply`的时候都需要全量更新文档并且再次遍历分割行状态，当然实际上只是计算迭代的话，实际上是不会太过于耗费性能，但是由于我们每次都是新的对象，那么在更新视图的时候，更容易造成性能的损耗。
+
+那么在后来的设计中，我们实现了一套`Immutable Delta+Iterator`来处理更新，这种时候我们就可以借助不可变的方式来实现`React`视图的更新，此时的`key`是根据`WeakMap`来实现的对应`id`值，此时就可以借助`key`的管理以及`React.memo`来实现视图的复用。但是这种方式也是有问题的，因为此时我们即使输入简单的内容，也会导致整个行的`key`发生改变，而此时我们是不必要更新此时的`key`的。
+
+此外在这种方式中，我们判断`LineState`是否需要新建则是根据整个行内的所有`LeafState`来重建的，也就是说这种时候我们是需要再次将所有的`op`遍历一遍，当然实际上由于最后还需要将`compose`后的`Delta`切割为行级别的内容，所以其实这里最少需要遍历两遍。那么此时我们需要思考优化方向，首先是首个`retain`，在这里我们应该直接完整复用原本的`LineState`，包括处理后的剩余节点也是如此。而对于中间的节点，我们就需要为其独立设计更新策略。
+
+首先是对于新建的节点，我们直接构建新的`LineState`即可，删除的节点则不从原本的`LineState`中放置于新的列表。而对于更新的节点，我们实际上是需要更新原本的`LineState`对象的，因为我们实际上的行是存在更新的，而重点是我们需要将原本的`LineState`的`key`值复用，这里我们方便的实现则是直接以`\n`的标识为目标的`State`，即如果在`123|312\n`的`|`位置插入`\n`的话，那么我们就是`123`是新的`LineState`，`312`是原本的`LineState`，这样我们就可以实现`key`的复用。

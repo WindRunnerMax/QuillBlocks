@@ -69,6 +69,6 @@ export const formatEOL = (text: string) => {
 /**
  * 判断是否为 EOL Op
  */
-export const isEOLOp = (op: Op) => {
-  return isInsertOp(op) && op.insert === EOL;
+export const isEOLOp = (op: Op | null) => {
+  return op && isInsertOp(op) && op.insert === EOL;
 };

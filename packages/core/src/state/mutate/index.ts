@@ -16,7 +16,7 @@ import { isObject } from "block-kit-utils";
 import type { BlockState } from "../modules/block-state";
 import { LeafState } from "../modules/leaf-state";
 import { LineState } from "../modules/line-state";
-import { StateIterator } from "./iterator";
+import { Iterator } from "./iterator";
 
 export class Mutate {
   /** 初始 Lines */
@@ -32,9 +32,11 @@ export class Mutate {
    * @param newOp
    */
   private insert(lines: LineState[], lineState: LineState, newLeaf: LeafState): LineState {
+    console.log("newLeaf.op :>> ", newLeaf.op);
     const leaves = lineState.getLeaves();
     const index = leaves.length;
-    const lastOp = leaves[index - 1].op;
+    const lastLeaf = lineState.getLastLeaf();
+    const lastOp = lastLeaf && lastLeaf.op;
     const newOp = newLeaf.op;
     // 如果是 EOL 则直接追加
     if (isEOLOp(newOp) || isEOLOp(lastOp)) {
@@ -74,7 +76,7 @@ export class Mutate {
   public compose(other: Delta): LineState[] {
     const lines: LineState[] = [];
     const otherOps = normalizeEOL(other.ops);
-    const thisIter = new StateIterator(this.lines);
+    const thisIter = new Iterator(this.lines);
     const otherIter = new OpIterator(otherOps);
     const firstOther = otherIter.peek();
     // 当前处理的 LineState
@@ -105,12 +107,6 @@ export class Mutate {
       if (otherIter.peekType() === OP_TYPES.INSERT) {
         const leaf = new LeafState(0, 0, otherIter.next(), lineState);
         lineState = this.insert(lines, lineState, leaf);
-      } else if (thisIter.peekType() === OP_TYPES.DELETE) {
-        const op = thisIter.next();
-        if (op) {
-          const leaf = new LeafState(0, 0, op, lineState);
-          lineState = this.insert(lines, lineState, leaf);
-        }
       } else {
         const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
         const thisLeaf = thisIter.next(length);
@@ -129,18 +125,20 @@ export class Mutate {
             isRetainOp(thisLeaf.op)
           );
           if (attributes) {
+            newLeaf.op.attributes = attributes;
             newLeaf.attributes = attributes;
           }
           lineState = this.insert(lines, lineState, newLeaf);
-          const leaves = lineState.getLeaves();
-          const lastOp = leaves[leaves.length - 1].op;
-          if (!otherIter.hasNext() && isEqualOp(lastOp, newLeaf.op)) {
+          const lastLeaf = lineState.getLastLeaf();
+          if (!otherIter.hasNext() && lastLeaf && isEqualOp(lastLeaf.op, newLeaf.op)) {
             // 处理剩余的 Leaves 和 Lines
             const rest = thisIter.rest();
             for (const leaf of rest.leaf) {
               lineState = this.insert(lines, lineState, leaf);
             }
+            console.log("rest.line.length :>> ", rest.line.length);
             lines.push(...rest.line);
+            return lines;
           }
         }
       }

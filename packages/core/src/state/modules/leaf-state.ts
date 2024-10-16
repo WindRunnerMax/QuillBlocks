@@ -1,5 +1,4 @@
 import type { AttributeMap, Op } from "block-kit-delta";
-import { getOpLength } from "block-kit-delta";
 
 import { EOL } from "../types";
 import type { LineState } from "./line-state";
@@ -23,8 +22,8 @@ export class LeafState {
     public parent: LineState
   ) {
     this.eol = false;
-    this.length = getOpLength(op);
     this.attributes = op.attributes || {};
+    this.length = op.insert ? op.insert.length : 0;
     if (op.insert === EOL) {
       this.eol = true;
     }

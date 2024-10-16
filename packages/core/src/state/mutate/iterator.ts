@@ -4,7 +4,7 @@ import { getOpLength, isDeleteOp, isInsertOp, isRetainOp, OP_TYPES } from "block
 import { LeafState } from "../modules/leaf-state";
 import type { LineState } from "../modules/line-state";
 
-export class StateIterator {
+export class Iterator {
   /** 行索引 */
   private row: number;
   /** 列索引 */
@@ -97,7 +97,7 @@ export class StateIterator {
     const nextLeaf = this.peek();
     if (nextLeaf) {
       const offset = this.offset;
-      const opLength = getOpLength(nextLeaf);
+      const opLength = getOpLength(nextLeaf.op);
       const restLength = opLength - offset;
       if (length >= restLength) {
         length = restLength;
@@ -115,7 +115,7 @@ export class StateIterator {
         return new LeafState(0, 0, deleteOp, nextLeaf.parent);
       } else {
         const retOp: Op = {};
-        if (nextLeaf.attributes) {
+        if (nextLeaf.op.attributes) {
           retOp.attributes = nextLeaf.attributes;
         }
         if (isRetainOp(op)) {
@@ -144,6 +144,7 @@ export class StateIterator {
    * 获取剩余的所有 Leaf 以及 Line
    */
   public rest() {
+    console.log("this.row,col,offset :>> ", this.row, this.col, this.offset);
     type Rest = { leaf: LeafState[]; line: LineState[] };
     const rest: Rest = { leaf: [], line: [] };
     if (!this.hasNext()) {
@@ -162,7 +163,7 @@ export class StateIterator {
       const next = this.next();
       const line = this.lines[row];
       if (line && next) {
-        const leaves = line.getLeaves().slice(col);
+        const leaves = line.getLeaves().slice(col + 1);
         rest.leaf = [next].concat(leaves);
         rest.line = this.lines.slice(row + 1);
       }

@@ -1,53 +1,51 @@
 import { Delta } from "block-kit-delta";
 
-import { ImmutableIterator } from "../../src/state/mutate/iterator";
+import { Editor } from "../../src/editor";
+import { Iterator } from "../../src/state/mutate/iterator";
 
-describe("immutable iterator", () => {
-  const insert1 = { insert: "Hello", attributes: { bold: "true" } };
-  const retain1 = { retain: 3 };
-  const insert2 = { insert: "2", attributes: { src: "link" } };
-  const delete1 = { delete: 4 };
-  const delta = new Delta([insert1, retain1, insert2, delete1]);
+describe("mutate state", () => {
+  const text1 = { insert: "text" };
+  const text2 = { insert: "text", attributes: { bold: "true" } };
+  const eol1 = { insert: "\n" };
+  const text3 = { insert: "text2" };
+  const eol2 = { insert: "\n", attributes: { align: "center" } };
+  const delta = new Delta({ ops: [text1, text2, eol1, text3, eol2] });
+  const editor = new Editor({ delta });
+  const state = editor.state.block;
+  const lineState1 = state.getLine(0);
+  const lineState2 = state.getLine(1);
+  const leafStateText1 = lineState1 && lineState1.getLeaf(0);
+  const leafStateText2 = lineState1 && lineState1.getLeaf(1);
+  const leafStateEOL1 = lineState1 && lineState1.getLeaf(2);
+  const leafStateText3 = lineState2 && lineState2.getLeaf(0);
+  const leafStateEOL2 = lineState2 && lineState2.getLeaf(1);
+  const leaves = [leafStateText1, leafStateText2, leafStateEOL1, leafStateText3, leafStateEOL2];
 
   it("next", () => {
-    const iter = new ImmutableIterator(delta.ops);
-    for (let i = 0; i < delta.ops.length; i += 1) {
-      expect(iter.next()).toBe(delta.ops[i]);
+    const iter = new Iterator(state.getLines());
+    for (let i = 0; i < leaves.length; i += 1) {
+      expect(iter.next()).toBe(leaves[i]);
     }
-    expect(iter.next()).toEqual({ retain: Infinity });
+    expect(iter.next()).toEqual(null);
   });
 
   it("next length", () => {
-    const iter = new ImmutableIterator(delta.ops);
-    expect(iter.next(2)).toEqual({
-      insert: "He",
-      attributes: { bold: "true" },
-    });
-    expect(iter.next(10)).toEqual({
-      insert: "llo",
-      attributes: { bold: "true" },
-    });
-    expect(iter.next(1)).toEqual({ retain: 1 });
-    expect(iter.next(2)).toEqual({ retain: 2 });
-    expect(iter.next(100)).toBe(insert2);
+    const iter = new Iterator(state.getLines());
+    expect(iter.next(2)?.op).toEqual({ insert: "te" });
+    expect(iter.next(10)?.op).toEqual({ insert: "xt" });
+    expect(iter.next(3)?.op).toEqual({ insert: "tex", attributes: { bold: "true" } });
+    expect(iter.next(1)?.op).toEqual({ insert: "t", attributes: { bold: "true" } });
+    expect(iter.next(1)?.op).toEqual({ insert: "\n" });
+    expect(iter.next(1)?.op).toEqual({ insert: "t" });
   });
 
   it("rest", () => {
-    const iter = new ImmutableIterator(delta.ops);
+    const iter = new Iterator(state.getLines());
     iter.next(2);
-    const rest1 = iter.rest();
-    expect(rest1[0]).toEqual({ insert: "llo", attributes: { bold: "true" } });
-    expect(rest1[1]).toBe(retain1);
-    expect(rest1[2]).toBe(insert2);
-    expect(rest1[3]).toBe(delete1);
-    iter.next(3);
-    const rest2 = iter.rest();
-    expect(rest2[0]).toBe(retain1);
-    expect(rest2[1]).toBe(insert2);
-    expect(rest2[2]).toBe(delete1);
-    iter.next(3);
-    iter.next(2);
-    iter.next(4);
-    expect(iter.rest()).toEqual([]);
+    const rest = iter.rest();
+    expect(rest.leaf[0]?.op).toEqual({ insert: "xt" });
+    expect(rest.leaf[1]).toBe(leafStateText2);
+    expect(rest.leaf[2]).toBe(leafStateEOL1);
+    expect(rest.line[0]).toBe(lineState2);
   });
 });

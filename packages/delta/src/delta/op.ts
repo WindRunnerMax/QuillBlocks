@@ -18,6 +18,6 @@ export const getOpLength = (op: Op): number => {
   } else if (isInsertOp(op)) {
     return op.insert.length;
   }
-  console.error("Unknown Op:", op);
+  console.trace("Unknown Op:", op);
   return 0;
 };
