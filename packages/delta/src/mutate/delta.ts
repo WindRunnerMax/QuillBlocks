@@ -1,22 +1,16 @@
-import type { AttributeMap, Op } from "block-kit-delta";
-import {
-  composeAttributes,
-  Delta,
-  getOpLength,
-  isDeleteOp,
-  isEqualAttributes,
-  isEqualOp,
-  isInsertOp,
-  isRetainOp,
-  OP_TYPES,
-} from "block-kit-delta";
 import { isObject } from "block-kit-utils";
 
-import { EOL } from "../types";
-import { isEOL, normalizeEOL } from "../utils/normalize";
-import { ImmutableIterator } from "./iterator";
+import { composeAttributes } from "../attributes/compose";
+import type { AttributeMap } from "../attributes/interface";
+import { Delta } from "../delta/delta";
+import type { Op } from "../delta/interface";
+import { EOL, OP_TYPES } from "../delta/interface";
+import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "../delta/op";
+import { isEOLOp, normalizeEOL } from "../utils/delta";
+import { isEqualAttributes, isEqualOp } from "../utils/equal";
+import { MutateIterator } from "./iterator";
 
-export class ImmutableDelta extends Delta {
+export class MutateDelta extends Delta {
   constructor(ops: Op[]) {
     super(ops);
   }
@@ -29,7 +23,7 @@ export class ImmutableDelta extends Delta {
     let index = this.ops.length;
     let lastOp = this.ops[index - 1];
     // 如果是 EOL 则直接追加
-    if (isEOL(newOp) || isEOL(lastOp)) {
+    if (isEOLOp(newOp) || isEOLOp(lastOp)) {
       this.ops.push(newOp);
       return this;
     }
@@ -76,8 +70,8 @@ export class ImmutableDelta extends Delta {
    */
   public compose(other: Delta) {
     other.ops = normalizeEOL(other.ops);
-    const thisIter = new ImmutableIterator(this.ops);
-    const otherIter = new ImmutableIterator(other.ops);
+    const thisIter = new MutateIterator(this.ops);
+    const otherIter = new MutateIterator(other.ops);
     const ops: Op[] = [];
     const firstOther = otherIter.peek();
     if (firstOther && isRetainOp(firstOther) && !firstOther.attributes) {
@@ -90,7 +84,7 @@ export class ImmutableDelta extends Delta {
         otherIter.next(firstOther.retain - firstLeft);
       }
     }
-    const delta = new ImmutableDelta(ops);
+    const delta = new MutateDelta(ops);
     while (thisIter.hasNext() || otherIter.hasNext()) {
       if (otherIter.peekType() === OP_TYPES.INSERT) {
         delta.push(otherIter.next());
@@ -137,7 +131,7 @@ export class ImmutableDelta extends Delta {
   public eachLine(
     predicate: (line: Delta, attributes: AttributeMap, index: number) => boolean | void
   ): void {
-    const iter = new ImmutableIterator(this.ops);
+    const iter = new MutateIterator(this.ops);
     let line: Op[] = [];
     let i = 0;
     while (iter.hasNext()) {

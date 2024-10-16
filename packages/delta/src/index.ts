@@ -9,6 +9,8 @@ export type { DeleteOp, InsertOp, Op, Ops, RetainOp } from "./delta/interface";
 export { EOL, OP_TYPES } from "./delta/interface";
 export { iterator, OpIterator } from "./delta/iterator";
 export { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "./delta/op";
+export { MutateDelta } from "./mutate/delta";
+export { MutateIterator } from "./mutate/iterator";
 export {
   cloneAttributes,
   cloneBlockDeltaLike,
@@ -17,5 +19,5 @@ export {
   cloneOp,
   cloneOps,
 } from "./utils/clone";
-export { deltaEndsWith } from "./utils/delta";
+export { deltaEndsWith, isEOLOp, normalizeEOL } from "./utils/delta";
 export { isEqualAttributes, isEqualOp } from "./utils/equal";

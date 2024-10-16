@@ -137,7 +137,7 @@ export class Selection {
     const isLastLine = focus.line === blockState.getLines().length - 1;
     const isFocusLineStart = focus.offset === 0;
     // 选区会强制变换到末尾节点前
-    const isFocusLineEnd = focus.offset === lineState.size - 1;
+    const isFocusLineEnd = focus.offset === lineState.length - 1;
     if (leftArrow) {
       // 在块的首行首节点按左键执行默认行为
       if (isFirstLine && isFocusLineStart) return void 0;
@@ -149,7 +149,7 @@ export class Selection {
         // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
         // 而 Range => start -> end, 只需要判断 isBackward 标识
         // start -> end 实际方向会在 new Range 时处理, 无需在此处实现
-        const newFocus = new Point(prevLine.index, prevLine.size - 1);
+        const newFocus = new Point(prevLine.index, prevLine.length - 1);
         // 边界条件 选区折叠时 shift + left 一定是反选, 否则取原始选区方向
         const isBackward = event.shiftKey && range.isCollapsed ? true : range.isBackward;
         const newAnchor = event.shiftKey ? anchor : newFocus.clone();

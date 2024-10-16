@@ -1,101 +1,150 @@
-import type { AttributeMap, Op } from "block-kit-delta";
+import type { AttributeMap, Delta, Op } from "block-kit-delta";
 import type { InsertOp } from "block-kit-delta";
-import { Delta } from "block-kit-delta";
+import {
+  composeAttributes,
+  isEOLOp,
+  isEqualAttributes,
+  isEqualOp,
+  isInsertOp,
+  isRetainOp,
+  normalizeEOL,
+  OP_TYPES,
+} from "block-kit-delta";
+import { OpIterator } from "block-kit-delta";
+import { isObject } from "block-kit-utils";
 
-import type { Editor } from "../../editor";
 import type { BlockState } from "../modules/block-state";
 import { LeafState } from "../modules/leaf-state";
 import { LineState } from "../modules/line-state";
-import { ImmutableDelta } from "./delta";
+import { StateIterator } from "./iterator";
 
-/**
- * 维护 Immutable State
- */
 export class Mutate {
-  /** 初始 Delta */
-  private prevDelta: ImmutableDelta;
-  /** 目标 Delta */
-  private nextDelta: ImmutableDelta;
-  /** Op To LeafState */
-  private opToState: WeakMap<Op, LeafState>;
-  /** Attributes To LeafState */
-  private attributesToState: WeakMap<AttributeMap, LineState>;
+  /** 初始 Lines */
+  private lines: LineState[];
 
-  constructor(private editor: Editor, private block: BlockState) {
-    const lines = block.getLines();
-    const ops: Op[] = [];
-    this.opToState = new WeakMap();
-    this.attributesToState = new WeakMap();
-    for (const line of lines) {
-      const leaves = line.getLeaves();
-      for (const leaf of leaves) {
-        ops.push(leaf.op);
-        this.opToState.set(leaf.op, leaf);
+  constructor(private block: BlockState) {
+    this.lines = block.getLines();
+  }
+
+  /**
+   * 在 LineState 插入 Op
+   * @param lineState
+   * @param newOp
+   */
+  private insert(lines: LineState[], lineState: LineState, newLeaf: LeafState): LineState {
+    const leaves = lineState.getLeaves();
+    const index = leaves.length;
+    const lastOp = leaves[index - 1].op;
+    const newOp = newLeaf.op;
+    // 如果是 EOL 则直接追加
+    if (isEOLOp(newOp) || isEOLOp(lastOp)) {
+      lineState._appendLeaf(newLeaf);
+      if (isEOLOp(newOp)) {
+        lines.push(lineState);
+        lineState.updateLeaves();
+        // this.key => 复用 other.key => 更新
+        lineState.updateKey(newLeaf.parent.key);
+        return LineState.create([], {}, this.block);
       }
-      this.attributesToState.set(line.attributes, line);
+      return lineState;
     }
-    this.prevDelta = new ImmutableDelta(ops);
-    this.nextDelta = this.prevDelta;
+    if (
+      isObject<Op>(lastOp) &&
+      isEqualAttributes(newOp.attributes, lastOp.attributes) &&
+      isInsertOp(newOp) &&
+      isInsertOp(lastOp)
+    ) {
+      // 合并相同属性的 insert
+      const op: InsertOp = { insert: lastOp.insert + newOp.insert };
+      if (isObject<AttributeMap>(newOp.attributes)) {
+        op.attributes = newOp.attributes;
+      }
+      lineState.setLeaf(new LeafState(0, 0, op, lineState), index - 1);
+      return lineState;
+    }
+    if (isInsertOp(newOp)) {
+      lineState._appendLeaf(newLeaf);
+    }
+    return lineState;
   }
 
   /**
-   * Immutable Compose
-   * @param Delta
+   * 组合 Ops
    */
-  public compose(delta: Delta): ImmutableDelta {
-    this.nextDelta = this.prevDelta.compose(delta);
-    return this.nextDelta;
-  }
-
-  /**
-   * Get Latest Ops
-   */
-  public getLatestOps(): Op[] {
-    return this.nextDelta.ops;
-  }
-
-  /**
-   * Immutable Apply
-   * @returns 更新过后的 Lines
-   */
-  public apply() {
-    // TODO: 在多行文档中修改小部分行场景下
-    // 直接标记无需修改的行状态, 避免大量遍历
+  public compose(other: Delta): LineState[] {
     const lines: LineState[] = [];
-    this.nextDelta.eachLine((delta, attributes) => {
-      const ops = delta.ops as InsertOp[];
-      let lineState: LineState | null = null;
-      for (let i = 0, n = ops.length; i < n; i++) {
-        const op = ops[i];
-        const leafState = this.opToState.get(op);
-        // 取首节点的 LineState 作为判断基准
-        // FIX: 当删除时先前的 ops 不会变更, 对比通过但实际长度不对应
-        // 导致操作的 DOM 无法正确删除, 且继续删除时出现无限重复删除节点问题
-        if (!i && leafState && leafState.parent.getLeaves().length === n) {
-          lineState = leafState.parent;
+    const otherOps = normalizeEOL(other.ops);
+    const thisIter = new StateIterator(this.lines);
+    const otherIter = new OpIterator(otherOps);
+    const firstOther = otherIter.peek();
+    // 当前处理的 LineState
+    let lineState = LineState.create([], {}, this.block);
+    if (firstOther && isRetainOp(firstOther) && !firstOther.attributes) {
+      let firstLeft = firstOther.retain;
+      while (thisIter.peekType() === OP_TYPES.INSERT && thisIter.peekLength() <= firstLeft) {
+        firstLeft = firstLeft - thisIter.peekLength();
+        const leaf = thisIter.next();
+        if (!leaf) {
           continue;
         }
-        // 当不存在 Leaf 或者 Leaf 的父级不是当前 Line 时
-        // 说明该行 ops/attrs 发生了改变, 需要重新构建 LineState
-        if (!leafState || leafState.parent !== lineState) {
-          lineState = null;
-          break;
+        if (isEOLOp(leaf.op)) {
+          // 首个 retain 覆盖的 \n 直接复用 LineState
+          lines.push(leaf.parent);
+          // 重置当前正在处理的 LineState
+          lineState = LineState.create([], {}, this.block);
+        } else {
+          // 其他 Op 则追加到当前处理的 LineState
+          lineState._appendLeaf(leaf);
         }
       }
-      if (!lineState) {
-        lineState = new LineState(this.editor, new Delta(), attributes, this.block);
-        // COMPAT: 避免实例化 LineState 时建立无效 LeafState 状态, 重设内建 delta
-        lineState._setDelta(delta);
+      if (firstOther.retain - firstLeft > 0) {
+        otherIter.next(firstOther.retain - firstLeft);
       }
-      ops.forEach((op, i) => {
-        let leafState = this.opToState.get(op);
-        if (!leafState) {
-          leafState = new LeafState(i, 0, op, lineState!);
+    }
+    while (thisIter.hasNext() || otherIter.hasNext()) {
+      if (otherIter.peekType() === OP_TYPES.INSERT) {
+        const leaf = new LeafState(0, 0, otherIter.next(), lineState);
+        lineState = this.insert(lines, lineState, leaf);
+      } else if (thisIter.peekType() === OP_TYPES.DELETE) {
+        const op = thisIter.next();
+        if (op) {
+          const leaf = new LeafState(0, 0, op, lineState);
+          lineState = this.insert(lines, lineState, leaf);
         }
-        lineState!.setLeaf(leafState, i);
-      });
-      lines.push(lineState!);
-    });
+      } else {
+        const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
+        const thisLeaf = thisIter.next(length);
+        const otherOp = otherIter.next(length);
+        if (isRetainOp(otherOp)) {
+          let newLeaf = new LeafState(0, 0, {}, lineState);
+          if (!thisLeaf) {
+            continue;
+          }
+          if (!isRetainOp(thisLeaf.op)) {
+            newLeaf = thisLeaf;
+          }
+          const attributes = composeAttributes(
+            thisLeaf.op.attributes,
+            otherOp.attributes,
+            isRetainOp(thisLeaf.op)
+          );
+          if (attributes) {
+            newLeaf.attributes = attributes;
+          }
+          lineState = this.insert(lines, lineState, newLeaf);
+          const leaves = lineState.getLeaves();
+          const lastOp = leaves[leaves.length - 1].op;
+          if (!otherIter.hasNext() && isEqualOp(lastOp, newLeaf.op)) {
+            // 处理剩余的 Leaves 和 Lines
+            const rest = thisIter.rest();
+            for (const leaf of rest.leaf) {
+              lineState = this.insert(lines, lineState, leaf);
+            }
+            lines.push(...rest.line);
+          }
+        }
+      }
+    }
     return lines;
   }
 }

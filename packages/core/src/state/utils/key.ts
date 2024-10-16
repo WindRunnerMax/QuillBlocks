@@ -24,4 +24,27 @@ export class Key {
     }
     return key.id;
   }
+
+  /**
+   * 根据节点刷新 id
+   * @param node
+   */
+  public static refresh(node: Object.Any): string {
+    const key = new Key();
+    NODE_TO_KEY.set(node, key);
+    return key.id;
+  }
+
+  /**
+   * 刷新 Key id
+   * @param node
+   * @param id
+   */
+  public static update(node: Object.Any, id: string): string {
+    const key = NODE_TO_KEY.get(node);
+    if (key) {
+      key.id = id;
+    }
+    return id;
+  }
 }

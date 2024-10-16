@@ -1,5 +1,7 @@
 # QuillBlocks
 
+QuillJs for React implementation.
+
 ## Blog
 
 * [初探富文本之富文本概述](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之富文本概述.md)

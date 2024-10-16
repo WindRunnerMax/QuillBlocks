@@ -1,8 +1,8 @@
-import type { Op } from "./interface";
-import { OP_TYPES } from "./interface";
-import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "./op";
+import type { Op } from "../delta/interface";
+import { OP_TYPES } from "../delta/interface";
+import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "../delta/op";
 
-export class OpIterator {
+export class MutateIterator {
   /** Ops 组 */
   private ops: Op[];
   /** Op 索引 */
@@ -20,7 +20,6 @@ export class OpIterator {
    * 判断是否存在 Next Op
    */
   public hasNext(): boolean {
-    // 即当前执行的 Op 存在未迭代的部分
     return this.peekLength() < Infinity;
   }
 
@@ -30,45 +29,45 @@ export class OpIterator {
    */
   public next(length?: number): Op {
     if (!length) {
-      // 这里并不是不符合规则的数据要跳过迭代
-      // 而是需要将当前 index 的 op insert 迭代完
       length = Infinity;
     }
-    // 这里命名为 nextOp 实际指向的还是当前 index 的 op
     const nextOp = this.ops[this.index];
     if (nextOp) {
-      // 暂存当前要处理的 insert 偏移量
       const offset = this.offset;
       const opLength = getOpLength(nextOp);
       const restLength = opLength - offset;
-      // 如果需要处理的长度大于当前 Op 的剩余长度
       if (length >= restLength) {
-        // 处理当前 Op 剩余的长度
         length = restLength;
-        // 此时需要迭代到下一个 Op
         this.index = this.index + 1;
-        // 重置索引偏移量
         this.offset = 0;
       } else {
-        // 处理传入的 Length 长度的 Op
         this.offset = this.offset + length;
       }
       if (isDeleteOp(nextOp)) {
+        // 剩余 OpLength 与 NextOp 相等 => Immutable
+        if (nextOp.delete === length) {
+          return nextOp;
+        }
         return { delete: length };
       } else {
         const retOp: Op = {};
-        // 处理当前 Op 携带的 Attributes
         if (nextOp.attributes) {
           retOp.attributes = nextOp.attributes;
         }
         if (isRetainOp(nextOp)) {
+          // 剩余 OpLength 与 NextOp 相等 => Immutable
+          if (nextOp.retain === length) {
+            return nextOp;
+          }
           retOp.retain = length;
         } else if (isInsertOp(nextOp)) {
-          // 通过之前暂存的 Offset 以及计算的 Length 截取 Insert 字符串
+          // 起始与裁剪位置等同 NextOp => Immutable
+          if (offset === 0 && nextOp.insert.length <= length) {
+            return nextOp;
+          }
           retOp.insert = nextOp.insert.substr(offset, length);
         } else {
-          // offset should === 0, length should === 1
-          retOp.insert = nextOp.insert;
+          return nextOp;
         }
         return retOp;
       }
@@ -89,7 +88,6 @@ export class OpIterator {
    */
   public peekLength(): number {
     if (this.ops[this.index]) {
-      // Should never return 0 if our index is being managed correctly
       return getOpLength(this.ops[this.index]) - this.offset;
     } else {
       return Infinity;
@@ -131,7 +129,3 @@ export class OpIterator {
     }
   }
 }
-
-export const iterator = (ops: Op[]): OpIterator => {
-  return new OpIterator(ops);
-};

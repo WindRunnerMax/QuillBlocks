@@ -1,28 +1,29 @@
-import type { AttributeMap, Delta } from "block-kit-delta";
+import type { AttributeMap } from "block-kit-delta";
+import type { Op } from "block-kit-delta";
+import { Delta } from "block-kit-delta";
 import { isInsertOp } from "block-kit-delta";
 
-import type { Editor } from "../../editor";
 import { Key } from "../utils/key";
 import type { BlockState } from "./block-state";
 import { LeafState } from "./leaf-state";
 
 export class LineState {
-  /** 行宽度 */
+  /** 唯一 key */
+  public key: string;
+  /** 行 Leaf 数量 */
   public size: number;
   /** 行起始偏移 */
   public start: number;
   /** 行号索引 */
   public index: number;
+  /** 行文本总宽度 */
+  public length: number;
   /** 标记更新子节点 */
   public isDirty = false;
-  /** 唯一 key */
-  public readonly key: string;
   /** Leaf 节点 */
   private leaves: LeafState[] = [];
 
   constructor(
-    /** Editor 实例 */
-    private editor: Editor,
     /** Delta 数据 */
     public delta: Delta,
     /** 行属性 */
@@ -33,19 +34,9 @@ export class LineState {
     this.index = 0;
     this.start = 0;
     this.key = Key.getId(this);
-    const iterator = { index: 0, offset: 0 };
-    for (const op of delta.ops) {
-      if (!isInsertOp(op) || !op.insert.length) {
-        this.editor.logger.warning("Invalid op in line", op);
-        iterator.index = iterator.index + 1;
-        continue;
-      }
-      const leaf = new LeafState(iterator.index, iterator.offset, op, this);
-      this.leaves.push(leaf);
-      iterator.index = iterator.index + 1;
-      iterator.offset = iterator.offset + op.insert.length;
-    }
-    this.size = iterator.offset;
+    this.size = 0;
+    this.length = 0;
+    this._deltaToLeaves(delta);
   }
 
   /**
@@ -95,11 +86,12 @@ export class LineState {
     this.leaves.forEach((leaf, index) => {
       leaf.index = index;
       leaf.offset = offset;
-      offset = offset + leaf.size;
+      offset = offset + leaf.length;
       leaf.parent = this;
     });
-    this.size = offset;
+    this.length = offset;
     this.isDirty = false;
+    this.size = this.leaves.length;
     return offset;
   }
 
@@ -125,11 +117,68 @@ export class LineState {
   }
 
   /**
+   * 强制刷新行 key
+   */
+  public forceRefresh() {
+    this.key = Key.refresh(this);
+  }
+
+  /**
+   * 强制刷新行 key
+   * @param key
+   */
+  public updateKey(key: string) {
+    this.key = key;
+    Key.update(this, key);
+  }
+
+  /**
    * 重设内建 Delta
    * @param delta
    * @note 仅编辑器内部使用, 需要保证自建 Leaves
    */
   public _setDelta(delta: Delta) {
     this.delta = delta;
+  }
+
+  /**
+   * 追加 LeafState
+   * @param delta
+   * @note 仅编辑器内部使用
+   */
+  public _appendLeaf(leaf: LeafState) {
+    leaf.index = this.size;
+    leaf.offset = this.length;
+    this.leaves.push(leaf);
+    this.size++;
+    this.length = this.length + leaf.length;
+  }
+
+  /**
+   * 通过 delta 创建 Leaves
+   * @note 仅编辑器内部使用
+   */
+  public _deltaToLeaves(delta: Delta) {
+    const iterator = { index: 0, offset: 0 };
+    for (const op of delta.ops) {
+      if (!isInsertOp(op) || !op.insert.length) {
+        this.parent.editor.logger.warning("Invalid op in line", op);
+        iterator.index = iterator.index + 1;
+        continue;
+      }
+      const leaf = new LeafState(iterator.index, iterator.offset, op, this);
+      this.leaves.push(leaf);
+      iterator.index = iterator.index + 1;
+      iterator.offset = iterator.offset + op.insert.length;
+    }
+    this.length = iterator.offset;
+    this.size = this.leaves.length;
+  }
+
+  /**
+   * 创建 LineState
+   */
+  public static create(ops: Op[], attributes: AttributeMap, block: BlockState) {
+    return new LineState(new Delta(ops), attributes, block);
   }
 }

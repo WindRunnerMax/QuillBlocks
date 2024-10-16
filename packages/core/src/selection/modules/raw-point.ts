@@ -36,7 +36,7 @@ export class RawPoint {
     }
     const block = editor.state.block;
     const line = block.getLine(point.line);
-    if (!line || point.offset > line.size) {
+    if (!line || point.offset > line.length) {
       editor.logger.warning("Line Not Found", point.line);
       return null;
     }

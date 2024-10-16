@@ -1,94 +1,44 @@
 import type { Op } from "block-kit-delta";
-import { OP_TYPES } from "block-kit-delta";
-import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "block-kit-delta";
+import { getOpLength, isDeleteOp, isInsertOp, isRetainOp, OP_TYPES } from "block-kit-delta";
 
-export class ImmutableIterator {
-  /** Ops 组 */
-  private ops: Op[];
-  /** Op 索引 */
-  private index: number;
+import { LeafState } from "../modules/leaf-state";
+import type { LineState } from "../modules/line-state";
+
+export class StateIterator {
+  /** 行索引 */
+  private row: number;
+  /** 列索引 */
+  private col: number;
   /** Op 偏移 */
   private offset: number;
+  /** LineState 组 */
+  private lines: LineState[];
 
-  constructor(ops: Op[]) {
-    this.ops = ops;
-    this.index = 0;
+  constructor(lines: LineState[]) {
+    this.lines = lines;
+    this.row = 0;
+    this.col = 0;
     this.offset = 0;
   }
 
   /**
-   * 判断是否存在 Next Op
+   * 获取当前正在迭代的 Leaf
    */
-  public hasNext(): boolean {
-    return this.peekLength() < Infinity;
-  }
-
-  /**
-   * 获取 Next Op 的部分/全部内容
-   * @param length
-   */
-  public next(length?: number): Op {
-    if (!length) {
-      length = Infinity;
+  public peek(): LeafState | null {
+    const line = this.lines[this.row];
+    if (line) {
+      return line.getLeaf(this.col);
     }
-    const nextOp = this.ops[this.index];
-    if (nextOp) {
-      const offset = this.offset;
-      const opLength = getOpLength(nextOp);
-      const restLength = opLength - offset;
-      if (length >= restLength) {
-        length = restLength;
-        this.index = this.index + 1;
-        this.offset = 0;
-      } else {
-        this.offset = this.offset + length;
-      }
-      if (isDeleteOp(nextOp)) {
-        // 剩余 OpLength 与 NextOp 相等 => Immutable
-        if (nextOp.delete === length) {
-          return nextOp;
-        }
-        return { delete: length };
-      } else {
-        const retOp: Op = {};
-        if (nextOp.attributes) {
-          retOp.attributes = nextOp.attributes;
-        }
-        if (isRetainOp(nextOp)) {
-          // 剩余 OpLength 与 NextOp 相等 => Immutable
-          if (nextOp.retain === length) {
-            return nextOp;
-          }
-          retOp.retain = length;
-        } else if (isInsertOp(nextOp)) {
-          // 起始与裁剪位置等同 NextOp => Immutable
-          if (offset === 0 && nextOp.insert.length <= length) {
-            return nextOp;
-          }
-          retOp.insert = nextOp.insert.substr(offset, length);
-        } else {
-          return nextOp;
-        }
-        return retOp;
-      }
-    } else {
-      return { retain: Infinity };
-    }
+    return null;
   }
 
   /**
-   * 获取当前正在迭代的 Op
-   */
-  public peek(): Op {
-    return this.ops[this.index];
-  }
-
-  /**
-   * 获取当前迭代 Op 的剩余长度
+   * 获取当前迭代 Leaf 的剩余长度
    */
   public peekLength(): number {
-    if (this.ops[this.index]) {
-      return getOpLength(this.ops[this.index]) - this.offset;
+    const leaf = this.peek();
+    if (leaf) {
+      return getOpLength(leaf.op) - this.offset;
     } else {
       return Infinity;
     }
@@ -98,10 +48,12 @@ export class ImmutableIterator {
    * 获取当前迭代 Op 的类型
    */
   public peekType(): string {
-    if (this.ops[this.index]) {
-      if (isDeleteOp(this.ops[this.index])) {
+    const leaf = this.peek();
+    if (leaf) {
+      const op = leaf.op;
+      if (isDeleteOp(op)) {
         return OP_TYPES.DELETE;
-      } else if (isRetainOp(this.ops[this.index])) {
+      } else if (isRetainOp(op)) {
         return OP_TYPES.RETAIN;
       } else {
         return OP_TYPES.INSERT;
@@ -111,21 +63,113 @@ export class ImmutableIterator {
   }
 
   /**
-   * 获取剩余的所有 Ops
+   * 移动指针 步入下一个 Leaf
    */
-  public rest(): Op[] {
+  public stepIntoNext(): void {
+    const line = this.lines[this.row];
+    if (!line) return void 0;
+    const leaves = line.getLeaves();
+    if (this.col < leaves.length - 1) {
+      this.col++;
+    } else {
+      this.row++;
+      this.col = 0;
+    }
+    this.offset = 0;
+  }
+
+  /**
+   * 判断是否存在当前 Leaf
+   */
+  public hasNext(): boolean {
+    // 即当前执行的 Leaf Op 存在未迭代的部分
+    return this.peekLength() < Infinity;
+  }
+
+  /**
+   * 获取 Next Op 的部分/全部内容
+   * @param length
+   */
+  public next(length?: number): LeafState | null {
+    if (!length) {
+      length = Infinity;
+    }
+    const nextLeaf = this.peek();
+    if (nextLeaf) {
+      const offset = this.offset;
+      const opLength = getOpLength(nextLeaf);
+      const restLength = opLength - offset;
+      if (length >= restLength) {
+        length = restLength;
+        this.stepIntoNext();
+      } else {
+        this.offset = this.offset + length;
+      }
+      const op = nextLeaf.op;
+      if (isDeleteOp(op)) {
+        // 剩余 OpLength 与 NextOp 相等 => Immutable
+        if (op.delete === length) {
+          return nextLeaf;
+        }
+        const deleteOp: Op = { delete: length };
+        return new LeafState(0, 0, deleteOp, nextLeaf.parent);
+      } else {
+        const retOp: Op = {};
+        if (nextLeaf.attributes) {
+          retOp.attributes = nextLeaf.attributes;
+        }
+        if (isRetainOp(op)) {
+          // 剩余 OpLength 与 NextOp 相等 => Immutable
+          if (op.retain === length) {
+            return nextLeaf;
+          }
+          retOp.retain = length;
+        } else if (isInsertOp(op)) {
+          // 起始与裁剪位置等同 NextOp => Immutable
+          if (offset === 0 && op.insert.length <= length) {
+            return nextLeaf;
+          }
+          retOp.insert = op.insert.substr(offset, length);
+        } else {
+          return nextLeaf;
+        }
+        return new LeafState(0, 0, retOp, nextLeaf.parent);
+      }
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * 获取剩余的所有 Leaf 以及 Line
+   */
+  public rest() {
+    type Rest = { leaf: LeafState[]; line: LineState[] };
+    const rest: Rest = { leaf: [], line: [] };
     if (!this.hasNext()) {
-      return [];
+      return rest;
     } else if (this.offset === 0) {
-      return this.ops.slice(this.index);
+      const line = this.lines[this.row];
+      if (line) {
+        rest.leaf = line.getLeaves().slice(this.col);
+        rest.line = this.lines.slice(this.row + 1);
+      }
+      return rest;
     } else {
       const offset = this.offset;
-      const index = this.index;
+      const row = this.row;
+      const col = this.col;
       const next = this.next();
-      const rest = this.ops.slice(this.index);
+      const line = this.lines[row];
+      if (line && next) {
+        const leaves = line.getLeaves().slice(col);
+        rest.leaf = [next].concat(leaves);
+        rest.line = this.lines.slice(row + 1);
+      }
       this.offset = offset;
-      this.index = index;
-      return [next].concat(rest);
+      this.row = row;
+      this.col = col;
+      return rest;
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "block-kit",
-  "description": "Quill Editor Blocks Kit",
+  "description": "QuillJs for React implementation",
   "version": "1.0.0",
   "scripts": {
     "bootstrap": "pnpm install --frozen-lockfile",

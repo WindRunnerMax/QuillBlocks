@@ -7,33 +7,29 @@ import { Key } from "../utils/key";
 import { LineState } from "./line-state";
 
 export class BlockState {
+  /** Block 行数量 */
+  public size;
   /** Block 内容长度 */
-  public size = 0;
+  public length;
   /** Block Key */
   public readonly key: string;
   /** LineState 集合 */
   private lines: LineState[] = [];
 
-  constructor(private editor: Editor, private block: Delta) {
+  constructor(public editor: Editor, delta: Delta) {
     this.key = Key.getId(this);
-    this.createLinesModel(block);
-  }
-
-  /**
-   * 初始化创建 LineState
-   * @param block
-   */
-  private createLinesModel(block: Delta) {
     let offset = 0;
     this.lines = [];
-    block.eachLine((delta, attributes, index) => {
-      const lineState = new LineState(this.editor, delta, attributes, this);
+    // 初始化创建 LineState
+    delta.eachLine((delta, attributes, index) => {
+      const lineState = new LineState(delta, attributes, this);
       lineState.index = index;
       lineState.start = offset;
-      offset = offset + lineState.size;
+      offset = offset + lineState.length;
       this.lines[index] = lineState;
     });
-    this.size = offset;
+    this.length = offset;
+    this.size = this.lines.length;
   }
 
   /**
@@ -63,10 +59,11 @@ export class BlockState {
     this.lines.forEach((state, index) => {
       state.index = index;
       state.start = offset;
-      const size = state.isDirty ? state.updateLeaves() : state.size;
+      const size = state.isDirty ? state.updateLeaves() : state.length;
       offset = offset + size;
     });
-    this.size = offset;
+    this.length = offset;
+    this.size = this.lines.length;
     return offset;
   }
 
