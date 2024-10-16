@@ -1,6 +1,11 @@
 import type { AttributeMap } from "../attributes/interface";
 import type { Op } from "../delta/interface";
 
+/**
+ * 判断两个 AttributeMap 是否相等
+ * @param o
+ * @param t
+ */
 export const isEqualAttributes = (o: AttributeMap | undefined, t: AttributeMap | undefined) => {
   const origin = o || {};
   const target = t || {};
@@ -13,6 +18,11 @@ export const isEqualAttributes = (o: AttributeMap | undefined, t: AttributeMap |
   return true;
 };
 
+/**
+ * 判断两个 Op 是否相等
+ * @param origin
+ * @param target
+ */
 export const isEqualOp = (origin: Op | undefined, target: Op | undefined) => {
   if (origin === target) return true;
   if (!origin || !target) return false;

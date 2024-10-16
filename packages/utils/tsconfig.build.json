@@ -3,8 +3,8 @@
   "useTsconfigDeclarationDir": true,
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "dist",
-    "declarationDir": "dist",
+    "outDir": "dist/es",
+    "declarationDir": "dist/es",
   },
   "include": ["src/**/*"]
 }

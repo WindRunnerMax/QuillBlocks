@@ -1,7 +1,13 @@
-import { isObject } from "blocks-kit-utils";
+import { isObject } from "block-kit-utils";
 
 import type { AttributeMap } from "./interface";
 
+/**
+ * 组合属性
+ * @param a
+ * @param b
+ * @param keepEmpty 保留空属性
+ */
 export const composeAttributes = (
   a: AttributeMap = {},
   b: AttributeMap = {},

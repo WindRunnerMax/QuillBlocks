@@ -11,8 +11,6 @@
     "experimentalDecorators": true,
     "declaration": true,
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
@@ -21,17 +19,11 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
-      "blocks-kit-core": ["./packages/core/src"],
-      "blocks-kit-delta": ["./packages/delta/src"],
-      "blocks-kit-delta/dist/*": ["./packages/delta/src/*"],
-      "blocks-kit-plugin": ["./packages/plugin/src"],
-      "blocks-kit-shared": ["./packages/shared/src"],
-      "blocks-kit-utils": ["./packages/utils/src"]
-    }
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
+      "block-kit-core": ["./packages/core/src"],
+      "block-kit-delta": ["./packages/delta/src"],
+      "block-kit-react": ["./packages/react/src"],
+      "block-kit-plugin": ["./packages/plugin/src"],
+      "block-kit-utils": ["./packages/utils/src"],
     }
   },
   "include": ["packages/*/src"]

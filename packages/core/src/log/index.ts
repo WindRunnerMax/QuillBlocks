@@ -1,4 +1,5 @@
 export const LOG_LEVEL = {
+  DEBUG: -1,
   INFO: 0,
   WARNING: 1,
   ERROR: 2,
@@ -7,27 +8,37 @@ export const LOG_LEVEL = {
 export class Logger {
   constructor(private level: number) {}
 
-  info(...args: unknown[]) {
-    if (this.level <= LOG_LEVEL.INFO) {
-      console.log("Editor Log: ", ...args);
+  set(level: number) {
+    this.level = level;
+  }
+
+  debug(key: string, ...args: unknown[]) {
+    if (this.level <= LOG_LEVEL.DEBUG) {
+      console.log("DEBUG -", key, ...args);
     }
   }
 
-  trace(...args: unknown[]) {
+  info(key: string, ...args: unknown[]) {
     if (this.level <= LOG_LEVEL.INFO) {
-      console.trace("Editor Trace: ", ...args);
+      console.log("Log -", key, ...args);
     }
   }
 
-  warning(...args: unknown[]) {
+  warning(key: string, ...args: unknown[]) {
     if (this.level <= LOG_LEVEL.WARNING) {
-      console.warn("Editor Warning: ", ...args);
+      console.warn("Warning -", key, ...args);
     }
   }
 
-  error(...args: unknown[]) {
+  error(key: string, ...args: unknown[]) {
     if (this.level <= LOG_LEVEL.ERROR) {
-      console.error("Editor Error: ", ...args);
+      console.error("Error -", key, ...args);
+    }
+  }
+
+  trace(key: string, ...args: unknown[]) {
+    if (this.level <= LOG_LEVEL.ERROR) {
+      console.trace("Trace -", key, ...args);
     }
   }
 }

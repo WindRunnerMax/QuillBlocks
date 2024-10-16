@@ -6,7 +6,7 @@ export class Event {
   private nativeEvent: NativeEvent;
   private bus: EventBus;
 
-  constructor(private readonly editor: Editor) {
+  constructor(private editor: Editor) {
     this.bus = new EventBus();
     this.nativeEvent = new NativeEvent(this.bus, this.editor);
   }
@@ -32,7 +32,7 @@ export class Event {
     return this.bus.off(key, listener);
   };
 
-  trigger: EventBus["trigger"] = (key, payload) => {
-    return this.bus.trigger(key, payload);
+  trigger: EventBus["emit"] = (key, payload) => {
+    return this.bus.emit(key, payload);
   };
 }

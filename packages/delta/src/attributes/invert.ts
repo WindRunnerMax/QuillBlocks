@@ -1,5 +1,10 @@
 import type { AttributeMap } from "./interface";
 
+/**
+ * 反转属性
+ * @param attr
+ * @param base
+ */
 export const invertAttributes = (
   attr: AttributeMap = {},
   base: AttributeMap = {}

@@ -1,3 +1,5 @@
+import type { Object } from "block-kit-utils";
+
 export const NATIVE_EVENTS = {
   COMPOSITION_START: "compositionstart",
   COMPOSITION_UPDATE: "compositionupdate",
@@ -15,6 +17,8 @@ export const NATIVE_EVENTS = {
   SELECTION_CHANGE_NATIVE: "selectionchange",
   MOUSE_DOWN: "mousedown",
   MOUSE_UP: "mouseup",
+  MOUSE_DOWN_GLOBAL: "mousedown_global",
+  MOUSE_UP_GLOBAL: "mouseup_global",
 } as const;
 
 export type NativeEventMap = {
@@ -34,13 +38,12 @@ export type NativeEventMap = {
   [NATIVE_EVENTS.SELECTION_CHANGE_NATIVE]: Event;
   [NATIVE_EVENTS.MOUSE_DOWN]: MouseEvent;
   [NATIVE_EVENTS.MOUSE_UP]: MouseEvent;
+  [NATIVE_EVENTS.MOUSE_DOWN_GLOBAL]: MouseEvent;
+  [NATIVE_EVENTS.MOUSE_UP_GLOBAL]: MouseEvent;
 };
 
 type NativeEventMapType = typeof NATIVE_EVENTS;
-type NativeEventMapKeys = NativeEventMapType[keyof NativeEventMapType];
+type NativeEventMapKeys = Object.Values<NativeEventMapType>;
+export type NativeEventHandler = (e: Event) => void;
 export type Listener<T extends NativeEventMapKeys> = (value: NativeEventMap[T]) => void;
-
-export type Listeners = {
-  [T in NativeEventMapKeys]?: Listener<T>;
-};
-export type NormalEventHandler = (e: Event) => void;
+export type Listeners = { [T in NativeEventMapKeys]?: Listener<T> };

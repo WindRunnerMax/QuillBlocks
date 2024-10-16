@@ -1,7 +1,12 @@
-import { isObject } from "blocks-kit-utils";
+import { isObject } from "block-kit-utils";
 
 import type { AttributeMap } from "./interface";
 
+/**
+ * 对比属性
+ * @param a
+ * @param b
+ */
 export const diffAttributes = (
   a: AttributeMap = {},
   b: AttributeMap = {}

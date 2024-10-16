@@ -1,20 +1,16 @@
-import { EDITABLE_KEY } from "../../state/utils/constant";
-import type { DOMElement, DOMNode } from "./is";
-import { isDOMComment, isDOMElement, isDOMText } from "./is";
+import { isDOMComment, isDOMElement, isDOMText } from "block-kit-utils";
 
-export type DOMRange = globalThis.Range;
-export type DOMSelection = globalThis.Selection;
-export type DOMStaticRange = globalThis.StaticRange;
-export type Direction = "forward" | "backward";
+import { EDITABLE, ZERO_SPACE_KEY } from "../../model/types";
+import type { Direction, DOMElement, DOMNode, DOMSelection, DOMStaticRange } from "../types";
+import { DIRECTION } from "../types";
 
-export type DOMPoint = {
-  node: Node | null;
-  offset: number;
-};
-
+/**
+ * 获取当前的 DOMSelection
+ * @param root
+ */
 export const getRootSelection = (root?: Element): DOMSelection | null => {
   if (root) {
-    // Maybe deal with shadow dom in the future
+    // 在 shadowRoot 中需要获取 ownerDocument 的 Selection
     const doc = root.ownerDocument;
     const sel = doc.getSelection();
     return sel;
@@ -23,6 +19,10 @@ export const getRootSelection = (root?: Element): DOMSelection | null => {
   }
 };
 
+/**
+ * 获取当前的 DOMStaticRange
+ * @param sel
+ */
 export const getStaticSelection = (sel?: Selection | null): DOMStaticRange | null => {
   const selection = sel ? getRootSelection() : sel;
   if (!selection || !selection.anchorNode || !selection.focusNode) {
@@ -42,8 +42,11 @@ export const getStaticSelection = (sel?: Selection | null): DOMStaticRange | nul
 };
 
 /**
- * Get the nearest editable child and index at `index` in a `parent`,
- * preferring `direction`.
+ * 获取 parent 中 index 处附近的可编辑节点和索引
+ * 优先 direction 方向的查找
+ * @param parent
+ * @param index
+ * @param direction
  */
 export const getEditableChildAndIndex = (
   parent: DOMElement,
@@ -58,10 +61,11 @@ export const getEditableChildAndIndex = (
 
   // While the child is a comment node, or an element node with no children,
   // keep iterating to find a sibling non-void, non-comment node.
+  // 当前节点为 注释节点/空元素节点/不可编辑元素节点 时, 继续查找下一个可编辑节点
   while (
     isDOMComment(child) ||
     (isDOMElement(child) && child.childNodes.length === 0) ||
-    (isDOMElement(child) && child.getAttribute(EDITABLE_KEY) === "false")
+    (isDOMElement(child) && child.getAttribute(EDITABLE) === "false")
   ) {
     if (triedForward && triedBackward) {
       break;
@@ -70,28 +74,35 @@ export const getEditableChildAndIndex = (
     if (i >= childNodes.length) {
       triedForward = true;
       i = index - 1;
-      direction = "backward";
+      // <- 向后查找 -1
+      direction = DIRECTION.BACKWARD;
       continue;
     }
 
     if (i < 0) {
       triedBackward = true;
       i = index + 1;
-      direction = "forward";
+      // -> 向前查找 +1
+      direction = DIRECTION.FORWARD;
       continue;
     }
 
     child = childNodes[i];
     index = i;
-    i += direction === "forward" ? 1 : -1;
+    // +1: 向前查找 -1: 向后查找
+    const increment = direction === DIRECTION.FORWARD ? 1 : -1;
+    i = i + increment;
   }
 
   return [child, index];
 };
 
 /**
- * Get the nearest editable child at `index` in a `parent`, preferring
- * `direction`.
+ * 获取 parent 中 index 处附近的可编辑节点
+ * 优先 direction 方向的查找
+ * @param parent
+ * @param index
+ * @param direction
  */
 export const getEditableChild = (
   parent: DOMElement,
@@ -102,11 +113,45 @@ export const getEditableChild = (
   return child;
 };
 
+/**
+ * 兼容性地获取 Text/Span 的 Text Node
+ * @param node
+ */
 export const getTextNode = (node: Node | null): Text | null => {
-  if (isDOMText(node)) return node;
+  if (isDOMText(node)) {
+    return node;
+  }
   if (isDOMElement(node)) {
     const textNode = node.childNodes[0];
-    if (textNode && isDOMText(textNode)) return textNode;
+    if (textNode && isDOMText(textNode)) {
+      return textNode;
+    }
   }
   return null;
+};
+
+/**
+ * 根据 DOMSelection 和 DOMStaticRange 判断方向
+ * @param sel
+ * @param staticSel
+ */
+export const isBackward = (sel: DOMSelection | null, staticSel: DOMStaticRange | null) => {
+  if (!sel || !staticSel) return false;
+  const { anchorNode, anchorOffset, focusNode, focusOffset } = sel;
+  const { startContainer, startOffset, endContainer, endOffset } = staticSel;
+  return (
+    anchorNode !== startContainer ||
+    anchorOffset !== startOffset ||
+    focusNode !== endContainer ||
+    focusOffset !== endOffset
+  );
+};
+
+export const isZeroNode = (node: Node | null) => {
+  if (!node || !node.parentElement) {
+    return false;
+  }
+  return node instanceof HTMLElement
+    ? node.hasAttribute(ZERO_SPACE_KEY)
+    : node.parentElement.hasAttribute(ZERO_SPACE_KEY);
 };

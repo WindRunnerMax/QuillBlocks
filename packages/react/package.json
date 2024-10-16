@@ -1,30 +1,34 @@
 {
-  "name": "blocks-kit-react",
+  "name": "block-kit-react",
   "version": "0.0.0",
   "description": "",
-  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss",
+    "**/*.less"
+  ],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "rspack serve --config ./rspack.config.js",
-    "build": "rspack build --config ./rspack.config.js",
-    "analyze": "rspack build --config ./rspack.config.js --analyze"
+    "dev": "vite",
+    "build": "tsc -p tsconfig.build.json && cp -r src/styles dist",
+    "test": "",
+    "lint:ts": "tsc -p tsconfig.build.json --noEmit",
+    "lint:circular": "madge --extensions js --circular ./dist"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@arco-design/web-react": "2.60.3",
-    "ahooks": "3.7.8",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "block-kit-core": "workspace: *",
+    "block-kit-delta": "workspace: *",
+    "block-kit-utils": "workspace: *"
   },
   "devDependencies": {
-    "@rspack/cli": "0.2.5",
-    "@rspack/plugin-html": "0.2.5",
     "@types/react": "17.0.2",
-    "@types/react-dom": "17.0.2",
-    "copy-webpack-plugin": "5",
-    "less": "4.2.0",
-    "less-loader": "12.1.0",
-    "sass-loader": "13.3.3"
+    "@types/react-dom": "17.0.2"
   }
 }

@@ -1,5 +1,5 @@
 import type { Editor } from "../../editor";
-import { EDITOR_STATE } from "../../state/utils/constant";
+import { EDITOR_STATE } from "../../state/types";
 import type { EventBus } from "../bus";
 import { NATIVE_EVENTS } from "./types";
 
@@ -8,72 +8,80 @@ export class NativeEvent {
 
   private onCompositionStart = (e: CompositionEvent) => {
     this.editor.state.set(EDITOR_STATE.COMPOSING, true);
-    this.event.trigger(NATIVE_EVENTS.COMPOSITION_START, e);
+    this.event.emit(NATIVE_EVENTS.COMPOSITION_START, e);
   };
 
   private onCompositionUpdate = (e: CompositionEvent) => {
-    this.event.trigger(NATIVE_EVENTS.COMPOSITION_UPDATE, e);
+    this.event.emit(NATIVE_EVENTS.COMPOSITION_UPDATE, e);
   };
 
   private onCompositionEnd = (e: CompositionEvent) => {
     this.editor.state.set(EDITOR_STATE.COMPOSING, false);
-    this.event.trigger(NATIVE_EVENTS.COMPOSITION_END, e);
+    this.event.emit(NATIVE_EVENTS.COMPOSITION_END, e);
   };
 
   private onBeforeInput = (e: Event) => {
-    this.event.trigger(NATIVE_EVENTS.BEFORE_INPUT, e as InputEvent);
+    this.event.emit(NATIVE_EVENTS.BEFORE_INPUT, e as InputEvent);
   };
 
   private onInput = (e: Event) => {
-    this.event.trigger(NATIVE_EVENTS.INPUT, e as InputEvent);
+    this.event.emit(NATIVE_EVENTS.INPUT, e as InputEvent);
   };
 
   private onCopy = (e: ClipboardEvent) => {
-    this.event.trigger(NATIVE_EVENTS.COPY, e);
+    this.event.emit(NATIVE_EVENTS.COPY, e);
   };
 
   private onCut = (e: ClipboardEvent) => {
-    this.event.trigger(NATIVE_EVENTS.CUT, e);
+    this.event.emit(NATIVE_EVENTS.CUT, e);
   };
 
   private onPaste = (e: ClipboardEvent) => {
-    this.event.trigger(NATIVE_EVENTS.PASTE, e);
+    this.event.emit(NATIVE_EVENTS.PASTE, e);
   };
 
   private onKeydown = (e: KeyboardEvent) => {
-    this.event.trigger(NATIVE_EVENTS.KEY_DOWN, e);
+    this.event.emit(NATIVE_EVENTS.KEY_DOWN, e);
   };
 
   private onKeypress = (e: KeyboardEvent) => {
-    this.event.trigger(NATIVE_EVENTS.KEY_PRESS, e);
+    this.event.emit(NATIVE_EVENTS.KEY_PRESS, e);
   };
 
   private onKeyup = (e: KeyboardEvent) => {
-    this.event.trigger(NATIVE_EVENTS.KEY_UP, e);
+    this.event.emit(NATIVE_EVENTS.KEY_UP, e);
   };
 
   private onFocus = (e: FocusEvent) => {
     this.editor.state.set(EDITOR_STATE.FOCUS, true);
-    this.event.trigger(NATIVE_EVENTS.FOCUS, e);
+    this.event.emit(NATIVE_EVENTS.FOCUS, e);
   };
 
   private onBlur = (e: FocusEvent) => {
     this.editor.state.set(EDITOR_STATE.FOCUS, false);
-    this.event.trigger(NATIVE_EVENTS.BLUR, e);
+    this.event.emit(NATIVE_EVENTS.BLUR, e);
   };
 
   private onSelectionChange = (e: Event) => {
-    this.event.trigger(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, e);
+    this.event.emit(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, e);
   };
 
   private onMouseDown = (e: MouseEvent) => {
-    this.editor.state.set(EDITOR_STATE.MOUSE_DOWN, true);
-    this.event.trigger(NATIVE_EVENTS.MOUSE_DOWN, e);
+    this.event.emit(NATIVE_EVENTS.MOUSE_DOWN, e);
   };
 
   private onMouseUp = (e: MouseEvent) => {
+    this.event.emit(NATIVE_EVENTS.MOUSE_UP, e);
+  };
+
+  private onMouseDownGlobal = (e: MouseEvent) => {
+    this.editor.state.set(EDITOR_STATE.MOUSE_DOWN, true);
+    this.event.emit(NATIVE_EVENTS.MOUSE_DOWN, e);
+  };
+
+  private onMouseUpGlobal = (e: MouseEvent) => {
     this.editor.state.set(EDITOR_STATE.MOUSE_DOWN, false);
-    this.event.trigger(NATIVE_EVENTS.MOUSE_UP, e);
+    this.event.emit(NATIVE_EVENTS.MOUSE_UP, e);
   };
 
   public bind() {
@@ -92,9 +100,11 @@ export class NativeEvent {
     container.addEventListener(NATIVE_EVENTS.KEY_UP, this.onKeyup);
     container.addEventListener(NATIVE_EVENTS.FOCUS, this.onFocus);
     container.addEventListener(NATIVE_EVENTS.BLUR, this.onBlur);
-    document.addEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
     container.addEventListener(NATIVE_EVENTS.MOUSE_DOWN, this.onMouseDown);
     container.addEventListener(NATIVE_EVENTS.MOUSE_UP, this.onMouseUp);
+    document.addEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
+    document.addEventListener(NATIVE_EVENTS.MOUSE_DOWN, this.onMouseDownGlobal);
+    document.addEventListener(NATIVE_EVENTS.MOUSE_UP, this.onMouseUpGlobal);
   }
 
   public unbind() {
@@ -112,8 +122,10 @@ export class NativeEvent {
     container.removeEventListener(NATIVE_EVENTS.KEY_UP, this.onKeyup);
     container.removeEventListener(NATIVE_EVENTS.FOCUS, this.onFocus);
     container.removeEventListener(NATIVE_EVENTS.BLUR, this.onBlur);
-    document.removeEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
     container.removeEventListener(NATIVE_EVENTS.MOUSE_DOWN, this.onMouseDown);
     container.removeEventListener(NATIVE_EVENTS.MOUSE_UP, this.onMouseUp);
+    document.removeEventListener(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, this.onSelectionChange);
+    document.removeEventListener(NATIVE_EVENTS.MOUSE_DOWN, this.onMouseDownGlobal);
+    document.removeEventListener(NATIVE_EVENTS.MOUSE_UP, this.onMouseUpGlobal);
   }
 }

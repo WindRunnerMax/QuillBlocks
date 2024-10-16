@@ -1,46 +1,62 @@
-import { BlockSet } from "blocks-kit-delta";
+import { Delta } from "block-kit-delta";
 
 import { Event } from "../event";
+import { Input } from "../input";
 import { LOG_LEVEL, Logger } from "../log";
-import { DATA_TYPE_KEY } from "../model/modules/property";
-import { Reflect } from "../reflect";
+import { Model } from "../model";
+import { Schema } from "../schema";
+import { Selection } from "../selection";
 import { EditorState } from "../state";
-import { EDITOR_STATE } from "../state/utils/constant";
-import { DEFAULT_BLOCK_SET_LIKE } from "./constant";
+import { EDITOR_STATE } from "../state/types";
 import type { EditorOptions } from "./types";
+import { BLOCK_LIKE } from "./utils/constant";
 
 export class Editor {
-  public blockSet: BlockSet;
+  /** 编辑容器 */
   private container: HTMLDivElement;
-  public readonly event: Event;
-  public readonly logger: Logger;
-  public readonly reflect: Reflect;
-  public readonly state: EditorState;
+  /** 状态模块 */
+  public state: EditorState;
+  /** 事件模块 */
+  public event: Event;
+  /** 选区模块 */
+  public selection: Selection;
+  /** 模型映射 */
+  public model: Model;
+  /** 日志模块 */
+  public logger: Logger;
+  /** 输入模块 */
+  public input: Input;
+  /** 配置模块 */
+  public schema: Schema;
 
-  constructor(options: EditorOptions) {
-    const { blockSet = new BlockSet(DEFAULT_BLOCK_SET_LIKE), logLevel = LOG_LEVEL.ERROR } = options;
-    this.blockSet = blockSet;
+  constructor(options: EditorOptions = {}) {
+    const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
     this.container = document.createElement("div");
-    this.container.setAttribute(DATA_TYPE_KEY, "placeholder");
-    this.logger = new Logger(logLevel);
-    this.reflect = new Reflect();
+    this.container.setAttribute("data-type", "mock");
+    this.schema = new Schema(schema);
+    this.state = new EditorState(this, delta);
     this.event = new Event(this);
-    this.state = new EditorState(this);
+    this.selection = new Selection(this);
+    this.model = new Model();
+    this.logger = new Logger(logLevel);
+    this.input = new Input(this);
   }
 
   public onMount(container: HTMLDivElement) {
-    this.container = container;
     if (this.state.get(EDITOR_STATE.MOUNTED)) {
       console.warn("Editor has been mounted, please destroy it before mount again.");
     }
-    this.container.setAttribute(DATA_TYPE_KEY, "editable");
+    this.container = container;
+    this.state.set(EDITOR_STATE.MOUNTED, true);
     this.event.bind();
-    this.state.renderEditableDOM();
   }
 
   public destroy() {
     this.event.unbind();
-    this.state.destroy();
+    this.input.destroy();
+    this.model.destroy();
+    this.selection.destroy();
+    this.state.set(EDITOR_STATE.MOUNTED, false);
   }
 
   public getContainer() {

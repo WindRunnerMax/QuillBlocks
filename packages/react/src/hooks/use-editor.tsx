@@ -1,16 +1,17 @@
-import type { Editor } from "blocks-kit-core";
+import type { Editor } from "block-kit-core";
 import React, { createContext } from "react";
 
-export const EditorContext = createContext<Editor | null>(null);
-export const WithEditor: React.FC<{ editor: Editor }> = props => {
+export const LaserContext = createContext<Editor | null>(null);
+
+export const EditorProvider: React.FC<{ editor: Editor }> = props => {
   const { editor, children } = props;
-  return <EditorContext.Provider value={editor}>{children}</EditorContext.Provider>;
+  return <LaserContext.Provider value={editor}>{children}</LaserContext.Provider>;
 };
 
 export const useEditor = () => {
-  const editor = React.useContext(EditorContext);
+  const editor = React.useContext(LaserContext);
   if (!editor) {
-    throw new Error("UseEditor must be used within a EditorContext");
+    throw new Error("UseEditor must be used within a LaserContext");
   }
   return editor;
 };

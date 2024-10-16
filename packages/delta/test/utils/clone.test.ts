@@ -1,28 +1,28 @@
-import type { DeltaSetLike } from "../../src";
-import { cloneDeltaSetLike } from "../../src";
+import type { BlockSetLike } from "../../src";
+import { cloneBlockSetLike } from "../../src";
 
 describe("clone", () => {
-  const deltaSet: DeltaSetLike = {
-    a: { ops: [{ insert: "123", attributes: { a: "1" } }], zoneId: "a", parentId: null },
-    b: { ops: [{ insert: "456" }], zoneId: "b", parentId: null },
+  const blockSet: BlockSetLike = {
+    a: { ops: [{ insert: "123", attributes: { a: "1" } }], blockId: "a", blockType: "Z" },
+    b: { ops: [{ insert: "456" }], blockId: "b", blockType: "Z" },
   };
-  const newDeltaSet = cloneDeltaSetLike(deltaSet);
+  const newBlockSet = cloneBlockSetLike(blockSet);
 
   it("equal object content", () => {
-    expect(deltaSet).toEqual(newDeltaSet);
+    expect(blockSet).toEqual(newBlockSet);
   });
 
   it("diff object", () => {
-    expect(deltaSet === newDeltaSet).toEqual(false);
+    expect(blockSet === newBlockSet).toEqual(false);
   });
 
-  it("diff zone delta", () => {
-    expect(deltaSet.a === newDeltaSet.a).toEqual(false);
-    expect(deltaSet.b === newDeltaSet.b).toEqual(false);
+  it("diff block delta", () => {
+    expect(blockSet.a === newBlockSet.a).toEqual(false);
+    expect(blockSet.b === newBlockSet.b).toEqual(false);
   });
 
-  it("diff zone delta ops", () => {
-    expect(deltaSet.a.ops === newDeltaSet.a.ops).toEqual(false);
-    expect(deltaSet.b.ops === newDeltaSet.b.ops).toEqual(false);
+  it("diff block delta ops", () => {
+    expect(blockSet.a.ops === newBlockSet.a.ops).toEqual(false);
+    expect(blockSet.b.ops === newBlockSet.b.ops).toEqual(false);
   });
 });

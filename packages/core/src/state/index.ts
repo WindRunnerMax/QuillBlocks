@@ -1,79 +1,113 @@
-import { Block } from "blocks-kit-delta";
-import { ROOT_BLOCK } from "blocks-kit-utils";
+import type { Delta } from "block-kit-delta";
 
 import type { Editor } from "../editor";
-import { DEFAULT_BLOCK_LIKE } from "../editor/constant";
-import { BlockState } from "./modules/block";
-import type { EDITOR_STATE } from "./utils/constant";
+import type { ContentChangeEvent } from "../event/bus/types";
+import { EDITOR_EVENT } from "../event/bus/types";
+import { Range } from "../selection/modules/range";
+import { RawRange } from "../selection/modules/raw-range";
+import { BlockState } from "./modules/block-state";
+import { Mutate } from "./mutate";
+import type { ApplyOptions } from "./types";
+import { EDITOR_STATE } from "./types";
 
 export class EditorState {
-  public entry: BlockState;
-  private active = ROOT_BLOCK;
-  private status: Map<string, boolean>;
-  private blocks: Map<string, BlockState>;
+  /** Delta 缓存 */
+  private _delta: Delta | null;
+  /** BlockState 引用 */
+  public block: BlockState;
+  /** 内建状态集合 */
+  private status: Record<string, boolean> = {};
 
-  constructor(public readonly editor: Editor) {
-    this.status = new Map();
-    this.blocks = new Map();
-    const entryDelta = this.editor.blockSet.get(ROOT_BLOCK);
-    const entry = entryDelta || new Block(DEFAULT_BLOCK_LIKE);
-    this.blocks.set(entry.id, new BlockState(this, entry));
-    this.entry = this.getBlockState(ROOT_BLOCK);
-    this.createBlockStateTree();
+  constructor(private editor: Editor, delta: Delta) {
+    this._delta = delta;
+    this.block = new BlockState(editor, delta);
   }
 
-  public destroy() {
-    this.active = ROOT_BLOCK;
-    this.status = new Map();
-    this.blocks = new Map();
-  }
-
-  private createBlockStateTree() {
-    // 初始化构建整个`Block`状态树
-    const dfs = (block: Block) => {
-      const state = this.getBlockState(block.id);
-      if (!state) return void 0;
-      block.children.forEach(id => {
-        const child = this.editor.blockSet.get(id);
-        if (!child) return void 0;
-        // 按需创建`state`以及关联关系
-        const childState = new BlockState(this, child);
-        this.blocks.set(id, childState);
-        state.addChild(childState);
-        dfs(childState.getRaw());
-      });
-    };
-    dfs(this.entry.getRaw());
-  }
-
-  public getActiveBlock() {
-    return this.active;
-  }
-
-  public setActiveBlock(blockId: string) {
-    this.active = blockId;
-  }
-
+  /**
+   * 获取编辑器状态
+   * @param key
+   */
   public get(key: keyof typeof EDITOR_STATE) {
-    return this.status.get(key);
+    return this.status[key];
   }
 
+  /**
+   * 设置编辑器状态
+   * @param key
+   * @param value
+   */
   public set(key: keyof typeof EDITOR_STATE, value: boolean) {
-    this.status.set(key, value);
+    this.status[key] = value;
     return this;
   }
 
-  public getBlockState(zoneId: typeof ROOT_BLOCK): BlockState;
-  public getBlockState(zoneId: string): BlockState | null;
-  public getBlockState(zoneId: string): BlockState | null {
-    return this.blocks.get(zoneId) || null;
+  /**
+   * 判断焦点是否在编辑器内
+   */
+  public isFocused() {
+    return !!this.get(EDITOR_STATE.FOCUS);
   }
 
-  public renderEditableDOM() {
-    const div = this.editor.getContainer();
-    // 完整清理`DOM`节点
-    div.innerHTML = "";
-    const root = this.entry.render();
-    div.appendChild(root);
+  /**
+   * 判断编辑器是否只读
+   */
+  public isReadonly() {
+    return !!this.get(EDITOR_STATE.READONLY);
+  }
+
+  /**
+   * 判断编辑器是否正在组合输入
+   */
+  public isComposing() {
+    return !!this.get(EDITOR_STATE.READONLY);
+  }
+
+  /**
+   * 转换为 BlockSet
+   * @param deep 深拷贝
+   * @note 以内建状态为主, BlockSet 按需转换
+   */
+  public toBlockSet(deep?: boolean) {
+    if (!deep && this._delta) {
+      return this._delta;
+    }
+    const delta = this.block.toDelta(deep);
+    this._delta = delta;
+    return delta;
+  }
+
+  /**
+   * 应用变更
+   * @param delta
+   * @param options
+   */
+  public apply(delta: Delta, options: ApplyOptions = {}) {
+    const { source = "user" } = options;
+    const previous = this.toBlockSet();
+    this._delta = null;
+
+    // 获取当前选区位置
+    const raw: RawRange | null = options.range || this.editor.selection.toRaw();
+
+    // 更新 BlockSet Model
+    const mutate = new Mutate(this.editor, this.block);
+    mutate.compose(delta).chop();
+    const newLines = mutate.apply();
+    this.block.updateLines(newLines);
+
+    // 更新选区位置
+    if (raw) {
+      const start = delta.transformPosition(raw.start);
+      const end = raw.len ? delta.transformPosition(raw.start + raw.len) : start;
+      const range = Range.fromRaw(this.editor, new RawRange(start, end - start));
+      this.editor.selection.set(range);
+    }
+
+    const current = this.toBlockSet();
+    Promise.resolve().then(() => {
+      const payload: ContentChangeEvent = { previous, current, source, changes: delta };
+      this.editor.logger.debug("Editor Content Change", payload);
+      this.editor.event.trigger(EDITOR_EVENT.CONTENT_CHANGE, payload);
+    });
   }
 }

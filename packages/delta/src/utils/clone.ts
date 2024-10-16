@@ -1,9 +1,13 @@
-import { isEmptyValue } from "blocks-kit-utils";
+import { isEmptyValue } from "block-kit-utils";
 
 import type { AttributeMap } from "../attributes/interface";
-import type { DeltaBlockLike, DeltaLike, DeltaSetLike } from "../cluster/interface";
+import type { BlockDeltaLike, BlockSetLike, DeltaLike } from "../cluster/interface";
 import type { Op, Ops } from "../delta/interface";
 
+/**
+ * 克隆属性
+ * @param attrs
+ */
 export const cloneAttributes = (attrs: AttributeMap): AttributeMap => {
   const newAttrs = {} as AttributeMap;
   for (const [key, value] of Object.entries(attrs)) {
@@ -12,6 +16,10 @@ export const cloneAttributes = (attrs: AttributeMap): AttributeMap => {
   return newAttrs;
 };
 
+/**
+ * 克隆操作
+ * @param op
+ */
 export const cloneOp = (op: Op): Op => {
   const attributes = op.attributes;
   if (isEmptyValue(attributes)) {
@@ -21,22 +29,38 @@ export const cloneOp = (op: Op): Op => {
   }
 };
 
+/**
+ * 克隆操作集合
+ * @param ops
+ */
 export const cloneOps = (ops: Ops): Ops => {
   return ops.map(cloneOp);
 };
 
+/**
+ * 克隆 DeltaLike
+ * @param delta
+ */
 export const cloneDeltaLike = (delta: DeltaLike): DeltaLike => {
   return { ...delta, ops: cloneOps(delta.ops) };
 };
 
-export const cloneZoneDeltaLike = (delta: DeltaBlockLike): DeltaBlockLike => {
+/**
+ * 克隆 BlockDeltaLike
+ * @param delta
+ */
+export const cloneBlockDeltaLike = (delta: BlockDeltaLike): BlockDeltaLike => {
   return { ...delta, ops: cloneOps(delta.ops) };
 };
 
-export const cloneDeltaSetLike = (deltaSet: DeltaSetLike): DeltaSetLike => {
-  const newDeltaSetLike = {} as DeltaSetLike;
-  for (const [key, value] of Object.entries(deltaSet)) {
-    newDeltaSetLike[key] = cloneZoneDeltaLike(value);
+/**
+ * 克隆 BlockSetLike
+ * @param blockSet
+ */
+export const cloneBlockSetLike = (blockSet: BlockSetLike): BlockSetLike => {
+  const newBlockSetLike = {} as BlockSetLike;
+  for (const [key, value] of Object.entries(blockSet)) {
+    newBlockSetLike[key] = cloneBlockDeltaLike(value);
   }
-  return newDeltaSetLike;
+  return newBlockSetLike;
 };

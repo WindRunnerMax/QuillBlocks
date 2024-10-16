@@ -1,5 +1,5 @@
 {
-  "name": "blocks-kit-tools",
+  "name": "block-kit-tools",
   "version": "0.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -15,7 +15,6 @@
   "dependencies": {
     "docx": "7.8.2",
     "image-size": "1.1.1",
-    "blocks-kit-utils": "workspace: *",
     "pdf-lib": "1.17.1",
     "pdfmake": "0.2.10",
     "quill-delta": "4.2.2"

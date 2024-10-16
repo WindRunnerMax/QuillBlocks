@@ -59,10 +59,17 @@ describe("helpers", () => {
       delta.eachLine(spy);
       expect(spy).toHaveBeenCalledTimes(4);
       expect(spy.mock.calls).toEqual([
-        [new Delta().insert("Hello"), {}, 0],
-        [new Delta(), {}, 1],
-        [new Delta().insert("World", { bold: "true" }), { align: "right" }, 2],
-        [new Delta().insert("!"), {}, 3],
+        [new Delta([{ insert: "Hello" }, { insert: "\n" }]), {}, 0],
+        [new Delta().insert("\n"), {}, 1],
+        [
+          new Delta([
+            { insert: "World", attributes: { bold: "true" } },
+            { insert: "\n", attributes: { align: "right" } },
+          ]),
+          { align: "right" },
+          2,
+        ],
+        [new Delta([{ insert: "!" }, { insert: "\n" }]), {}, 3],
       ]);
     });
 
@@ -72,8 +79,8 @@ describe("helpers", () => {
       delta.eachLine(spy);
       expect(spy).toHaveBeenCalledTimes(2);
       expect(spy.mock.calls).toEqual([
-        [new Delta().insert("Hello"), {}, 0],
-        [new Delta().insert("World!"), {}, 1],
+        [new Delta([{ insert: "Hello" }, { insert: "\n" }]), {}, 0],
+        [new Delta([{ insert: "World!" }, { insert: "\n" }]), {}, 1],
       ]);
     });
 
