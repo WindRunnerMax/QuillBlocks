@@ -1,4 +1,4 @@
-import { formatEOL, normalizeEOL } from "../../src/state/utils/normalize";
+import { formatEOL, normalizeEOL } from "../../src/utils/delta";
 
 describe("normalize", () => {
   it("lf signal line", () => {

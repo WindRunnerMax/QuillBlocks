@@ -4,7 +4,6 @@ import {
   composeAttributes,
   isEOLOp,
   isEqualAttributes,
-  isEqualOp,
   isInsertOp,
   isRetainOp,
   normalizeEOL,
@@ -32,7 +31,6 @@ export class Mutate {
    * @param newOp
    */
   private insert(lines: LineState[], lineState: LineState, newLeaf: LeafState): LineState {
-    console.log("newLeaf.op :>> ", newLeaf.op);
     const leaves = lineState.getLeaves();
     const index = leaves.length;
     const lastLeaf = lineState.getLastLeaf();
@@ -40,12 +38,13 @@ export class Mutate {
     const newOp = newLeaf.op;
     // 如果是 EOL 则直接追加
     if (isEOLOp(newOp) || isEOLOp(lastOp)) {
+      const key = newLeaf.parent.key;
       lineState._appendLeaf(newLeaf);
       if (isEOLOp(newOp)) {
         lines.push(lineState);
         lineState.updateLeaves();
         // this.key => 复用 other.key => 更新
-        lineState.updateKey(newLeaf.parent.key);
+        lineState.updateKey(key);
         return LineState.create([], {}, this.block);
       }
       return lineState;
@@ -111,13 +110,11 @@ export class Mutate {
         const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
         const thisLeaf = thisIter.next(length);
         const otherOp = otherIter.next(length);
+        // 1. 预设 retain 2. Infinity
         if (isRetainOp(otherOp)) {
-          let newLeaf = new LeafState(0, 0, {}, lineState);
-          if (!thisLeaf) {
+          const newLeaf = thisLeaf;
+          if (!thisLeaf || !newLeaf) {
             continue;
-          }
-          if (!isRetainOp(thisLeaf.op)) {
-            newLeaf = thisLeaf;
           }
           const attributes = composeAttributes(
             thisLeaf.op.attributes,
@@ -129,14 +126,12 @@ export class Mutate {
             newLeaf.attributes = attributes;
           }
           lineState = this.insert(lines, lineState, newLeaf);
-          const lastLeaf = lineState.getLastLeaf();
-          if (!otherIter.hasNext() && lastLeaf && isEqualOp(lastLeaf.op, newLeaf.op)) {
+          if (!otherIter.hasNext()) {
             // 处理剩余的 Leaves 和 Lines
             const rest = thisIter.rest();
             for (const leaf of rest.leaf) {
               lineState = this.insert(lines, lineState, leaf);
             }
-            console.log("rest.line.length :>> ", rest.line.length);
             lines.push(...rest.line);
             return lines;
           }

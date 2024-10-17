@@ -144,12 +144,16 @@ export class Iterator {
    * 获取剩余的所有 Leaf 以及 Line
    */
   public rest() {
-    console.log("this.row,col,offset :>> ", this.row, this.col, this.offset);
     type Rest = { leaf: LeafState[]; line: LineState[] };
     const rest: Rest = { leaf: [], line: [] };
     if (!this.hasNext()) {
       return rest;
     } else if (this.offset === 0) {
+      // col === 0 && offset === 0 则直接返回剩余的 Line
+      if (this.col === 0) {
+        rest.line = this.lines.slice(this.row);
+        return rest;
+      }
       const line = this.lines[this.row];
       if (line) {
         rest.leaf = line.getLeaves().slice(this.col);

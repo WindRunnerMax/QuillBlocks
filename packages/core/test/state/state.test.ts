@@ -43,7 +43,7 @@ describe("mutate iterator", () => {
     const newLines = mutate.compose(changes);
     const newLineState1 = newLines[0];
     const newLineState2 = newLines[1];
-    expect(lineState1).toBe(newLineState1);
+    expect(lineState1?.key).toBe(newLineState1.key);
     expect(newLineState1.getLeaf(0)).toBe(leafStateText1);
     expect(newLineState1.getLeaf(1)).toBe(leafStateText2);
     expect(newLineState1.getLeaf(2)).toBe(leafStateEOL1);
@@ -87,22 +87,18 @@ describe("mutate iterator", () => {
     expect(newLineState2.getLeaf(1)).toBe(leafStateEOL2);
   });
 
-  it.only("reduce line length", () => {
+  it("reduce line length", () => {
     const changes = new Delta().retain(4).delete(4);
     const mutate = new Mutate(state);
     const newLines = mutate.compose(changes);
     expect(newLines.length).toBe(2);
-    console.log(
-      "newLines.getLeaves :>> ",
-      newLines.map(line => line.getOps())
-    );
-    // const newLineState1 = newLines[0];
-    // const newLineState2 = newLines[1];
-    // expect(lineState1).not.toBe(newLineState1);
-    // expect(newLineState1.getLeaf(0)).toBe(leafStateText1);
-    // expect(newLineState1.getLeaf(1)).toBe(leafStateEOL1);
-    // expect(lineState2).toBe(newLineState2);
-    // expect(newLineState2.getLeaf(0)).toBe(leafStateText3);
-    // expect(newLineState2.getLeaf(1)).toBe(leafStateEOL2);
+    const newLineState1 = newLines[0];
+    const newLineState2 = newLines[1];
+    expect(lineState1).not.toBe(newLineState1);
+    expect(newLineState1.getLeaf(0)).toBe(leafStateText1);
+    expect(newLineState1.getLeaf(1)).toBe(leafStateEOL1);
+    expect(lineState2).toBe(newLineState2);
+    expect(newLineState2.getLeaf(0)).toBe(leafStateText3);
+    expect(newLineState2.getLeaf(1)).toBe(leafStateEOL2);
   });
 });
