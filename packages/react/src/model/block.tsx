@@ -11,7 +11,7 @@ const BlockView: FC<{
   state: BlockState;
 }> = props => {
   const { editor, state } = props;
-  const [lineState, setLineState] = useState(() => state.getLines());
+  const [lines, setLines] = useState(() => state.getLines());
 
   const setModel = (ref: HTMLDivElement | null) => {
     if (ref) {
@@ -20,7 +20,7 @@ const BlockView: FC<{
   };
 
   const onContentChange = useMemoFn(() => {
-    setLineState(state.getLines());
+    setLines(state.getLines());
   });
 
   useLayoutEffect(() => {
@@ -53,8 +53,8 @@ const BlockView: FC<{
 
   return (
     <div className="block-kit-block notranslate" {...{ [BLOCK_KEY]: true }} ref={setModel}>
-      {lineState.map((line, index) => (
-        <LineModel key={index} editor={editor} lineState={line} index={index}></LineModel>
+      {lines.map((line, index) => (
+        <LineModel key={line.key} editor={editor} lineState={line} index={index}></LineModel>
       ))}
     </div>
   );

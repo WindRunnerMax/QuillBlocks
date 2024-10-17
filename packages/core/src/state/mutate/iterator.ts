@@ -87,6 +87,24 @@ export class Iterator {
   }
 
   /**
+   * 初始 Retain 时获取 LineState[]
+   * @param retain
+   * @param newLines
+   */
+  public firstRetain(retain: number, newLines: LineState[]) {
+    let firstRetain = retain;
+    while (retain > 0) {
+      const line = this.lines[this.row];
+      if (!line) break;
+      if (firstRetain < line.length) break;
+      this.row++;
+      newLines.push(line);
+      firstRetain = firstRetain - line.length;
+    }
+    return firstRetain;
+  }
+
+  /**
    * 获取 Next Op 的部分/全部内容
    * @param length
    */

@@ -1,6 +1,7 @@
 import { Delta } from "block-kit-delta";
 
 import { Editor } from "../../src/editor";
+import type { LineState } from "../../src/state/modules/line-state";
 import { Iterator } from "../../src/state/mutate/iterator";
 
 describe("mutate state", () => {
@@ -20,6 +21,33 @@ describe("mutate state", () => {
   const leafStateText3 = lineState2 && lineState2.getLeaf(0);
   const leafStateEOL2 = lineState2 && lineState2.getLeaf(1);
   const leaves = [leafStateText1, leafStateText2, leafStateEOL1, leafStateText3, leafStateEOL2];
+
+  it("first retain", () => {
+    const iter = new Iterator(state.getLines());
+    const newLines: LineState[] = [];
+    const firstRetain = iter.firstRetain(8, newLines);
+    expect(firstRetain).toBe(8);
+    expect(newLines.length).toBe(0);
+    expect(iter.next()).toBe(leafStateText1);
+  });
+
+  it("first retain lf", () => {
+    const iter = new Iterator(state.getLines());
+    const newLines: LineState[] = [];
+    const firstRetain = iter.firstRetain(9, newLines);
+    expect(firstRetain).toBe(0);
+    expect(newLines.length).toBe(1);
+    expect(iter.next()).toBe(leafStateText3);
+  });
+
+  it("first retain over", () => {
+    const iter = new Iterator(state.getLines());
+    const newLines: LineState[] = [];
+    const firstRetain = iter.firstRetain(10, newLines);
+    expect(firstRetain).toBe(1);
+    expect(newLines.length).toBe(1);
+    expect(iter.next()).toBe(leafStateText3);
+  });
 
   it("next", () => {
     const iter = new Iterator(state.getLines());

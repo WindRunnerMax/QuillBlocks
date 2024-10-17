@@ -37,15 +37,18 @@ export class Mutate {
     const lastLeaf = lineState.getLastLeaf();
     const lastOp = lastLeaf && lastLeaf.op;
     const newOp = newLeaf.op;
-    // 如果是 EOL 则直接追加
-    if (isEOLOp(newOp) || isEOLOp(lastOp)) {
+    // 如果 NewOp/LastOp 是 EOL 则直接追加
+    const isNewEOLOp = isEOLOp(newOp);
+    const isLastEOLOp = isEOLOp(newOp);
+    if (isNewEOLOp || isLastEOLOp) {
       const key = newLeaf.parent.key;
       lineState._appendLeaf(newLeaf);
-      if (isEOLOp(newOp)) {
+      if (isNewEOLOp) {
         lines.push(lineState);
-        lineState.updateLeaves();
         // this.key => 复用 other.key => 更新
         lineState.updateKey(key);
+        lineState.updateLeaves();
+        lineState.attributes = newOp.attributes || {};
         return LineState.create([], {}, this.block);
       }
       return lineState;
@@ -82,22 +85,14 @@ export class Mutate {
     // 当前处理的 LineState
     let lineState = LineState.create([], {}, this.block);
     if (firstOther && isRetainOp(firstOther) && !firstOther.attributes) {
-      let firstLeft = firstOther.retain;
+      let firstLeft = thisIter.firstRetain(firstOther.retain, lines);
       while (thisIter.peekType() === OP_TYPES.INSERT && thisIter.peekLength() <= firstLeft) {
         firstLeft = firstLeft - thisIter.peekLength();
         const leaf = thisIter.next();
-        if (!leaf) {
-          continue;
-        }
-        if (isEOLOp(leaf.op)) {
-          // 首个 retain 覆盖的 \n 直接复用 LineState
-          lines.push(leaf.parent);
-          // 重置当前正在处理的 LineState
-          lineState = LineState.create([], {}, this.block);
-        } else {
-          // 其他 Op 则追加到当前处理的 LineState
-          lineState._appendLeaf(leaf);
-        }
+        if (!leaf) continue;
+        // 初始行数据在 thisIter.firstRetain 中处理完成
+        // 其他 Op 则可直接追加到当前处理的 LineState
+        lineState._appendLeaf(leaf);
       }
       if (firstOther.retain - firstLeft > 0) {
         otherIter.next(firstOther.retain - firstLeft);
