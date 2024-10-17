@@ -22,10 +22,12 @@ export class LineState {
   public isDirty = false;
   /** Leaf 节点 */
   private leaves: LeafState[] = [];
+  /** Ops 缓存 */
+  private _ops: Op[] | null = null;
 
   constructor(
     /** Delta 数据 */
-    public delta: Delta,
+    delta: Delta,
     /** 行属性 */
     public attributes: AttributeMap,
     /** 父级 BlockState */
@@ -63,6 +65,9 @@ export class LineState {
     }
     this.isDirty = true;
     this.leaves[index] = node;
+    if (this._ops) {
+      this._ops[index] = node.op;
+    }
     return this;
   }
 
@@ -91,12 +96,15 @@ export class LineState {
       this.leaves = leaves;
     }
     let offset = 0;
+    const ops: Op[] = [];
     this.leaves.forEach((leaf, index) => {
       leaf.index = index;
       leaf.offset = offset;
       offset = offset + leaf.length;
       leaf.parent = this;
+      ops.push(leaf.op);
     });
+    this._ops = ops;
     this.length = offset;
     this.isDirty = false;
     this.size = this.leaves.length;
@@ -107,7 +115,11 @@ export class LineState {
    * 通过 Leaves 获取行 Ops
    */
   public getOps() {
-    return this.leaves.map(leaf => leaf.op);
+    if (this._ops) {
+      return this._ops;
+    }
+    this._ops = this.leaves.map(leaf => leaf.op);
+    return this._ops;
   }
 
   /**
@@ -141,18 +153,9 @@ export class LineState {
   }
 
   /**
-   * 重设内建 Delta
-   * @param delta
-   * @note 仅编辑器内部使用, 需要保证自建 Leaves
-   */
-  public _setDelta(delta: Delta) {
-    this.delta = delta;
-  }
-
-  /**
    * 追加 LeafState
    * @param delta
-   * @note 仅编辑器内部使用
+   * @internal 仅编辑器内部使用
    */
   public _appendLeaf(leaf: LeafState) {
     leaf.index = this.size;
@@ -164,18 +167,22 @@ export class LineState {
 
   /**
    * 通过 delta 创建 Leaves
-   * @note 仅编辑器内部使用
+   * @internal 仅编辑器内部使用
    */
   public _deltaToLeaves(delta: Delta) {
+    this._ops = [];
+    this.leaves = [];
+    this.isDirty = false;
     const iterator = { index: 0, offset: 0 };
     for (const op of delta.ops) {
       if (!isInsertOp(op) || !op.insert.length) {
-        this.parent.editor.logger.warning("Invalid op in line", op);
+        this.parent.editor.logger.warning("Invalid op in LineState", op);
         iterator.index = iterator.index + 1;
         continue;
       }
       const leaf = new LeafState(iterator.index, iterator.offset, op, this);
       this.leaves.push(leaf);
+      this._ops.push(op);
       iterator.index = iterator.index + 1;
       iterator.offset = iterator.offset + op.insert.length;
     }
@@ -185,6 +192,9 @@ export class LineState {
 
   /**
    * 创建 LineState
+   * @param ops
+   * @param attributes
+   * @param block
    */
   public static create(ops: Op[], attributes: AttributeMap, block: BlockState) {
     return new LineState(new Delta(ops), attributes, block);

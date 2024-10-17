@@ -1,4 +1,4 @@
-import type { AttributeMap, Op } from "block-kit-delta";
+import type { Op } from "block-kit-delta";
 
 import { EOL } from "../types";
 import type { LineState } from "./line-state";
@@ -8,8 +8,6 @@ export class LeafState {
   public eol: boolean;
   /** Op 长度 */
   public length: number;
-  /** Op 属性 */
-  public attributes: AttributeMap;
 
   constructor(
     /** Op 起始索引 */
@@ -22,7 +20,6 @@ export class LeafState {
     public parent: LineState
   ) {
     this.eol = false;
-    this.attributes = op.attributes || {};
     this.length = op.insert ? op.insert.length : 0;
     if (op.insert === EOL) {
       this.eol = true;
@@ -34,5 +31,16 @@ export class LeafState {
    */
   public getText() {
     return this.op.insert || "";
+  }
+
+  /**
+   * 创建 LeafState
+   * @param op
+   * @param index
+   * @param offset
+   * @param parent
+   */
+  public static create(op: Op, index: number, offset: number, parent: LineState) {
+    return new LeafState(index, offset, op, parent);
   }
 }

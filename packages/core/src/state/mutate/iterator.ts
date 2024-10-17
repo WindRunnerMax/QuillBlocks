@@ -116,7 +116,7 @@ export class Iterator {
       } else {
         const retOp: Op = {};
         if (nextLeaf.op.attributes) {
-          retOp.attributes = nextLeaf.attributes;
+          retOp.attributes = nextLeaf.op.attributes;
         }
         if (isRetainOp(op)) {
           // 剩余 OpLength 与 NextOp 相等 => Immutable

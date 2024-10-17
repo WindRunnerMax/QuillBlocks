@@ -20,7 +20,7 @@ const LeafView: FC<{
 
   return (
     <span {...{ [LEAF_KEY]: true }} ref={setModel}>
-      {leafState.attributes.bold === "true" ? (
+      {leafState.op.attributes?.bold === "true" ? (
         <b>
           <Text>{leafState.getText()}</Text>
         </b>

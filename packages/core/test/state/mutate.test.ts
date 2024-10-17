@@ -101,4 +101,13 @@ describe("mutate iterator", () => {
     expect(newLineState2.getLeaf(0)).toBe(leafStateText3);
     expect(newLineState2.getLeaf(1)).toBe(leafStateEOL2);
   });
+
+  it("retain whole attrs", () => {
+    const changes = new Delta().retain(4).retain(4, { bold: "false" });
+    const mutate = new Mutate(state);
+    const newLines = mutate.compose(changes);
+    const newLeaf1 = newLines[0]?.getLeaf(1);
+    expect(newLeaf1).toBeTruthy();
+    expect(newLeaf1).not.toEqual(leafStateText2);
+  });
 });

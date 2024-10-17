@@ -1,6 +1,7 @@
 import type { AttributeMap, Delta, Op } from "block-kit-delta";
 import type { InsertOp } from "block-kit-delta";
 import {
+  cloneOp,
   composeAttributes,
   isEOLOp,
   isEqualAttributes,
@@ -112,21 +113,18 @@ export class Mutate {
         const otherOp = otherIter.next(length);
         // 1. 预设 retain 2. Infinity
         if (isRetainOp(otherOp)) {
-          const newLeaf = thisLeaf;
+          let newLeaf = thisLeaf;
           if (!thisLeaf || !newLeaf) {
             continue;
           }
-          const attributes = composeAttributes(
-            thisLeaf.op.attributes,
-            otherOp.attributes,
-            isRetainOp(thisLeaf.op)
-          );
-          if (attributes) {
-            newLeaf.op.attributes = attributes;
-            newLeaf.attributes = attributes;
+          if (otherOp.attributes) {
+            const attrs = composeAttributes(thisLeaf.op.attributes, otherOp.attributes);
+            const newOp = cloneOp(thisLeaf.op);
+            newOp.attributes = attrs || {};
+            newLeaf = LeafState.create(newOp, 0, 0, thisLeaf.parent);
           }
           lineState = this.insert(lines, lineState, newLeaf);
-          if (!otherIter.hasNext()) {
+          if (!otherIter.hasNext() && newLeaf === thisLeaf) {
             // 处理剩余的 Leaves 和 Lines
             const rest = thisIter.rest();
             for (const leaf of rest.leaf) {
