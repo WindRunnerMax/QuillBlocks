@@ -16,7 +16,7 @@ const LineView: FC<{
 
   const setModel = (ref: HTMLDivElement | null) => {
     if (ref) {
-      ref && editor.model.setLineModel(ref, lineState);
+      editor.model.setLineModel(ref, lineState);
     }
   };
 

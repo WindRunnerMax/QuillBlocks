@@ -1,7 +1,13 @@
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
 import { EDITOR_STATE } from "../state/types";
-import { deleteBackward, deleteForward, deleteFragment, insertText } from "./modules/execute";
+import {
+  deleteBackward,
+  deleteForward,
+  deleteFragment,
+  insertBreak,
+  insertText,
+} from "./modules/execute";
 
 export class Input {
   constructor(private editor: Editor) {
@@ -40,6 +46,11 @@ export class Input {
       case "deleteWordForward":
       case "deleteContentForward": {
         deleteForward(this.editor, sel);
+        break;
+      }
+      case "insertLineBreak":
+      case "insertParagraph": {
+        insertBreak(this.editor, sel);
         break;
       }
       case "insertFromDrop":

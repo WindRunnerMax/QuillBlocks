@@ -1,4 +1,4 @@
-import { Delta } from "block-kit-delta";
+import { Delta, EOL } from "block-kit-delta";
 
 import type { Editor } from "../../editor";
 import type { Range } from "../../selection/modules/range";
@@ -82,5 +82,26 @@ export const deleteForward = (editor: Editor, sel: Range) => {
     return void 0;
   }
   const delta = new Delta().retain(start).delete(1);
+  editor.state.apply(delta, { range: raw });
+};
+
+/**
+ * 插入换行符
+ * @param editor
+ * @param sel
+ */
+export const insertBreak = (editor: Editor, sel: Range) => {
+  const raw = RawRange.fromRange(editor, sel);
+  if (!raw) {
+    return void 0;
+  }
+  const start = raw.start;
+  const len = raw.len;
+  if (start < 0) {
+    return void 0;
+  }
+  const delta = new Delta().retain(start);
+  len && delta.delete(len);
+  delta.insert(EOL);
   editor.state.apply(delta, { range: raw });
 };

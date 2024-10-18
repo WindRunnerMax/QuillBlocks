@@ -15,12 +15,13 @@ const BlockView: FC<{
 
   const setModel = (ref: HTMLDivElement | null) => {
     if (ref) {
-      ref && editor.model.setBlockModel(ref, state);
+      editor.model.setBlockModel(ref, state);
     }
   };
 
   const onContentChange = useMemoFn(() => {
     setLines(state.getLines());
+    editor.state.set(EDITOR_STATE.PAINTING, true);
   });
 
   useLayoutEffect(() => {
@@ -34,7 +35,6 @@ const BlockView: FC<{
     // 视图更新需要重新设置选区 无依赖
     const selection = editor.selection.get();
     if (
-      !editor.state.get(EDITOR_STATE.MOUSE_DOWN) &&
       !editor.state.get(EDITOR_STATE.COMPOSING) &&
       editor.state.get(EDITOR_STATE.FOCUS) &&
       selection
@@ -48,6 +48,7 @@ const BlockView: FC<{
   useEffect(() => {
     // 视图更新需要触发视图绘制完成事件 无依赖
     editor.logger.debug("OnPaint");
+    editor.state.set(EDITOR_STATE.PAINTING, false);
     editor.event.trigger(EDITOR_EVENT.PAINT, {});
   });
 

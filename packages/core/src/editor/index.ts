@@ -4,6 +4,7 @@ import { Event } from "../event";
 import { Input } from "../input";
 import { LOG_LEVEL, Logger } from "../log";
 import { Model } from "../model";
+import { Plugin } from "../plugin";
 import { Schema } from "../schema";
 import { Selection } from "../selection";
 import { EditorState } from "../state";
@@ -14,20 +15,22 @@ import { BLOCK_LIKE } from "./utils/constant";
 export class Editor {
   /** 编辑容器 */
   private container: HTMLDivElement;
-  /** 状态模块 */
-  public state: EditorState;
-  /** 事件模块 */
-  public event: Event;
-  /** 选区模块 */
-  public selection: Selection;
-  /** 模型映射 */
-  public model: Model;
-  /** 日志模块 */
-  public logger: Logger;
-  /** 输入模块 */
-  public input: Input;
   /** 配置模块 */
   public schema: Schema;
+  /** 事件模块 */
+  public event: Event;
+  /** 模型映射 */
+  public model: Model;
+  /** 输入模块 */
+  public input: Input;
+  /** 日志模块 */
+  public logger: Logger;
+  /** 插件模块 */
+  public plugin: Plugin;
+  /** 状态模块 */
+  public state: EditorState;
+  /** 选区模块 */
+  public selection: Selection;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
@@ -40,6 +43,7 @@ export class Editor {
     this.model = new Model();
     this.logger = new Logger(logLevel);
     this.input = new Input(this);
+    this.plugin = new Plugin(this);
   }
 
   public onMount(container: HTMLDivElement) {

@@ -1,4 +1,4 @@
-export type SchemaItem = {
+export type SchemaRule = {
   /** 块级节点 */
   block?: boolean;
   /** 行内块节点 */
@@ -9,4 +9,4 @@ export type SchemaItem = {
   tailMark?: boolean;
 };
 
-export type EditorSchema = Record<string, SchemaItem>;
+export type EditorSchema = Record<string, SchemaRule>;

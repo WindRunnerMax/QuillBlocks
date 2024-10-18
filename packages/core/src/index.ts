@@ -16,9 +16,10 @@ export {
   ZERO_SPACE_KEY,
   ZERO_SYMBOL,
 } from "./model/types";
-export { EditorPlugin } from "./plugin";
-export type { LeafContext, LineContext } from "./plugin/types";
-export type { EditorSchema, SchemaItem } from "./schema/types";
+export { CorePlugin } from "./plugin/modules/implement";
+export { CALLER_TYPE } from "./plugin/types";
+export type { LeafContext, LineContext } from "./plugin/types/context";
+export type { EditorSchema, SchemaRule } from "./schema/types";
 export { Point } from "./selection/modules/point";
 export { Range } from "./selection/modules/range";
 export { RawPoint } from "./selection/modules/raw-point";
