@@ -7,7 +7,7 @@ import {
   deleteFragment,
   insertBreak,
   insertText,
-} from "./modules/execute";
+} from "./modules/apply";
 
 export class Input {
   constructor(private editor: Editor) {
@@ -15,11 +15,18 @@ export class Input {
     this.editor.event.on(EDITOR_EVENT.COMPOSITION_END, this.onCompositionEnd);
   }
 
-  destroy() {
+  /**
+   * 销毁插件
+   */
+  public destroy() {
     this.editor.event.off(EDITOR_EVENT.BEFORE_INPUT, this.onBeforeInput);
     this.editor.event.off(EDITOR_EVENT.COMPOSITION_END, this.onCompositionEnd);
   }
 
+  /**
+   * BeforeInput
+   * @param event
+   */
   private onBeforeInput = (event: InputEvent) => {
     if (this.editor.state.get(EDITOR_STATE.COMPOSING)) {
       return null;
@@ -66,6 +73,10 @@ export class Input {
     }
   };
 
+  /**
+   * 组合输入结束
+   * @param event
+   */
   private onCompositionEnd = (event: CompositionEvent) => {
     const data = event.data;
     const sel = this.editor.selection.get();

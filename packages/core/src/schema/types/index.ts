@@ -5,7 +5,7 @@ export type SchemaRule = {
   inline?: boolean;
   /** 空节点 */
   void?: boolean;
-  /** 跟踪 Mark */
+  /** 追踪 Mark */
   tailMark?: boolean;
 };
 

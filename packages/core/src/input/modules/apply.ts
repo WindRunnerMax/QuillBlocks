@@ -3,6 +3,7 @@ import { Delta, EOL } from "block-kit-delta";
 import type { Editor } from "../../editor";
 import type { Range } from "../../selection/modules/range";
 import { RawRange } from "../../selection/modules/raw-range";
+import { pickOpAtIndex } from "../utils/collection";
 
 /**
  * 插入文本
@@ -15,7 +16,9 @@ export const insertText = (editor: Editor, sel: Range, text: string) => {
   if (!raw) {
     return void 0;
   }
-  const delta = new Delta().retain(raw.start).delete(raw.len).insert(text);
+  const indexOp = pickOpAtIndex(editor, raw.start);
+  const attributes = editor.schema.filterTailMark(indexOp);
+  const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
   editor.state.apply(delta, { range: raw });
 };
 

@@ -6,6 +6,13 @@ import type { Range } from "../../selection/modules/range";
 import type { NativeEventMap } from "../native/types";
 import { NATIVE_EVENTS } from "../native/types";
 
+export const EDITOR_EVENT = {
+  CONTENT_CHANGE: "CONTENT_CHANGE",
+  SELECTION_CHANGE: "SELECTION_CHANGE",
+  PAINT: "PAINT",
+  ...NATIVE_EVENTS,
+} as const;
+
 export type ContentChangeEvent = {
   current: Delta;
   previous: Delta;
@@ -18,22 +25,14 @@ export type SelectionChangeEvent = {
   current: Range | null;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type PaintEvent = {};
-
-export const EDITOR_EVENT = {
-  CONTENT_CHANGE: "CONTENT_CHANGE",
-  SELECTION_CHANGE: "SELECTION_CHANGE",
-  PAINT: "PAINT",
-  ...NATIVE_EVENTS,
-} as const;
-
 export type EventMap = {
   [EDITOR_EVENT.CONTENT_CHANGE]: ContentChangeEvent;
   [EDITOR_EVENT.SELECTION_CHANGE]: SelectionChangeEvent;
   [EDITOR_EVENT.PAINT]: PaintEvent;
 } & NativeEventMap;
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type PaintEvent = {};
 export type EventMapType = typeof EDITOR_EVENT;
 export type EventMapKeys = Object.Values<EventMapType>;
 export type EditorEvent = Reflex.Tuple<EventMap>;

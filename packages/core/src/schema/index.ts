@@ -1,3 +1,6 @@
+import type { AttributeMap, Op } from "block-kit-delta";
+import { isEOLOp } from "block-kit-delta";
+
 import type { EditorSchema } from "./types";
 
 export class Schema {
@@ -19,6 +22,58 @@ export class Schema {
       if (value.block) {
         this.block.add(key);
       }
+      if (value.inline) {
+        this.inline.add(key);
+      }
+      if (value.tailMark) {
+        this.tailMark.add(key);
+      }
     }
+  }
+
+  /**
+   * 判断 Void 节点
+   * @param op
+   */
+  public isVoid(op: Op): boolean {
+    if (!op.attributes) return false;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.void.has(key));
+  }
+
+  /**
+   * 判断 Inline 节点
+   * @param op
+   */
+  public isInline(op: Op): boolean {
+    if (!op.attributes) return false;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.inline.has(key));
+  }
+
+  /**
+   * 判断 Block 节点
+   * @param op
+   */
+  public isBlock(op: Op): boolean {
+    if (!op.attributes) return false;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.block.has(key));
+  }
+
+  /**
+   * 过滤出 Tail Mark
+   * @param op
+   */
+  public filterTailMark(op: Op | null): AttributeMap | undefined {
+    if (!op || !op.attributes || isEOLOp(op)) return void 0;
+    const keys = Object.keys(op.attributes);
+    const result: AttributeMap = {};
+    for (const key of keys) {
+      if (this.tailMark.has(key)) {
+        result[key] = op.attributes[key];
+      }
+    }
+    return Object.keys(result).length ? result : void 0;
   }
 }

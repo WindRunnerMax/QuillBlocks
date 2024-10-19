@@ -46,6 +46,10 @@ export class Editor {
     this.plugin = new Plugin(this);
   }
 
+  /**
+   * 挂载编辑器
+   * @param container
+   */
   public onMount(container: HTMLDivElement) {
     if (this.state.get(EDITOR_STATE.MOUNTED)) {
       console.warn("Editor has been mounted, please destroy it before mount again.");
@@ -55,15 +59,23 @@ export class Editor {
     this.event.bind();
   }
 
+  /**
+   * 获取编辑器容器
+   * @returns
+   */
+  public getContainer() {
+    return this.container;
+  }
+
+  /**
+   * 销毁编辑器
+   */
   public destroy() {
     this.event.unbind();
     this.input.destroy();
     this.model.destroy();
     this.selection.destroy();
     this.state.set(EDITOR_STATE.MOUNTED, false);
-  }
-
-  public getContainer() {
-    return this.container;
+    this.plugin.destroy();
   }
 }
