@@ -7,7 +7,6 @@ import type { LeafState } from "../../state/modules/leaf-state";
 import type { LineState } from "../../state/modules/line-state";
 
 export type LineContext = {
-  op: Op;
   classList: string[];
   lineState: LineState;
   attributes?: AttributeMap;

@@ -31,7 +31,7 @@ const LeafView: FC<{
     };
     for (const plugin of editor.plugin.current) {
       if (plugin.render && plugin.match(context.attributes || {}, context.op)) {
-        plugin.render(context);
+        context.children = plugin.render(context);
       }
     }
     return context;

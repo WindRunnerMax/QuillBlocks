@@ -1,15 +1,14 @@
+import { DEFAULT_PRIORITY } from "block-kit-utils";
+
 import type { Editor } from "../editor";
 import type { CorePlugin } from "./modules/implement";
 import type { CallerMap, CallerType } from "./types";
 
 export class Plugin {
-  /** 行级插件 */
-  public lines: CorePlugin[];
-  /** 所有插件 */
+  /** 排序后的插件 */
   public current: CorePlugin[];
 
   constructor(private editor: Editor) {
-    this.lines = [];
     this.current = [];
   }
 
@@ -22,9 +21,11 @@ export class Plugin {
     const map: Record<string, CorePlugin> = {};
     for (const plugin of plugins) {
       map[plugin.key] = plugin;
-      plugin.renderLine && this.lines.push(plugin);
     }
-    this.current = Object.values(map);
+    const priority = DEFAULT_PRIORITY;
+    this.current = Object.values(map).sort(
+      (a, b) => (a.priority || priority) - (b.priority || priority)
+    );
   };
 
   /**
@@ -49,7 +50,7 @@ export class Plugin {
    * 销毁插件
    */
   public destroy(): void {
-    for (const plugin of this.lines) {
+    for (const plugin of this.current) {
       plugin.destroy();
     }
   }
