@@ -282,3 +282,20 @@ invert1 = undoable.transform(invert1, true); // [{retain:4},{delete:1}]
 此外在这种方式中，我们判断`LineState`是否需要新建则是根据整个行内的所有`LeafState`来重建的，也就是说这种时候我们是需要再次将所有的`op`遍历一遍，当然实际上由于最后还需要将`compose`后的`Delta`切割为行级别的内容，所以其实这里最少需要遍历两遍。那么此时我们需要思考优化方向，首先是首个`retain`，在这里我们应该直接完整复用原本的`LineState`，包括处理后的剩余节点也是如此。而对于中间的节点，我们就需要为其独立设计更新策略。
 
 首先是对于新建的节点，我们直接构建新的`LineState`即可，删除的节点则不从原本的`LineState`中放置于新的列表。而对于更新的节点，我们实际上是需要更新原本的`LineState`对象的，因为我们实际上的行是存在更新的，而重点是我们需要将原本的`LineState`的`key`值复用，这里我们方便的实现则是直接以`\n`的标识为目标的`State`，即如果在`123|312\n`的`|`位置插入`\n`的话，那么我们就是`123`是新的`LineState`，`312`是原本的`LineState`，这样我们就可以实现`key`的复用。
+
+## Void 选区变换
+本质上富文本编辑器是图文混排的编辑器，在通过`Void/Embed`来实现图片的时候，我发现如果点击图片节点并不能触发`DOM`选区的变化，而由于`DOM`选区本身不变化则会导致我们的`Model`选区不会跟随变动，因此诸如焦点和选择等问题就会出现。
+
+```html
+<div contenteditable>
+  <div><span>123</span></div>
+  <div><span><img src="https://windrunnermax.github.io/DocEditor/favicon.ico" /></span></div>
+  <div><span>123</span></div>
+</div>
+<script>
+  document.addEventListener("selectionchange", function() {
+    console.log(window.getSelection());
+  });
+</script>
+```
+

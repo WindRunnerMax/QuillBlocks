@@ -8,5 +8,9 @@ export const INIT = new Delta({
     { insert: "text2" },
     { insert: "bold2", attributes: { bold: "true" } },
     { insert: "\n" },
+    { insert: " ", attributes: { image: "true" } },
+    { insert: "\n" },
+    { insert: "text3" },
+    { insert: "\n" },
   ],
 });

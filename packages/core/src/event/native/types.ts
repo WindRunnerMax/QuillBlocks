@@ -42,8 +42,8 @@ export type NativeEventMap = {
   [NATIVE_EVENTS.MOUSE_UP_GLOBAL]: MouseEvent;
 };
 
-type NativeEventMapType = typeof NATIVE_EVENTS;
-type NativeEventMapKeys = Object.Values<NativeEventMapType>;
+export type NativeEventMapType = typeof NATIVE_EVENTS;
+export type NativeEventMapKeys = Object.Values<NativeEventMapType>;
 export type NativeEventHandler = (e: Event) => void;
 export type Listener<T extends NativeEventMapKeys> = (value: NativeEventMap[T]) => void;
 export type Listeners = { [T in NativeEventMapKeys]?: Listener<T> };

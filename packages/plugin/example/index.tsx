@@ -8,13 +8,14 @@ import { useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 
 import { BoldPlugin } from "../src/bold";
+import { ImagePlugin } from "../src/image";
 import { INIT } from "./block";
 import { schema } from "./schema";
 
 const LaserEditor: FC = () => {
   const editor = useMemo(() => {
     const editor = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
-    editor.plugin.register(new BoldPlugin());
+    editor.plugin.register(new BoldPlugin(), new ImagePlugin());
     return editor;
   }, []);
 
