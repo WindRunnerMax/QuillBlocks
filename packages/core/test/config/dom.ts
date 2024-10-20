@@ -3,10 +3,10 @@ import {
   BLOCK_KEY,
   EDITABLE,
   EDITOR_KEY,
-  ENTER_KEY,
   LEAF_KEY,
   LEAF_STRING,
   NODE_KEY,
+  ZERO_ENTER_KEY,
   ZERO_SPACE_KEY,
   ZERO_SYMBOL,
 } from "../../src/model/types";
@@ -61,7 +61,7 @@ export const createZeroSpaceDOM = () => {
 
 export const createEnterDOM = () => {
   const dom = createZeroSpaceDOM();
-  dom.setAttribute(ENTER_KEY, "true");
+  dom.setAttribute(ZERO_ENTER_KEY, "true");
   return dom;
 };
 
