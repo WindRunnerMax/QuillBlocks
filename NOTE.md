@@ -138,8 +138,18 @@
 <div contenteditable="true"><span contenteditable="false" style="background: #eee; display: inline-block;"><div contenteditable="false">Void</div></span><span>!</span></div>
 ```
 ## 选区校正
-1. `Zero`节点选区位置前置。
+1. `ZeroEnter`节点选区位置前置。
 2. 方向键选区位置调整，目标预测`Next`状态，折叠/`shift`状态处理。
+
+```js
+// Case 1: 当前节点为 data-zero-enter 时, 需要将其修正为前节点末尾
+// content\n[cursor] => content[cursor]\n
+const isEnterZero = isEnterZeroNode(node);
+if (isEnterZero && offset) {
+  leafOffset = Math.max(leafOffset - 1, 0);
+  return new Point(lineIndex, leafOffset);
+}
+```
 
 ```html
 <div id="$1" contenteditable style="outline: 1px solid #aaa">1234567890</div>
@@ -299,3 +309,48 @@ invert1 = undoable.transform(invert1, true); // [{retain:4},{delete:1}]
 </script>
 ```
 
+在`Slate`中的实现是当触发`OnClick`事件时，会主动调用`ReactEditor.toSlateNode`方法查找`data-slate-node`对应的`DOM`节点，然后通过`ELEMENT_TO_NODE`查找对应的`Slate Node`节点，再通过`ReactEditor.findPath`来获取其对应的`Path`节点，如果此时两个基点都是`Void`则会创建`range`，然后最终设置最新的`DOM`。
+
+```js
+// https://github.com/ianstormtaylor/slate/blob/f2e211/packages/slate-react/src/components/editable.tsx#L1153
+const node = ReactEditor.toSlateNode(editor, event.target)
+const path = ReactEditor.findPath(editor, node)
+const start = Editor.start(editor, path)
+const end = Editor.end(editor, path)
+const startVoid = Editor.void(editor, { at: start })
+const endVoid = Editor.void(editor, { at: end })
+
+if (
+  startVoid &&
+  endVoid &&
+  Path.equals(startVoid[1], endVoid[1])
+) {
+  const range = Editor.range(editor, start)
+  Transforms.select(editor, range)
+}
+```
+
+在当前的编辑器实现中，由于我们的设计是通过`Void`节点作为高阶组件来实现，因此在这里可以直接借助`onMouseDown`事件来实现选区的设置即可，而在这里的选区又出现了问题，此处的节点状态是` \n`，此处实际上会被分为三个位置，而我们实际上的`Void`只应该在第二个位置，而这个位置实际上也应该被认为是行首，因为在按键盘左右键的时候也需要用到。
+
+```js
+const onMouseDown = () => {
+  const el = ref.current;
+  if (!el) return void 0;
+  const leafNode = el.closest(`[${LEAF_KEY}]`) as HTMLElement | null;
+  const leafState = editor.model.getLeafState(leafNode);
+  if (leafState) {
+    const point = new Point(leafState.parent.index, leafState.offset + leafState.length);
+    const range = new Range(point, point.clone());
+    editor.selection.set(range, true);
+  }
+};
+
+// Case 2: 光标位于 data-zero-void 节点前时, 需要将其修正为节点末
+// [cursor][void]\n => [void][cursor]\n
+const isVoidZero = isVoidZeroNode(node);
+if (isVoidZero && offset === 0) {
+  return new Point(lineIndex, 1);
+}
+
+const isFocusLineStart = isVoidZeroNode(staticSel.startContainer) && focus.offset === 1;
+```

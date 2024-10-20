@@ -1,5 +1,5 @@
 import type { AttributeMap } from "block-kit-delta";
-import type { LeafContext } from "block-kit-react";
+import type { ReactLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
 import type { ReactNode } from "react";
 
@@ -13,7 +13,7 @@ export class BoldPlugin extends EditorPlugin {
     return !!attrs[BOLD_KEY];
   }
 
-  public render(context: LeafContext): ReactNode {
+  public render(context: ReactLeafContext): ReactNode {
     context.style.fontWeight = "bold";
     return context.children;
   }

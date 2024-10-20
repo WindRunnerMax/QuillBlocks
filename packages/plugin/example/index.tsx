@@ -1,5 +1,3 @@
-import "block-kit-react/styles/index.css";
-
 import { Editor, LOG_LEVEL } from "block-kit-core";
 import { BlockDelta } from "block-kit-delta";
 import { Laser } from "block-kit-react";

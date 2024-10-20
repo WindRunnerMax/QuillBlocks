@@ -1,5 +1,5 @@
 import type { Editor, LeafState } from "block-kit-core";
-import { ENTER_KEY, LEAF_KEY } from "block-kit-core";
+import { LEAF_KEY } from "block-kit-core";
 import type { FC } from "react";
 import React from "react";
 
@@ -9,6 +9,7 @@ const EOLView: FC<{
   editor: Editor;
   index: number;
   leafState: LeafState;
+  hideEOLNode?: boolean;
 }> = props => {
   const { editor, leafState } = props;
 
@@ -19,8 +20,8 @@ const EOLView: FC<{
   };
 
   return (
-    <span {...{ [LEAF_KEY]: true, [ENTER_KEY]: true }} ref={setModel}>
-      <ZeroSpace />
+    <span {...{ [LEAF_KEY]: true }} ref={setModel}>
+      <ZeroSpace enter hide={props.hideEOLNode} />
     </span>
   );
 };

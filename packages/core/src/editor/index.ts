@@ -36,12 +36,12 @@ export class Editor {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
     this.container = document.createElement("div");
     this.container.setAttribute("data-type", "mock");
+    this.logger = new Logger(logLevel);
     this.schema = new Schema(schema);
+    this.model = new Model();
     this.state = new EditorState(this, delta);
     this.event = new Event(this);
     this.selection = new Selection(this);
-    this.model = new Model();
-    this.logger = new Logger(logLevel);
     this.input = new Input(this);
     this.plugin = new Plugin(this);
   }

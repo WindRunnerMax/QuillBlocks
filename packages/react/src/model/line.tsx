@@ -1,5 +1,6 @@
 import type { Editor, LineState } from "block-kit-core";
 import { NODE_KEY } from "block-kit-core";
+import { EOL } from "block-kit-delta";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
@@ -22,15 +23,26 @@ const LineView: FC<{
   };
 
   const children = useMemo(() => {
+    let hideEOLNode = false;
     return (
       <React.Fragment>
-        {leaves.map((leaf, index) =>
-          !leaf.eol ? (
+        {leaves.map((leaf, index) => {
+          // 当存在独占行的节点时, 需要隐藏 EOL 节点
+          if (!hideEOLNode && leaf.block && leaf.void) {
+            hideEOLNode = true;
+          }
+          return !leaf.eol ? (
             <LeafModel key={index} editor={editor} index={index} leafState={leaf} />
           ) : (
-            <EOLModel key={index} editor={editor} index={index} leafState={leaf} />
-          )
-        )}
+            <EOLModel
+              hideEOLNode={hideEOLNode}
+              key={EOL}
+              editor={editor}
+              index={index}
+              leafState={leaf}
+            />
+          );
+        })}
       </React.Fragment>
     );
   }, [editor, leaves]);
@@ -52,7 +64,7 @@ const LineView: FC<{
   }, [children, editor.plugin, lineState]);
 
   return (
-    <div {...{ [NODE_KEY]: true }} className="block-kit-line" ref={setModel}>
+    <div {...{ [NODE_KEY]: true }} ref={setModel}>
       {context.children}
     </div>
   );

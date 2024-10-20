@@ -63,10 +63,14 @@ export class Selection {
 
   /**
    * 更新选区模型
+   * @param range
+   * @param force
    */
   public set(range: Range | null, force = false): void {
     if (Range.isEqual(this.current, range)) {
       this.current = range;
+      // FIX: [cursor]\n 按右键时 Model 校准, 但是 DOM 没有校准
+      force && this.updateDOMSelection();
       return void 0;
     }
     this.previous = this.current;
@@ -133,9 +137,11 @@ export class Selection {
     const blockState = this.editor.state.block;
     const lineState = blockState && blockState.getLine(focus.line);
     if (!blockState || !lineState) return void 0;
+    const firstLeaf = lineState.getLeaf(0);
+    const isBlockVoid = firstLeaf && firstLeaf.block && firstLeaf.void;
     const isFirstLine = focus.line === 0;
     const isLastLine = focus.line === blockState.getLines().length - 1;
-    const isFocusLineStart = focus.offset === 0;
+    const isFocusLineStart = focus.offset === 0 || (isBlockVoid && focus.offset === 1);
     // 选区会强制变换到末尾节点前
     const isFocusLineEnd = focus.offset === lineState.length - 1;
     if (leftArrow) {

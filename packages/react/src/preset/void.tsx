@@ -1,28 +1,45 @@
-import { VOID_KEY } from "block-kit-core";
-import type { PropsWithChildren } from "react";
-import { forwardRef } from "react";
+import { LEAF_KEY, VOID_KEY } from "block-kit-core";
+import { Range } from "block-kit-core";
+import { Point } from "block-kit-core";
+import type { FC, PropsWithChildren } from "react";
 import React from "react";
 
+import { useEditor } from "../hooks/use-editor";
 import { ZeroSpace } from "./zero";
 
 export type VoidProps = PropsWithChildren<{
   className?: string;
 }>;
 
-export const Void = forwardRef<HTMLSpanElement, VoidProps>((props, ref) => {
+export const Void: FC<VoidProps> = props => {
+  const editor = useEditor();
+  const ref = React.useRef<HTMLSpanElement>(null);
+
+  const onMouseDown = () => {
+    const el = ref.current;
+    if (!el) return void 0;
+    const leafNode = el.closest(`[${LEAF_KEY}]`) as HTMLElement | null;
+    const leafState = editor.model.getLeafState(leafNode);
+    if (leafState) {
+      const point = new Point(leafState.parent.index, leafState.offset + leafState.length);
+      const range = new Range(point, point.clone());
+      editor.selection.set(range, true);
+    }
+  };
+
   return (
     <React.Fragment>
-      <ZeroSpace style={{ position: "absolute", width: 0, height: 0, display: "inline-block" }} />
+      <ZeroSpace void hide />
       <span
         ref={ref}
         className={props.className}
         style={{ userSelect: "none" }}
         contentEditable={false}
         {...{ [VOID_KEY]: true }}
+        onMouseDown={onMouseDown}
       >
         {props.children}
-        <ZeroSpace style={{ position: "absolute", width: 0, height: 0, display: "inline-block" }} />
       </span>
     </React.Fragment>
   );
-});
+};

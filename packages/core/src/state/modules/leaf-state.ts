@@ -5,9 +5,15 @@ import type { LineState } from "./line-state";
 
 export class LeafState {
   /** EOL 节点 */
-  public eol: boolean;
+  public readonly eol: boolean;
   /** Op 长度 */
-  public length: number;
+  public readonly length: number;
+  /** Void 节点 */
+  public readonly void: boolean;
+  /** Block 节点 */
+  public readonly block: boolean;
+  /** Inline 节点 */
+  public readonly inline: boolean;
 
   constructor(
     /** Op 起始索引 */
@@ -20,10 +26,11 @@ export class LeafState {
     public parent: LineState
   ) {
     this.eol = false;
+    this.eol = op.insert === EOL;
     this.length = op.insert ? op.insert.length : 0;
-    if (op.insert === EOL) {
-      this.eol = true;
-    }
+    this.void = parent.parent.editor.schema.isVoid(op);
+    this.block = parent.parent.editor.schema.isBlock(op);
+    this.inline = parent.parent.editor.schema.isInline(op);
   }
 
   /**

@@ -3,7 +3,7 @@ import { getLineNode, getModelElement } from "../../model/utils/dom";
 import { Point } from "../modules/point";
 import { Range } from "../modules/range";
 import type { DOMPoint } from "../types";
-import { isZeroNode } from "./dom";
+import { isEnterZeroNode, isVoidZeroNode } from "./dom";
 import { normalizeDOMPoint } from "./native";
 
 /**
@@ -32,11 +32,18 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   }
 
   // COMPAT: 此处开始根据 case 修正 zero/void offset [节点级别]
-  // Case 1: 当前节点为 data-zero-space 时, 需要将其修正为前节点末尾
+  // Case 1: 当前节点为 data-zero-enter 时, 需要将其修正为前节点末尾
   // content\n[cursor] => content[cursor]\n
-  if (isZeroNode(node) && offset) {
+  const isEnterZero = isEnterZeroNode(node);
+  if (isEnterZero && offset) {
     leafOffset = Math.max(leafOffset - 1, 0);
     return new Point(lineIndex, leafOffset);
+  }
+  // Case 2: 光标位于 data-zero-void 节点前时, 需要将其修正为节点末
+  // [cursor][void]\n => [void][cursor]\n
+  const isVoidZero = isVoidZeroNode(node);
+  if (isVoidZero && offset === 0) {
+    return new Point(lineIndex, 1);
   }
 
   return new Point(lineIndex, leafOffset);

@@ -1,6 +1,6 @@
 import { isDOMComment, isDOMElement, isDOMText } from "block-kit-utils";
 
-import { EDITABLE, ZERO_SPACE_KEY } from "../../model/types";
+import { EDITABLE, ZERO_ENTER_KEY, ZERO_SPACE_KEY, ZERO_VOID_KEY } from "../../model/types";
 import type { Direction, DOMElement, DOMNode, DOMSelection, DOMStaticRange } from "../types";
 import { DIRECTION } from "../types";
 
@@ -24,7 +24,7 @@ export const getRootSelection = (root?: Element): DOMSelection | null => {
  * @param sel
  */
 export const getStaticSelection = (sel?: Selection | null): DOMStaticRange | null => {
-  const selection = sel ? getRootSelection() : sel;
+  const selection = sel ? sel : getRootSelection();
   if (!selection || !selection.anchorNode || !selection.focusNode) {
     return null;
   }
@@ -147,6 +147,10 @@ export const isBackward = (sel: DOMSelection | null, staticSel: DOMStaticRange |
   );
 };
 
+/**
+ * Zero 节点 data-zero-space
+ * @param node
+ */
 export const isZeroNode = (node: Node | null) => {
   if (!node || !node.parentElement) {
     return false;
@@ -154,4 +158,30 @@ export const isZeroNode = (node: Node | null) => {
   return node instanceof HTMLElement
     ? node.hasAttribute(ZERO_SPACE_KEY)
     : node.parentElement.hasAttribute(ZERO_SPACE_KEY);
+};
+
+/**
+ * Enter Zero 节点 data-enter
+ * @param node
+ */
+export const isEnterZeroNode = (node: Node | null) => {
+  if (!node || !node.parentElement) {
+    return false;
+  }
+  return node instanceof HTMLElement
+    ? node.hasAttribute(ZERO_ENTER_KEY)
+    : node.parentElement.hasAttribute(ZERO_ENTER_KEY);
+};
+
+/**
+ * Void Zero 节点 data-zero-void
+ * @param node
+ */
+export const isVoidZeroNode = (node: Node | null) => {
+  if (!node || !node.parentElement) {
+    return false;
+  }
+  return node instanceof HTMLElement
+    ? node.hasAttribute(ZERO_VOID_KEY)
+    : node.parentElement.hasAttribute(ZERO_VOID_KEY);
 };

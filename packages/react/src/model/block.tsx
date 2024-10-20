@@ -53,7 +53,7 @@ const BlockView: FC<{
   });
 
   return (
-    <div className="block-kit-block notranslate" {...{ [BLOCK_KEY]: true }} ref={setModel}>
+    <div className="notranslate" {...{ [BLOCK_KEY]: true }} ref={setModel}>
       {lines.map((line, index) => (
         <LineModel key={line.key} editor={editor} lineState={line} index={index}></LineModel>
       ))}

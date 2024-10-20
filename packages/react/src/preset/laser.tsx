@@ -28,10 +28,16 @@ export const Laser: React.FC<{
     <EditorProvider editor={editor}>
       <div
         ref={ref}
-        className="block-kit-editor"
         {...{ [EDITOR_KEY]: true }}
         contentEditable={!readonly}
         suppressContentEditableWarning
+        style={{
+          outline: "none",
+          overflowWrap: "break-word",
+          position: "relative",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+        }}
       >
         <BlockModel editor={editor} state={editor.state.block}></BlockModel>
       </div>

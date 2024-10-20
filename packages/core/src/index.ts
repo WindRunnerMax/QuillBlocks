@@ -6,15 +6,15 @@ export { LOG_LEVEL } from "./log";
 export {
   BLOCK_KEY,
   EDITOR_KEY,
-  ENTER_KEY,
   LEAF_KEY,
   LEAF_STRING,
-  NO_BREAK_KEY,
   NODE_KEY,
   VOID_KEY,
+  ZERO_ENTER_KEY,
   ZERO_NO_BREAK_SYMBOL,
   ZERO_SPACE_KEY,
   ZERO_SYMBOL,
+  ZERO_VOID_KEY,
 } from "./model/types";
 export { CorePlugin } from "./plugin/modules/implement";
 export { CALLER_TYPE } from "./plugin/types";
