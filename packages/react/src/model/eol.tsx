@@ -9,7 +9,7 @@ const EOLView: FC<{
   editor: Editor;
   index: number;
   leafState: LeafState;
-  hideEOLNode?: boolean;
+  blockVoid?: boolean;
 }> = props => {
   const { editor, leafState } = props;
 
@@ -21,7 +21,7 @@ const EOLView: FC<{
 
   return (
     <span {...{ [LEAF_KEY]: true }} ref={setModel}>
-      <ZeroSpace enter hide={props.hideEOLNode} />
+      <ZeroSpace enter hide={props.blockVoid} />
     </span>
   );
 };

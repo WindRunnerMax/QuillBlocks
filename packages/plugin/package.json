@@ -13,7 +13,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "rspack serve --config ./rspack.config.ts",
     "build": "rm -rf dist && rollup -c",
     "test": "",
     "lint:ts": "tsc -p tsconfig.build.json --noEmit",
@@ -23,29 +23,33 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "react-dom": ">=16",
-    "react": ">=16"
+    "react": ">=16",
+    "react-dom": ">=16"
   },
   "dependencies": {
+    "@arco-design/web-react": "^2.64.0",
     "block-kit-core": "workspace: *",
     "block-kit-delta": "workspace: *",
     "block-kit-react": "workspace: *",
     "block-kit-utils": "workspace: *"
   },
   "devDependencies": {
-    "glob": "10.3.10",
-    "rollup": "2.75.7",
-    "rollup-plugin-postcss": "4.0.2",
-    "rollup-plugin-typescript2": "0.32.1",
     "@rollup/plugin-commonjs": "22.0.1",
     "@rollup/plugin-node-resolve": "13.3.0",
     "@rollup/plugin-replace": "5.0.4",
-    "@vitejs/plugin-react-swc": "3.0.0",
-    "sass": "1.62.1",
-    "vite": "4.1.0",
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2",
+    "@rspack/cli": "^0.2.5",
+    "@rspack/plugin-html": "^0.2.5",
+    "glob": "10.3.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "@types/react": "17.0.2",
-    "@types/react-dom": "17.0.2"
+    "rollup": "2.75.7",
+    "rollup-plugin-postcss": "4.0.2",
+    "rollup-plugin-typescript2": "0.32.1",
+    "copy-webpack-plugin": "5",
+    "less": "4.2.0",
+    "less-loader": "12.1.0",
+    "sass-loader": "13.3.3"
   }
 }

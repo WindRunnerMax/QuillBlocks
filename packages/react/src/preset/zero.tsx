@@ -1,12 +1,7 @@
 import { ZERO_ENTER_KEY, ZERO_SPACE_KEY, ZERO_SYMBOL, ZERO_VOID_KEY } from "block-kit-core";
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 
-export const NO_CURSOR = {
-  position: "absolute",
-  width: 0,
-  height: 0,
-  display: "inline-block",
-} as const;
+import { NO_CURSOR } from "../utils/constant";
 
 export type ZeroSpaceProps = {
   hide?: boolean;

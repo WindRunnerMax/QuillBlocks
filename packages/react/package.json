@@ -22,6 +22,10 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16",
+    "react-dom": ">=16"
+  },
   "dependencies": {
     "block-kit-core": "workspace: *",
     "block-kit-delta": "workspace: *",

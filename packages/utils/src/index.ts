@@ -1,6 +1,7 @@
 export { KEY_CODE } from "./constant";
 export type { Func, Reflex } from "laser-utils";
 export {
+  Bind,
   cs,
   DEFAULT_PRIORITY,
   getId,

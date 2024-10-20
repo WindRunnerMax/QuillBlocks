@@ -352,5 +352,78 @@ if (isVoidZero && offset === 0) {
   return new Point(lineIndex, 1);
 }
 
-const isFocusLineStart = isVoidZeroNode(staticSel.startContainer) && focus.offset === 1;
+const firstLeaf = lineState.getLeaf(0);
+const isBlockVoid = firstLeaf && firstLeaf.block && firstLeaf.void;
+const isFocusLineStart = focus.offset === 0 || (isBlockVoid && focus.offset === 1);
+```
+
+## 节点选中状态
+在编辑器场景中，节点的选中状态是非常常见的功能，例如在当点击图片节点时，通常需要为图片节点添加选中状态，当前我思考了两种实现方式，分别是使用`React Context`和内建的事件管理来实现，`React Context`是在最外层维护选区的`useState`状态，而内建事件管理则是监听编辑器内部的`selection change`事件来处理回调。
+
+`Slate`是使用`Context`来实现的，在每个`ElementComponent`节点的外层都会有`SelectedContext`来管理选中状态，当选区状态变化时则会重新执行`render`函数。这样的方式实现起来方便，只需要预设`Hooks`就可以直接在渲染后的组件中获取到选中状态，但是这样的方式需要在最外层将`selection`状态传递到子组件当中。
+
+```js
+// https://github.com/ianstormtaylor/slate/blob/f2e2117/packages/slate-react/src/hooks/use-children.tsx#L64
+const sel = selection && Range.intersection(range, selection)
+children.push(
+  <SelectedContext.Provider key={`provider-${key.id}`} value={!!sel}>
+    <ElementComponent
+      decorations={ds}
+      element={n}
+      key={key.id}
+      renderElement={renderElement}
+      renderPlaceholder={renderPlaceholder}
+      renderLeaf={renderLeaf}
+      selection={sel}
+    />
+  </SelectedContext.Provider>
+)
+```
+
+在这里我们使用的方式则是管理编辑器事件来管理选区，因为在我们的插件里是实例化后调用方法来完成视图渲染的调度，那么在这里我们就实现继承于`EditorPlugin`的类以及选区高阶组件，在实例中监听编辑器的选区变化，用以触发高阶组件的状态变化，而高阶组件的选择状态则可以直接根据`leaf`的位置与当前选区的位置来判断。
+
+```js
+export abstract class SelectionPlugin extends EditorPlugin {
+  protected idToView: Map<string, SelectionHOC>;
+  public mountView(id: string, view: SelectionHOC) {
+    this.idToView.set(id, view);
+  }
+  public unmountView(id: string) {
+    this.idToView.delete(id);
+  }
+  public onSelectionChange = (e: SelectionChangeEvent) => {
+    const current = e.current;
+    this.idToView.forEach(view => {
+      view.onSelectionChange(current);
+    });
+  };
+}
+
+export class SelectionHOC extends React.PureComponent<Props, State> {
+  public onSelectionChange(range: Range | null) {
+    const nextState = range ? isLeafRangeIntersect(this.props.leaf, range) : false;
+    if (this.state.selected !== nextState) {
+      this.setState({ selected: nextState });
+    }
+  }
+
+  public render() {
+    const selected = this.state.selected;
+    if (this.props.selection.readonly) {
+      return this.props.children;
+    }
+    return (
+      <div className={cs(this.props.className, selected && "doc-block-selected")}>
+        {React.Children.map(this.props.children, child => {
+          if (React.isValidElement(child)) {
+            const { props } = child;
+            return React.cloneElement(child, { ...props, selected: selected });
+          } else {
+            return child;
+          }
+        })}
+      </div>
+    );
+  }
+}
 ```

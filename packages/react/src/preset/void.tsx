@@ -9,6 +9,7 @@ import { ZeroSpace } from "./zero";
 
 export type VoidProps = PropsWithChildren<{
   className?: string;
+  style?: React.CSSProperties;
 }>;
 
 export const Void: FC<VoidProps> = props => {
@@ -33,7 +34,7 @@ export const Void: FC<VoidProps> = props => {
       <span
         ref={ref}
         className={props.className}
-        style={{ userSelect: "none" }}
+        style={{ userSelect: "none", ...props.style }}
         contentEditable={false}
         {...{ [VOID_KEY]: true }}
         onMouseDown={onMouseDown}

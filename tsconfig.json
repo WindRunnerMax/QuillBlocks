@@ -23,8 +23,13 @@
       "block-kit-delta": ["./packages/delta/src"],
       "block-kit-react": ["./packages/react/src"],
       "block-kit-plugin": ["./packages/plugin/src"],
-      "block-kit-utils": ["./packages/utils/src"],
+      "block-kit-utils": ["./packages/utils/src"]
     }
   },
-  "include": ["packages/*/src"]
+  "include": ["packages/*/src"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

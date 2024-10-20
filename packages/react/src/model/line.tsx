@@ -23,25 +23,24 @@ const LineView: FC<{
   };
 
   const children = useMemo(() => {
-    let hideEOLNode = false;
     return (
       <React.Fragment>
         {leaves.map((leaf, index) => {
-          // 当存在独占行的节点时, 需要隐藏 EOL 节点
-          if (!hideEOLNode && leaf.block && leaf.void) {
-            hideEOLNode = true;
+          if (leaf.eol) {
+            // 判断是否为 Block Void 行, 只需要判断行首节点即可
+            const firstNode = leaves[0];
+            const isBlockVoid = firstNode && firstNode.block && firstNode.void;
+            return (
+              <EOLModel
+                blockVoid={isBlockVoid}
+                key={EOL}
+                editor={editor}
+                index={index}
+                leafState={leaf}
+              />
+            );
           }
-          return !leaf.eol ? (
-            <LeafModel key={index} editor={editor} index={index} leafState={leaf} />
-          ) : (
-            <EOLModel
-              hideEOLNode={hideEOLNode}
-              key={EOL}
-              editor={editor}
-              index={index}
-              leafState={leaf}
-            />
-          );
+          return <LeafModel key={index} editor={editor} index={index} leafState={leaf} />;
         })}
       </React.Fragment>
     );
@@ -64,7 +63,7 @@ const LineView: FC<{
   }, [children, editor.plugin, lineState]);
 
   return (
-    <div {...{ [NODE_KEY]: true }} ref={setModel}>
+    <div {...{ [NODE_KEY]: true }} ref={setModel} dir="auto">
       {context.children}
     </div>
   );

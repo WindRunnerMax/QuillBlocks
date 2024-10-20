@@ -5,6 +5,7 @@
         "CRDT",
         "pako",
         "pnpm",
+        "rspack",
         "TSON",
         "undoable",
         "webrtc"

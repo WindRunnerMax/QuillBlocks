@@ -139,44 +139,34 @@ export class Selection {
     if (!blockState || !lineState) return void 0;
     const firstLeaf = lineState.getLeaf(0);
     const isBlockVoid = firstLeaf && firstLeaf.block && firstLeaf.void;
-    const isFirstLine = focus.line === 0;
-    const isLastLine = focus.line === blockState.getLines().length - 1;
     const isFocusLineStart = focus.offset === 0 || (isBlockVoid && focus.offset === 1);
     // 选区会强制变换到末尾节点前
     const isFocusLineEnd = focus.offset === lineState.length - 1;
-    if (leftArrow) {
-      // 在块的首行首节点按左键执行默认行为
-      if (isFirstLine && isFocusLineStart) return void 0;
+    if (leftArrow && isFocusLineStart) {
       // 在非首行的首节点时将选取设置为前一行的末尾
-      if (isFocusLineStart) {
-        const prevLine = blockState.getLine(focus.line - 1);
-        if (!prevLine) return void 0;
-        event.preventDefault();
-        // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
-        // 而 Range => start -> end, 只需要判断 isBackward 标识
-        // start -> end 实际方向会在 new Range 时处理, 无需在此处实现
-        const newFocus = new Point(prevLine.index, prevLine.length - 1);
-        // 边界条件 选区折叠时 shift + left 一定是反选, 否则取原始选区方向
-        const isBackward = event.shiftKey && range.isCollapsed ? true : range.isBackward;
-        const newAnchor = event.shiftKey ? anchor : newFocus.clone();
-        this.set(new Range(newAnchor, newFocus, isBackward), true);
-      }
+      const prevLine = blockState.getLine(focus.line - 1);
+      if (!prevLine) return void 0;
+      event.preventDefault();
+      // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
+      // 而 Range => start -> end, 只需要判断 isBackward 标识
+      // start -> end 实际方向会在 new Range 时处理, 无需在此处实现
+      const newFocus = new Point(prevLine.index, prevLine.length - 1);
+      // 边界条件 选区折叠时 shift + left 一定是反选, 否则取原始选区方向
+      const isBackward = event.shiftKey && range.isCollapsed ? true : range.isBackward;
+      const newAnchor = event.shiftKey ? anchor : newFocus.clone();
+      this.set(new Range(newAnchor, newFocus, isBackward), true);
     }
-    if (rightArrow) {
-      // 在块的末行末节点按右键执行默认行为
-      if (isLastLine && isFocusLineEnd) return void 0;
+    if (rightArrow && isFocusLineEnd) {
       // 在非末行的末节点时将选取设置为后一行的首节点
-      if (isFocusLineEnd) {
-        const nextLine = blockState.getLine(focus.line + 1);
-        if (!nextLine) return void 0;
-        event.preventDefault();
-        const newFocus = new Point(nextLine.index, 0);
-        // 边界条件 选区折叠时 shift + right 一定是正选, 否则取原始选区方向
-        // [focus]\n[anchor] 此时按 right, 会被认为是 反选+折叠, 实际状态会被 new Range 校正
-        const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
-        const newAnchor = event.shiftKey ? anchor : newFocus.clone();
-        this.set(new Range(newAnchor, newFocus, isBackward), true);
-      }
+      const nextLine = blockState.getLine(focus.line + 1);
+      if (!nextLine) return void 0;
+      event.preventDefault();
+      const newFocus = new Point(nextLine.index, 0);
+      // 边界条件 选区折叠时 shift + right 一定是正选, 否则取原始选区方向
+      // [focus]\n[anchor] 此时按 right, 会被认为是 反选+折叠, 实际状态会被 new Range 校正
+      const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
+      const newAnchor = event.shiftKey ? anchor : newFocus.clone();
+      this.set(new Range(newAnchor, newFocus, isBackward), true);
     }
   };
 }
