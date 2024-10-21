@@ -1,8 +1,7 @@
 import "../styles/selection.scss";
 
 import type { LeafState } from "block-kit-core";
-import type { Range } from "block-kit-core";
-import { isLeafRangeIntersect } from "block-kit-core";
+import { Range } from "block-kit-core";
 import { cs, getId } from "block-kit-utils";
 import React from "react";
 
@@ -37,7 +36,8 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
   }
 
   public onSelectionChange(range: Range | null) {
-    const nextState = range ? isLeafRangeIntersect(this.props.leaf, range) : false;
+    const leaf = this.props.leaf;
+    const nextState = range ? Range.intersection(leaf.toRange(), range) : false;
     if (this.state.selected !== nextState) {
       this.setState({ selected: nextState });
     }

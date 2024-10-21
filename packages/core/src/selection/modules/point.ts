@@ -56,13 +56,30 @@ export class Point {
   }
 
   /**
-   * 判断 Origin 是否在 Target 之前
-   * @param origin
-   * @param target
+   * 判断 Point1 是否在 Point2 之前
+   * @param point1
+   * @param point2
+   * @note 即 < (p1 p2), 反之则 >= (p2 p1)
    */
-  public static isBefore(origin: Point, target: Point): boolean {
-    if (origin.line < target.line) return true;
-    if (origin.line === target.line && origin.offset < target.offset) {
+  public static isBefore(point1: Point | null, point2: Point | null): boolean {
+    if (!point1 || !point2) return false;
+    if (point1.line < point2.line) return true;
+    if (point1.line === point2.line && point1.offset < point2.offset) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 判断 Point1 是否在 Point2 之后
+   * @param point1
+   * @param point2
+   * @note 即 > (p2 p1), 反之则 <= (p1 p2)
+   */
+  public static isAfter(point1: Point | null, point2: Point | null): boolean {
+    if (!point1 || !point2) return false;
+    if (point1.line > point2.line) return true;
+    if (point1.line === point2.line && point1.offset > point2.offset) {
       return true;
     }
     return false;

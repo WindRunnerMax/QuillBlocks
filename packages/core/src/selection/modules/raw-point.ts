@@ -55,11 +55,24 @@ export class RawPoint {
   }
 
   /**
-   * 判断 Origin 是否在 Target 之前
-   * @param origin
-   * @param target
+   * 判断 Point1 是否在 Point2 之前
+   * @param point1
+   * @param point2
+   * @note 即 < (p1 p2), 反之则 >= (p2 p1)
    */
-  public static isBefore(origin: RawPoint, target: RawPoint): boolean {
-    return origin.offset < target.offset;
+  public static isBefore(point1: RawPoint | null, point2: RawPoint | null): boolean {
+    if (!point1 || !point2) return false;
+    return point1.offset < point2.offset;
+  }
+
+  /**
+   * 判断 Point1 是否在 Point2 之后
+   * @param point1
+   * @param point2
+   * @note 即 > (p2 p1), 反之则 <= (p1 p2)
+   */
+  public static isAfter(point1: RawPoint | null, point2: RawPoint | null): boolean {
+    if (!point1 || !point2) return false;
+    return point1.offset > point2.offset;
   }
 }

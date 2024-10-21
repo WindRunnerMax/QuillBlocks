@@ -29,4 +29,3 @@ export { LeafState } from "./state/modules/leaf-state";
 export { LineState } from "./state/modules/line-state";
 export type { ApplyOptions } from "./state/types";
 export { EDITOR_STATE } from "./state/types";
-export { isLeafRangeIntersect } from "./state/utils/collection";

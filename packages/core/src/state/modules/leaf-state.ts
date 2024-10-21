@@ -1,5 +1,7 @@
 import type { Op } from "block-kit-delta";
 
+import { Point } from "../../selection/modules/point";
+import { Range } from "../../selection/modules/range";
 import { EOL } from "../types";
 import type { LineState } from "./line-state";
 
@@ -49,5 +51,14 @@ export class LeafState {
    */
   public static create(op: Op, index: number, offset: number, parent: LineState) {
     return new LeafState(index, offset, op, parent);
+  }
+
+  /**
+   * 将 LeafState 转换为 Range
+   */
+  public toRange() {
+    const start = new Point(this.parent.index, this.offset);
+    const end = new Point(this.parent.index, this.offset + this.length);
+    return new Range(start, end);
   }
 }

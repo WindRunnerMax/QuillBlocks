@@ -70,10 +70,46 @@ export class Range {
 
   /**
    * 判断 Range 是否相等
+   * @param origin
+   * @param target
    */
   public static isEqual(origin: Range | null, target: Range | null): boolean {
     if (origin === target) return true;
     if (!origin || !target) return false;
     return Point.isEqual(origin.start, target.start) && Point.isEqual(origin.end, target.end);
+  }
+
+  /**
+   * 判断 Range1 是否包含 Range2
+   * @param range1
+   * @param range2
+   */
+  public static includes(range1: Range | null, range2: Range | null): boolean {
+    if (!range1 || !range2) return false;
+    const { start: start1, end: end1 } = range1;
+    const { start: start2, end: end2 } = range2;
+    // --start1--end1--start2--end2--
+    // --start1--start2--end2--end1-- ✅
+    const start1BeforeStart2 = !Point.isAfter(start1, start2);
+    const end1AfterEnd2 = !Point.isBefore(end1, end2);
+    return start1BeforeStart2 && end1AfterEnd2;
+  }
+
+  /**
+   * 判断 range1 是否与 range2 交叉
+   * @param range1
+   * @param range2
+   */
+  public static intersection(range1: Range | null, range2: Range | null): boolean {
+    if (!range1 || !range2) return false;
+    const { start: start1, end: end1 } = range1;
+    const { start: start2, end: end2 } = range2;
+    // --start1--end1--start2--end2--
+    // => --end1--start2--
+    // --start1--start2--end1--end2--  ✅
+    // => --start2--end1--
+    const start = Point.isBefore(start1, start2) ? start2 : start1;
+    const end = Point.isBefore(end1, end2) ? end1 : end2;
+    return !Point.isAfter(start, end);
   }
 }
