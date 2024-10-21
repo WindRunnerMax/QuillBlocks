@@ -64,7 +64,7 @@ export class Mutate {
       if (isObject<AttributeMap>(newOp.attributes)) {
         op.attributes = newOp.attributes;
       }
-      lineState.setLeaf(new LeafState(0, 0, op, lineState), index - 1);
+      lineState.setLeaf(new LeafState(op, 0, lineState), index - 1);
       return lineState;
     }
     if (isInsertOp(newOp)) {
@@ -100,7 +100,7 @@ export class Mutate {
     }
     while (thisIter.hasNext() || otherIter.hasNext()) {
       if (otherIter.peekType() === OP_TYPES.INSERT) {
-        const leaf = new LeafState(0, 0, otherIter.next(), lineState);
+        const leaf = new LeafState(otherIter.next(), 0, lineState);
         lineState = this.insert(lines, lineState, leaf);
       } else {
         const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
@@ -116,7 +116,7 @@ export class Mutate {
             const attrs = composeAttributes(thisLeaf.op.attributes, otherOp.attributes);
             const newOp = cloneOp(thisLeaf.op);
             newOp.attributes = attrs || {};
-            newLeaf = LeafState.create(newOp, 0, 0, thisLeaf.parent);
+            newLeaf = LeafState.create(newOp, 0, thisLeaf.parent);
           }
           lineState = this.insert(lines, lineState, newLeaf);
           if (!otherIter.hasNext() && newLeaf === thisLeaf) {

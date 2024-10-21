@@ -18,12 +18,10 @@ export class LeafState {
   public readonly inline: boolean;
 
   constructor(
-    /** Op 起始索引 */
-    public index: number,
-    /** Op 起始偏移量 */
-    public offset: number,
     /** Op 引用 */
     public op: Op,
+    /** Op 起始偏移量 */
+    public offset: number,
     /** 父级 LineState */
     public parent: LineState
   ) {
@@ -49,8 +47,8 @@ export class LeafState {
    * @param offset
    * @param parent
    */
-  public static create(op: Op, index: number, offset: number, parent: LineState) {
-    return new LeafState(index, offset, op, parent);
+  public static create(op: Op, offset: number, parent: LineState) {
+    return new LeafState(op, offset, parent);
   }
 
   /**

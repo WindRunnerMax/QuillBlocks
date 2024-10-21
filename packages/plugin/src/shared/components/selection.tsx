@@ -49,7 +49,7 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
       return this.props.children;
     }
     return (
-      <div className={cs(this.props.className, selected && "doc-block-selected")}>
+      <div className={cs(this.props.className, selected && "doc-block-selected")} data-selection>
         {React.Children.map(this.props.children, child => {
           if (React.isValidElement(child)) {
             const { props } = child;

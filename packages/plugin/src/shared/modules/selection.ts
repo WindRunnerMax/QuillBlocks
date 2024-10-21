@@ -1,14 +1,12 @@
 import type { Editor, SelectionChangeEvent } from "block-kit-core";
 import { EDITOR_EVENT } from "block-kit-core";
-import { EditorPlugin } from "block-kit-react";
 
 import type { SelectionHOC } from "../components/selection";
 
-export abstract class SelectionPlugin extends EditorPlugin {
+export class SelectionPlugin {
   protected idToView: Map<string, SelectionHOC>;
 
   constructor(protected editor: Editor, public readonly: boolean) {
-    super();
     this.idToView = new Map();
     editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, this.onSelectionChange);
   }

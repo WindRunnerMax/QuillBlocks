@@ -97,8 +97,7 @@ export class LineState {
     }
     let offset = 0;
     const ops: Op[] = [];
-    this.leaves.forEach((leaf, index) => {
-      leaf.index = index;
+    this.leaves.forEach(leaf => {
       leaf.offset = offset;
       offset = offset + leaf.length;
       leaf.parent = this;
@@ -158,7 +157,6 @@ export class LineState {
    * @internal 仅编辑器内部使用
    */
   public _appendLeaf(leaf: LeafState) {
-    leaf.index = this.size;
     leaf.offset = this.length;
     this.leaves.push(leaf);
     this.size++;
@@ -173,20 +171,18 @@ export class LineState {
     this._ops = [];
     this.leaves = [];
     this.isDirty = false;
-    const iterator = { index: 0, offset: 0 };
+    let offset = 0;
     for (const op of delta.ops) {
       if (!isInsertOp(op) || !op.insert.length) {
         this.parent.editor.logger.warning("Invalid op in LineState", op);
-        iterator.index = iterator.index + 1;
         continue;
       }
-      const leaf = new LeafState(iterator.index, iterator.offset, op, this);
+      const leaf = new LeafState(op, offset, this);
       this.leaves.push(leaf);
       this._ops.push(op);
-      iterator.index = iterator.index + 1;
-      iterator.offset = iterator.offset + op.insert.length;
+      offset = offset + op.insert.length;
     }
-    this.length = iterator.offset;
+    this.length = offset;
     this.size = this.leaves.length;
   }
 

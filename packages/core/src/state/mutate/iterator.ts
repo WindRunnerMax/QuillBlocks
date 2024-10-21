@@ -130,7 +130,7 @@ export class Iterator {
           return nextLeaf;
         }
         const deleteOp: Op = { delete: length };
-        return new LeafState(0, 0, deleteOp, nextLeaf.parent);
+        return new LeafState(deleteOp, 0, nextLeaf.parent);
       } else {
         const retOp: Op = {};
         if (nextLeaf.op.attributes) {
@@ -151,7 +151,7 @@ export class Iterator {
         } else {
           return nextLeaf;
         }
-        return new LeafState(0, 0, retOp, nextLeaf.parent);
+        return new LeafState(retOp, 0, nextLeaf.parent);
       }
     } else {
       return null;
