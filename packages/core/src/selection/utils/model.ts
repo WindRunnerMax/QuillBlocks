@@ -41,8 +41,10 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   }
   // Case 2: 光标位于 data-zero-void 节点前时, 需要将其修正为节点末
   // [cursor][void]\n => [void][cursor]\n
+  // Case 3: 光标位于 data-zero-void 节点唤起 IME 输入, 修正为节点末
+  // [ xxx[cursor]]\n => [ [cursor]xxx]\n
   const isVoidZero = isVoidZeroNode(node);
-  if (isVoidZero && offset === 0) {
+  if (isVoidZero && offset !== 1) {
     return new Point(lineIndex, 1);
   }
 

@@ -1,8 +1,10 @@
-import { LEAF_KEY, VOID_KEY } from "block-kit-core";
+import { EDITOR_EVENT, VOID_KEY } from "block-kit-core";
 import { Range } from "block-kit-core";
 import { Point } from "block-kit-core";
+import type { EventFn } from "block-kit-utils";
+import { KEY_CODE, useMemoFn } from "block-kit-utils";
 import type { FC, PropsWithChildren } from "react";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 
 import { useEditor } from "../hooks/use-editor";
 import type { ReactLeafContext } from "../plugin";
@@ -15,26 +17,52 @@ export type VoidProps = PropsWithChildren<{
 }>;
 
 export const Void: FC<VoidProps> = props => {
+  const { context } = props;
   const editor = useEditor();
-  const ref = React.useRef<HTMLSpanElement>(null);
+  const leafState = context.leafState;
+  const range = useMemo(() => leafState.toRange(), [leafState]);
 
   const onMouseDown = () => {
-    const el = ref.current;
-    if (!el) return void 0;
-    const leafNode = el.closest(`[${LEAF_KEY}]`) as HTMLElement | null;
-    const leafState = editor.model.getLeafState(leafNode);
-    if (leafState) {
-      const point = new Point(leafState.parent.index, leafState.offset + leafState.length);
-      const range = new Range(point, point.clone());
-      editor.selection.set(range, true);
-    }
+    const point = new Point(leafState.parent.index, leafState.offset + leafState.length);
+    const range = new Range(point, point.clone());
+    editor.selection.set(range, true);
   };
+
+  const onKeyDown = useMemoFn<EventFn<typeof EDITOR_EVENT.KEY_DOWN>>(e => {
+    const sel = editor.selection.get();
+    if (sel && sel.isCollapsed && Point.isEqual(sel.start, range.end)) {
+      switch (e.keyCode) {
+        case KEY_CODE.UP: {
+          e.preventDefault();
+          const prevLine = leafState.parent.prev();
+          if (!prevLine) break;
+          const point = new Point(prevLine.index, prevLine.length - 1);
+          editor.selection.set(new Range(point, point.clone()), true);
+          break;
+        }
+        case KEY_CODE.DOWN: {
+          e.preventDefault();
+          const nextLine = leafState.parent.next();
+          if (!nextLine) break;
+          const point = new Point(nextLine.index, 0);
+          editor.selection.set(new Range(point, point.clone()), true);
+          break;
+        }
+      }
+    }
+  });
+
+  useEffect(() => {
+    editor.event.on(EDITOR_EVENT.KEY_DOWN, onKeyDown);
+    return () => {
+      editor.event.off(EDITOR_EVENT.KEY_DOWN, onKeyDown);
+    };
+  }, [editor.event, onKeyDown]);
 
   return (
     <React.Fragment>
       <ZeroSpace void hide />
       <span
-        ref={ref}
         className={props.className}
         style={{ userSelect: "none", ...props.style }}
         contentEditable={false}

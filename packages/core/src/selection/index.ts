@@ -42,10 +42,13 @@ export class Selection {
    * 处理选区变换事件
    */
   private onNativeSelectionChange = () => {
+    if (this.editor.state.isComposing()) {
+      return void 0;
+    }
     const root = this.editor.getContainer();
     const sel = getRootSelection(root);
     const staticSel = getStaticSelection(sel);
-    if (!sel || !staticSel || this.editor.state.get(EDITOR_STATE.COMPOSING)) {
+    if (!sel || !staticSel) {
       return void 0;
     }
     // 选区必然是从 startContainer 到 endContainer
@@ -69,7 +72,8 @@ export class Selection {
   public set(range: Range | null, force = false): void {
     if (Range.isEqual(this.current, range)) {
       this.current = range;
-      // FIX: [cursor]\n 按右键时 Model 校准, 但是 DOM 没有校准
+      // FIX: [cursor]\n 状态按右键 Model 校准, 但是 DOM 没有校准
+      // 因此即使选区没有变化, 在 force 模式下也需要更新 DOM 选区
       force && this.updateDOMSelection();
       return void 0;
     }
@@ -100,7 +104,7 @@ export class Selection {
     }
     const sel = toDOMRange(this.editor, range);
     if (!sel || !sel.startContainer || !sel.endContainer) {
-      this.editor.logger.warning("Invalid DOM Range", sel);
+      this.editor.logger.warning("Invalid DOM Range", sel, range);
       selection.removeAllRanges();
       return false;
     }

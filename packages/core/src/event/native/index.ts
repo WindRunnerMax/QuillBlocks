@@ -16,8 +16,8 @@ export class NativeEvent {
   };
 
   private onCompositionEnd = (e: CompositionEvent) => {
-    this.editor.state.set(EDITOR_STATE.COMPOSING, false);
     this.event.emit(NATIVE_EVENTS.COMPOSITION_END, e);
+    this.editor.state.set(EDITOR_STATE.COMPOSING, false);
   };
 
   private onBeforeInput = (e: Event) => {

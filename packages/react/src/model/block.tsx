@@ -32,7 +32,7 @@ const BlockView: FC<{
   }, [editor.event, onContentChange]);
 
   useLayoutEffect(() => {
-    // 视图更新需要重新设置选区 无依赖
+    // 视图更新需要重新设置选区 无依赖数组
     const selection = editor.selection.get();
     if (
       !editor.state.get(EDITOR_STATE.COMPOSING) &&
@@ -46,7 +46,7 @@ const BlockView: FC<{
   });
 
   useEffect(() => {
-    // 视图更新需要触发视图绘制完成事件 无依赖
+    // 视图更新需要触发视图绘制完成事件 无依赖数组
     editor.logger.debug("OnPaint");
     editor.state.set(EDITOR_STATE.PAINTING, false);
     editor.event.trigger(EDITOR_EVENT.PAINT, {});

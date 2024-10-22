@@ -1,3 +1,5 @@
+import "./styles/index.scss";
+
 import type { Editor } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLeafContext } from "block-kit-react";
@@ -28,7 +30,7 @@ export class ImagePlugin extends EditorPlugin {
 
   public render(context: ReactLeafContext): ReactNode {
     return (
-      <Void style={{ display: "inline-block" }} context={context}>
+      <Void className="editor-image-void" context={context}>
         <SelectionHOC selection={this.selection} leaf={context.leafState}>
           <img
             src="https://windrunnermax.github.io/DocEditor/favicon.ico"

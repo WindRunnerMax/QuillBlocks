@@ -59,7 +59,7 @@ export class EditorState {
    * 判断编辑器是否正在组合输入
    */
   public isComposing() {
-    return !!this.get(EDITOR_STATE.READONLY);
+    return !!this.get(EDITOR_STATE.COMPOSING);
   }
 
   /**

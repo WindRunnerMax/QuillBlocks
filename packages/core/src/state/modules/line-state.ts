@@ -152,6 +152,22 @@ export class LineState {
   }
 
   /**
+   * 向前查找行状态
+   * @param len
+   */
+  public prev(len = 1) {
+    return this.parent.getLine(this.index - len);
+  }
+
+  /**
+   * 向后查找行状态
+   * @param len
+   */
+  public next(len = 1) {
+    return this.parent.getLine(this.index + len);
+  }
+
+  /**
    * 追加 LeafState
    * @param delta
    * @internal 仅编辑器内部使用

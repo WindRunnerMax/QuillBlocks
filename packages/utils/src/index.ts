@@ -1,5 +1,5 @@
 export { KEY_CODE } from "./constant";
-export type { Func, Reflex } from "laser-utils";
+export type { EventFn, Func, Reflex } from "laser-utils";
 export {
   Bind,
   cs,

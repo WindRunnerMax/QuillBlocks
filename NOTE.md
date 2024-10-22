@@ -427,3 +427,73 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
   }
 }
 ```
+
+## Void 移动光标
+在我们的设计中`DOM`结构是完整对应数据结构的，在`Void`结构中本体的空节点会被渲染为`ZeroWidth`的`Text`节点以及延续的嵌入节点，整体节点渲染如下所示。
+
+```html
+<div data-node="true" dir="auto">
+  <span data-leaf="true" class="">
+    <span data-zero-space="true" data-zero-void="true" style="width: 0px; height: 0px; color: transparent; position: absolute;">​</span>
+    <span class="editor-image-void" contenteditable="false" data-void="true" style="user-select: none;">
+      <img src="https://windrunnermax.github.io/DocEditor/favicon.ico" width="200" height="200">
+    </span>
+  </span>
+  <span data-leaf="true">
+    <span data-zero-space="true" data-zero-enter="true" style="width: 0px; height: 0px; color: transparent; position: absolute;">​</span>
+  </span>
+</div>
+```
+
+然而这个实现在移动光标的时候会出现问题，如果此时光标在`Void`节点时按下方向键时会导致光标无法移动，因为此时选区会移动到回车零宽字符的末尾，而由于我们的选区校正会将其又校正回`Void`节点的零宽字符后，这就导致了光标无法移动的问题。因此这里需要主动控制选区的移动，在`Void`节点上绑定键盘事件，按上下方向键时受控处理。
+
+```js
+const sel = editor.selection.get();
+if (sel && sel.isCollapsed && Point.isEqual(sel.start, range.end)) {
+  switch (e.keyCode) {
+    case KEY_CODE.DOWN: {
+      e.preventDefault();
+      const nextLine = leafState.parent.next();
+      if (!nextLine) break;
+      const point = new Point(nextLine.index, nextLine.length - 1);
+      editor.selection.set(new Range(point, point.clone()), true);
+      break;
+    }
+    case KEY_CODE.UP: {
+      e.preventDefault();
+      const prevLine = leafState.parent.prev();
+      if (!prevLine) break;
+      const point = new Point(prevLine.index, prevLine.length - 1);
+      editor.selection.set(new Range(point, point.clone()), true);
+      break;
+    }
+  }
+}
+```
+
+## Void 键入内容
+如果光标此时在`Void`节点时，此时按下任何输入键则会导致节点内容变成`inline-block`的形式，这里的问题是`BlockVoid`节点应该是独占一行的，而输入内容之后，则实际的状态变成了如下内容。
+
+```
+[Zero][input]\n
+```
+
+因此在这里最简单的方案则是此时如果光标在`Void`节点时按下输入键则直接阻止默认行为，如果输入内容则不会触发`insert`具体的文本，这个行为跟`Slate`的表现是一致的。
+
+```js
+const indexOp = pickOpAtRange(editor, sel);
+if (editor.schema.isVoid(indexOp)) {
+  return void 0;
+}
+```
+
+但是在这里我们还需要处理中文输入的情况，因为`beforeinput`事件是不能够实际阻止`IME`的行为的，而此时我们的内容虽然没有办法输入进去，但是选区发生了变化，还会导致我们的`toDOMRange`方法出现了问题，选区此时会被重置为`null`，因此我们需要在选区从`DOM`到`Modal`时重新为其校正。
+
+```js
+// Case 3: 光标位于 data-zero-void 节点唤起 IME 输入, 修正为节点末
+// [ xxx[cursor]]\n => [ [cursor]xxx]\n
+const isVoidZero = isVoidZeroNode(node);
+if (isVoidZero && offset !== 1) {
+  return new Point(lineIndex, 1);
+}
+```
