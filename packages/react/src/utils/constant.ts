@@ -1,6 +1,6 @@
-export const NO_CURSOR = {
-  position: "absolute",
+export const NO_CURSOR: React.CSSProperties = {
   width: 0,
   height: 0,
-  display: "inline-block",
+  color: "transparent",
+  position: "absolute",
 } as const;

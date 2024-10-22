@@ -28,7 +28,7 @@ export class ImagePlugin extends EditorPlugin {
 
   public render(context: ReactLeafContext): ReactNode {
     return (
-      <Void style={{ display: "inline-block" }}>
+      <Void style={{ display: "inline-block" }} context={context}>
         <SelectionHOC selection={this.selection} leaf={context.leafState}>
           <img
             src="https://windrunnermax.github.io/DocEditor/favicon.ico"

@@ -35,8 +35,8 @@ export class Schema {
    * 判断 Void 节点
    * @param op
    */
-  public isVoid(op: Op): boolean {
-    if (!op.attributes) return false;
+  public isVoid(op: Op | null): boolean {
+    if (!op || !op.attributes || isEOLOp(op)) return false;
     const keys = Object.keys(op.attributes);
     return keys.some(key => this.void.has(key));
   }
@@ -45,8 +45,8 @@ export class Schema {
    * 判断 Inline 节点
    * @param op
    */
-  public isInline(op: Op): boolean {
-    if (!op.attributes) return false;
+  public isInline(op: Op | null): boolean {
+    if (!op || !op.attributes || isEOLOp(op)) return false;
     const keys = Object.keys(op.attributes);
     return keys.some(key => this.inline.has(key));
   }
@@ -55,8 +55,8 @@ export class Schema {
    * 判断 Block 节点
    * @param op
    */
-  public isBlock(op: Op): boolean {
-    if (!op.attributes) return false;
+  public isBlock(op: Op | null): boolean {
+    if (!op || !op.attributes || isEOLOp(op)) return false;
     const keys = Object.keys(op.attributes);
     return keys.some(key => this.block.has(key));
   }

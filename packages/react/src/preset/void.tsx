@@ -5,11 +5,13 @@ import type { FC, PropsWithChildren } from "react";
 import React from "react";
 
 import { useEditor } from "../hooks/use-editor";
+import type { ReactLeafContext } from "../plugin";
 import { ZeroSpace } from "./zero";
 
 export type VoidProps = PropsWithChildren<{
   className?: string;
   style?: React.CSSProperties;
+  context: ReactLeafContext;
 }>;
 
 export const Void: FC<VoidProps> = props => {
