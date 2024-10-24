@@ -538,3 +538,30 @@ if (isVoidZero && offset !== 1) {
 理论上这种方式并不容易实现，而恰好我又想起来了`ot-json`的协同算法，因此直接在飞书的文档代码中搜索了一下`ot-json`的硬编码字符串，果然存在相关内容，因此我猜测整个协同的实现则是`ot-json0`来实现结构协同，`easy-sync`来实现文本协同，而不直接使用`ot-json0`的`text-type`来实现文本协同，则是因为`json0`仅实现了纯文本的协同，没有携带`attrs`相关的数据，如果需要组合来维护线性结构的富文本则还有些成本在内。
 
 实际上我个人觉得嵌套的数据结构是比较难以处理的，以`list + quote`格式为例，在嵌套结构中 `list`嵌套`quote` / `quote`嵌套`list` 的表现是不一致的，类似的内容需要特殊处理，而对于扁平的结构则无论怎么套`list + quote`都是在`op`独立的`attributes`中，无论先后都不会有差异。因此我还是比较希望使用第二种方法来实现`blocks`，这种实现则不需要`ot-json`的介入，仅需要`rich-text/easy-sync`类型的协同数据基类即可，这样对于数据的操作类型则简单很多，但是在数据可读性上就稍微弱了一些，而实现的协同算法对于数据结构则极为依赖，因此这里对于方案的选用还是需要再考虑一下。
+
+关注协同算法的实现即使对于非协同的场景也是非常重要的，对于我们的纯本地内容而言，假设此时我们需要上传图片则由于上传的过程是异步的，我们就需要在上传中加一个`loading`状态，而在上传完成之后则需要将`src`的位置替换为正式的`url`，初始的`src`则可以是`blob`的临时`url`。那么在这个过程中我们就需要`blob -> http`的这个状态作为`undoable`的操作，否则就会导致`undo`的时候会回退到`loading`的暂态。而如果在不实现协同依赖的`transform`操作变换的情况下，则通常不会记录`invert2`即可，下面的内容也是可以实现的。
+
+```js
+const Delta = Quill.imports.delta;
+let base = new Delta();
+const op1 = new Delta().insert(" ", { src: "blob" });
+const invert1 = op1.invert(base); // { delete: 1 }
+base = base.compose(op1); // { insert: " ", attributes: { src: "blob" } }
+const undoable = new Delta().retain(1, { src: "http" });
+base = base.compose(undoable); // { insert: " ", attributes: { src: "http" } }
+base = base.compose(invert1); // []
+```
+
+在通常情况下这里并没有什么问题，而`invert`的数据中如果存在`attributes`则可能出现问题，在下面的例子中，假如我们不进行`undoable.transform`的操作，则会导致最终的结果是`src: mock`，但是别忘了我们的`undoable`是`src: http`，这里的`http`是不应该被替换的，因此这里的`transform`操作是非常重要的，当我们依照先前的`History`协同基础设计上将其做操作变换，然后再进行`compose`应用`inverted`结果，就可以得到正确的`src: http`属性。
+
+```js
+const Delta = Quill.imports.delta;
+let base = new Delta().insert(" ", { src: "mock" });
+const op1 = new Delta().retain(1, { src: "blob" });
+let invert1 = op1.invert(base); // { retain: 1, attrs: { src: "mock" } }
+base = base.compose(op1); // { insert: " ", attributes: { src: "blob" } }
+const undoable = new Delta().retain(1, { src: "http" });
+base = base.compose(undoable); // { insert: " ", attributes: { src: "http" } }
+invert1 = undoable.transform(invert1, true); // []
+base = base.compose(invert1); // { insert: " ", attrs: { src: "http" } }
+```
