@@ -232,7 +232,8 @@ if (isEnterZero && offset) {
 </script>
 ```
 
-## History 模块设计
+## History 协同基础
+无论是在数据结构还是诸多模块的设计中，我一直都是比较协同相关的基础建设，因此对于`History`模块自然需要设计协同基础能力。对于`History`的栈基础设计则不是此处关注的重点，设想一下对于远程的`Op`我们自然不能由非此`Op`产生的客户端撤销，即`A`不应该撤销`B`的`Op`，那么在这里需要先回顾一下协同的基本实现，即`Delta`的`transform`函数的使用`ob1 = transform(a, b)`。
 
 ```js
 // https://quilljs.com/playground/snow
@@ -250,6 +251,8 @@ baseA = baseA.compose(ob1); // [{insert:"12AB"}]
 baseB = baseB.compose(oa1); // [{insert:"12AB"}]
 ```
 
+那么对于协同存储的栈内容，我们就需要`Delta`的`invert`函数来实现，这个函数需要将`previous`作为基准来得到`inverted`，即`changes.invert(previous)`。如下面的示例中在得到`inverted`之后，我们此时的`undo`栈则是存在两个值，如果此时得到了一个`undoable`的`op`例如远程操作或者图片的上传完成操作，就需要为栈内的存量数据做变换操作，类似于`oa1 = transform(remoteOp, a)`将所有的栈内操作全部处理。
+
 ```js
 // https://www.npmjs.com/package/quill-delta#invert
 // https://github.com/slab/quill/blob/main/packages/quill/src/modules/history.ts
@@ -257,26 +260,27 @@ const Delta = Quill.imports.delta;
 let base = new Delta();
 const op1 = new Delta().insert("1");
 const op2 = new Delta().retain(1).insert("2");
-base = base.compose(op1); // [{insert:"1"}]
 let invert1 = op1.invert(base); // [{delete:1}]
-base = base.compose(op2); // [{insert:"12"}]
+base = base.compose(op1); // [{insert:"1"}]
 let invert2 = op2.invert(base); // [{retain:1},{delete:1}]
+base = base.compose(op2); // [{insert:"12"}]
 let undoable = new Delta().retain(2).insert("3");
 base = base.compose(undoable); // [{insert:"123"}]
 invert2 = undoable.transform(invert2, true); // [{retain:1},{delete:1}]
-undoable = invert2.transform(undoable); // [{retain:1},{insert:"3"}]
 invert1 = undoable.transform(invert1, true); // [{delete:1}]
 ```
+
+上述的算法实现其实存在一个问题，我们的`undoable op`是一直处于原始状态，而实际上由于假设`inverted`内容会实际应用到`base`，因此这里的`undoable`同样也需要做变换。在下面的例子上若不做`undoable transform`的话，则`invert2`的结果则是`retain: 3, delete: 1`，此时的基准是`00031000`则删除的字符是`3`，此时明显是错误的，而在做了`transform`之后是`retain: 4, delete: 1`则能正确删除`1`字符。
 
 ```js
 const Delta = Quill.imports.delta;
 let base = new Delta().insert("000000");
 const op1 = new Delta().retain(3).insert("1");
 const op2 = new Delta().retain(3).insert("2");
-base = base.compose(op1); // [{insert:"0001000"}]
 let invert1 = op1.invert(base); // [{retain:3},{delete:1}]
-base = base.compose(op2); // [{insert:"00021000"}]
+base = base.compose(op1); // [{insert:"0001000"}]
 let invert2 = op2.invert(base); // [{retain: 3},{delete:1}]
+base = base.compose(op2); // [{insert:"00021000"}]
 let undoable = new Delta().retain(4).insert("3");
 base = base.compose(undoable); // [{insert:"000231000"}]
 invert2 = undoable.transform(invert2, true); // [{retain:3},{delete:1}]
@@ -497,3 +501,40 @@ if (isVoidZero && offset !== 1) {
   return new Point(lineIndex, 1);
 }
 ```
+
+## 数据结构与协同
+对编辑器而言数据结构的设计非常重要，我在最开始就是希望实现`blocks`化的编辑器，因此在基本包的设计中并没有设计块级的嵌套结构，而是更专注于基本图文混排的富文本能力。而在基本的块结构上实现`Blocks`能力，目前我能设想到两种设计，第一种是类似于`slate`的嵌套数据结构，即通过多层的`children`来组织所有的块结构，而`leaf`节点中的每个`delta`都是行结构内容。
+
+```js
+{
+  children: [
+    { delta: Delta(), attributes: {} },
+    { delta: Delta(), attributes: {} }
+  ]
+}
+```
+
+第二种方式则是借助`delta`本身来管理块结构，也就是说块的引用是借助`op`节点来完成，同样的每个`id`指向的`block`我们依然只维护行级别的内容。其实也就是相当于我们需要设计一个独立的`L(list)`类型的`block`，以此来按行管理所有的子级`blocks`，此外例如表格的表达，则同样需要需要独立的`G(group)`来组织非受控的单元格`blocks`，其并不参与实际渲染而仅作为桥接内容。
+
+```js
+{
+  xxx: {
+    ops: [ { insert: "abc" } ]
+  },
+  yyy: {
+    ops: [ { insert: "123" } ]
+  },
+  ROOT: {
+    ops: [
+      { insert: " ", attributes: { blockId: "xxx" } },
+      { insert: " ", attributes: { blockId: "yyy" } },
+    ]
+  }
+}
+```
+
+在思考这个问题的时候，我想到先前在飞书开放平台的服务端的读取文档内容接口，其内容的设计是基于`block`的嵌套结构设计，类似于我们上述的第一种方案，只不过粒度会更细一些，预测是将文本的内容也做了转换。但是问题是之前看过飞书的协同算法是`easy-sync`来实现的，而`easy-sync`是针对于文本的扁平结构实现的协同算法，那么是如何用扁平结构的协同算法实现的嵌套结构协同。
+
+理论上这种方式并不容易实现，而恰好我又想起来了`ot-json`的协同算法，因此直接在飞书的文档代码中搜索了一下`ot-json`的硬编码字符串，果然存在相关内容，因此我猜测整个协同的实现则是`ot-json0`来实现结构协同，`easy-sync`来实现文本协同，而不直接使用`ot-json0`的`text-type`来实现文本协同，则是因为`json0`仅实现了纯文本的协同，没有携带`attrs`相关的数据，如果需要组合来维护线性结构的富文本则还有些成本在内。
+
+实际上我个人觉得嵌套的数据结构是比较难以处理的，以`list + quote`格式为例，在嵌套结构中 `list`嵌套`quote` / `quote`嵌套`list` 的表现是不一致的，类似的内容需要特殊处理，而对于扁平的结构则无论怎么套`list + quote`都是在`op`独立的`attributes`中，无论先后都不会有差异。因此我还是比较希望使用第二种方法来实现`blocks`，这种实现则不需要`ot-json`的介入，仅需要`rich-text/easy-sync`类型的协同数据基类即可，这样对于数据的操作类型则简单很多，但是在数据可读性上就稍微弱了一些，而实现的协同算法对于数据结构则极为依赖，因此这里对于方案的选用还是需要再考虑一下。

@@ -28,4 +28,4 @@ export { BlockState } from "./state/modules/block-state";
 export { LeafState } from "./state/modules/leaf-state";
 export { LineState } from "./state/modules/line-state";
 export type { ApplyOptions } from "./state/types";
-export { EDITOR_STATE } from "./state/types";
+export { APPLY_SOURCE, EDITOR_STATE } from "./state/types";

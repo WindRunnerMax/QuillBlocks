@@ -1,7 +1,6 @@
-import type { RawRange } from "../../selection/modules/raw-range";
+import type { O } from "block-kit-utils/dist/es/types";
 
-/** End Of Line */
-export const EOL = "\n";
+import type { RawRange } from "../../selection/modules/raw-range";
 
 export const EDITOR_STATE = {
   /** IME 组合状态 */
@@ -18,4 +17,12 @@ export const EDITOR_STATE = {
   PAINTING: "PAINTING",
 } as const;
 
-export type ApplyOptions = { source?: string; range?: RawRange };
+export const APPLY_SOURCE = {
+  USER: "USER",
+  REMOTE: "REMOTE",
+};
+
+export type ApplyOptions = {
+  source?: O.Values<typeof APPLY_SOURCE>;
+  range?: RawRange;
+};

@@ -1,21 +1,21 @@
 import type { Op } from "block-kit-delta";
+import { EOL } from "block-kit-delta";
 
 import { Point } from "../../selection/modules/point";
 import { Range } from "../../selection/modules/range";
-import { EOL } from "../types";
 import type { LineState } from "./line-state";
 
 export class LeafState {
   /** EOL 节点 */
   public readonly eol: boolean;
-  /** Op 长度 */
-  public readonly length: number;
   /** Void 节点 */
   public readonly void: boolean;
   /** Block 节点 */
   public readonly block: boolean;
   /** Inline 节点 */
   public readonly inline: boolean;
+  /** Op 长度 */
+  public readonly length: number;
 
   constructor(
     /** Op 引用 */
@@ -27,10 +27,11 @@ export class LeafState {
   ) {
     this.eol = false;
     this.eol = op.insert === EOL;
+    const editor = parent.parent.editor;
+    this.void = editor.schema.isVoid(op);
+    this.block = editor.schema.isBlock(op);
+    this.inline = editor.schema.isInline(op);
     this.length = op.insert ? op.insert.length : 0;
-    this.void = parent.parent.editor.schema.isVoid(op);
-    this.block = parent.parent.editor.schema.isBlock(op);
-    this.inline = parent.parent.editor.schema.isInline(op);
   }
 
   /**
@@ -38,6 +39,15 @@ export class LeafState {
    */
   public getText() {
     return this.op.insert || "";
+  }
+
+  /**
+   * 将 LeafState 转换为 Range
+   */
+  public toRange() {
+    const start = new Point(this.parent.index, this.offset);
+    const end = new Point(this.parent.index, this.offset + this.length);
+    return new Range(start, end);
   }
 
   /**
@@ -49,14 +59,5 @@ export class LeafState {
    */
   public static create(op: Op, offset: number, parent: LineState) {
     return new LeafState(op, offset, parent);
-  }
-
-  /**
-   * 将 LeafState 转换为 Range
-   */
-  public toRange() {
-    const start = new Point(this.parent.index, this.offset);
-    const end = new Point(this.parent.index, this.offset + this.length);
-    return new Range(start, end);
   }
 }

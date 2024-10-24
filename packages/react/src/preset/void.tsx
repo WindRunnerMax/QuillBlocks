@@ -30,24 +30,25 @@ export const Void: FC<VoidProps> = props => {
 
   const onKeyDown = useMemoFn<EventFn<typeof EDITOR_EVENT.KEY_DOWN>>(e => {
     const sel = editor.selection.get();
-    if (sel && sel.isCollapsed && Point.isEqual(sel.start, range.end)) {
-      switch (e.keyCode) {
-        case KEY_CODE.UP: {
-          e.preventDefault();
-          const prevLine = leafState.parent.prev();
-          if (!prevLine) break;
-          const point = new Point(prevLine.index, prevLine.length - 1);
-          editor.selection.set(new Range(point, point.clone()), true);
-          break;
-        }
-        case KEY_CODE.DOWN: {
-          e.preventDefault();
-          const nextLine = leafState.parent.next();
-          if (!nextLine) break;
-          const point = new Point(nextLine.index, 0);
-          editor.selection.set(new Range(point, point.clone()), true);
-          break;
-        }
+    if (!sel || !sel.isCollapsed || !Point.isEqual(sel.end, range.end)) {
+      return void 0;
+    }
+    switch (e.keyCode) {
+      case KEY_CODE.UP: {
+        e.preventDefault();
+        const prevLine = leafState.parent.prev();
+        if (!prevLine) break;
+        const point = new Point(prevLine.index, prevLine.length - 1);
+        editor.selection.set(new Range(point, point.clone()), true);
+        break;
+      }
+      case KEY_CODE.DOWN: {
+        e.preventDefault();
+        const nextLine = leafState.parent.next();
+        if (!nextLine) break;
+        const point = new Point(nextLine.index, 0);
+        editor.selection.set(new Range(point, point.clone()), true);
+        break;
       }
     }
   });
