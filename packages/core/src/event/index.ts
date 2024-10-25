@@ -11,28 +11,28 @@ export class Event {
     this.nativeEvent = new NativeEvent(this.bus, this.editor);
   }
 
-  bind() {
+  public bind() {
     return this.nativeEvent.bind();
   }
 
-  unbind() {
+  public unbind() {
     this.bus.clear();
     return this.nativeEvent.unbind();
   }
 
-  on: EventBus["on"] = (key, listener, priority) => {
+  public on: EventBus["on"] = (key, listener, priority) => {
     return this.bus.on(key, listener, priority);
   };
 
-  once: EventBus["once"] = (key, listener, priority) => {
+  public once: EventBus["once"] = (key, listener, priority) => {
     return this.bus.once(key, listener, priority);
   };
 
-  off: EventBus["off"] = (key, listener) => {
+  public off: EventBus["off"] = (key, listener) => {
     return this.bus.off(key, listener);
   };
 
-  trigger: EventBus["emit"] = (key, payload) => {
+  public trigger: EventBus["emit"] = (key, payload) => {
     return this.bus.emit(key, payload);
   };
 }

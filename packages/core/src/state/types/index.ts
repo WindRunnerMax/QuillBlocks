@@ -20,6 +20,7 @@ export const EDITOR_STATE = {
 export const APPLY_SOURCE = {
   USER: "USER",
   REMOTE: "REMOTE",
+  HISTORY: "HISTORY",
 };
 
 export type ApplyOptions = {

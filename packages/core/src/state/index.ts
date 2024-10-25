@@ -88,6 +88,8 @@ export class EditorState {
 
     // 获取当前选区位置
     const raw: RawRange | null = options.range || this.editor.selection.toRaw();
+    const payload = { previous, current: previous, source, changes: delta };
+    this.editor.event.trigger(EDITOR_EVENT.CONTENT_WILL_CHANGE, payload);
 
     // 更新 BlockSet Model
     const mutate = new Mutate(this.block);

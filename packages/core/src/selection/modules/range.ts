@@ -32,9 +32,7 @@ export class Range {
     [this.start, this.end] = isEndBeforeStart ? [end, start] : [start, end];
     this.isBackward = isNil(backward) ? isEndBeforeStart : backward;
     this.isCollapsed = isNil(collapsed) ? Point.isEqual(start, end) : collapsed;
-    if (this.isCollapsed) {
-      this.isBackward = false;
-    }
+    this.isBackward = this.isCollapsed ? false : this.isBackward;
   }
 
   /**

@@ -14,11 +14,18 @@ export class Selection {
   private previous: Range | null = null;
   private current: Range | null = null;
 
+  /**
+   * 构造函数
+   * @param editor
+   */
   constructor(private editor: Editor) {
     this.editor.event.on(EDITOR_EVENT.SELECTION_CHANGE_NATIVE, this.onNativeSelectionChange);
     this.editor.event.on(EDITOR_EVENT.KEY_DOWN, this.onArrowKeyDown);
   }
 
+  /**
+   * 销毁模块
+   */
   public destroy() {
     this.editor.event.off(EDITOR_EVENT.SELECTION_CHANGE_NATIVE, this.onNativeSelectionChange);
     this.editor.event.off(EDITOR_EVENT.KEY_DOWN, this.onArrowKeyDown);
@@ -148,7 +155,7 @@ export class Selection {
     const isFocusLineEnd = focus.offset === lineState.length - 1;
     if (leftArrow && isFocusLineStart) {
       // 在非首行的首节点时将选取设置为前一行的末尾
-      const prevLine = blockState.getLine(focus.line - 1);
+      const prevLine = lineState.prev();
       if (!prevLine) return void 0;
       event.preventDefault();
       // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
@@ -162,7 +169,7 @@ export class Selection {
     }
     if (rightArrow && isFocusLineEnd) {
       // 在非末行的末节点时将选取设置为后一行的首节点
-      const nextLine = blockState.getLine(focus.line + 1);
+      const nextLine = lineState.next();
       if (!nextLine) return void 0;
       event.preventDefault();
       const newFocus = new Point(nextLine.index, 0);

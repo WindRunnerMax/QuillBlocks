@@ -17,4 +17,7 @@ export const KEY_CODE = {
   RIGHT: 39,
   DOWN: 40,
   DELETE: 46,
+  Z: 90,
+  Y: 89,
+  A: 65,
 };

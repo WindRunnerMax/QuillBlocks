@@ -7,9 +7,10 @@ import type { NativeEventMap } from "../native/types";
 import { NATIVE_EVENTS } from "../native/types";
 
 export const EDITOR_EVENT = {
+  PAINT: "PAINT",
   CONTENT_CHANGE: "CONTENT_CHANGE",
   SELECTION_CHANGE: "SELECTION_CHANGE",
-  PAINT: "PAINT",
+  CONTENT_WILL_CHANGE: "CONTENT_WILL_CHANGE",
   ...NATIVE_EVENTS,
 } as const;
 
@@ -26,9 +27,10 @@ export type SelectionChangeEvent = {
 };
 
 export type EventMap = {
+  [EDITOR_EVENT.PAINT]: PaintEvent;
   [EDITOR_EVENT.CONTENT_CHANGE]: ContentChangeEvent;
   [EDITOR_EVENT.SELECTION_CHANGE]: SelectionChangeEvent;
-  [EDITOR_EVENT.PAINT]: PaintEvent;
+  [EDITOR_EVENT.CONTENT_WILL_CHANGE]: ContentChangeEvent;
 } & NativeEventMap;
 
 // eslint-disable-next-line @typescript-eslint/ban-types

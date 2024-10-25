@@ -1,6 +1,7 @@
 import { Delta } from "block-kit-delta";
 
 import { Event } from "../event";
+import { History } from "../history";
 import { Input } from "../input";
 import { LOG_LEVEL, Logger } from "../log";
 import { Model } from "../model";
@@ -31,6 +32,8 @@ export class Editor {
   public state: EditorState;
   /** 选区模块 */
   public selection: Selection;
+  /** 历史模块 */
+  public history: History;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
@@ -44,6 +47,7 @@ export class Editor {
     this.selection = new Selection(this);
     this.input = new Input(this);
     this.plugin = new Plugin(this);
+    this.history = new History(this);
   }
 
   /**
@@ -74,8 +78,9 @@ export class Editor {
     this.event.unbind();
     this.input.destroy();
     this.model.destroy();
-    this.selection.destroy();
-    this.state.set(EDITOR_STATE.MOUNTED, false);
     this.plugin.destroy();
+    this.selection.destroy();
+    this.history.destroy();
+    this.state.set(EDITOR_STATE.MOUNTED, false);
   }
 }

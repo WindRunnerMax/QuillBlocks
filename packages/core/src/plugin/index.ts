@@ -8,8 +8,21 @@ export class Plugin {
   /** 排序后的插件 */
   public current: CorePlugin[];
 
+  /**
+   * 构造函数
+   * @param editor
+   */
   constructor(private editor: Editor) {
     this.current = [];
+  }
+
+  /**
+   * 销毁插件
+   */
+  public destroy(): void {
+    for (const plugin of this.current) {
+      plugin.destroy();
+    }
   }
 
   /**
@@ -44,14 +57,5 @@ export class Plugin {
       }
     }
     return payload;
-  }
-
-  /**
-   * 销毁插件
-   */
-  public destroy(): void {
-    for (const plugin of this.current) {
-      plugin.destroy();
-    }
   }
 }

@@ -1,3 +1,4 @@
+export type { EventContext } from "laser-utils/dist/es/event-bus";
 export { EventBus } from "laser-utils/dist/es/event-bus";
 
 export interface EventBusMap {}
