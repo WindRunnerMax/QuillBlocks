@@ -23,27 +23,16 @@ const LineView: FC<{
   };
 
   const children = useMemo(() => {
-    return (
-      <React.Fragment>
-        {leaves.map((leaf, index) => {
-          if (leaf.eol) {
-            // 判断是否为 Block Void 行, 只需要判断行首节点即可
-            const firstNode = leaves[0];
-            const isBlockVoid = firstNode && firstNode.block && firstNode.void;
-            return (
-              <EOLModel
-                blockVoid={isBlockVoid}
-                key={EOL}
-                editor={editor}
-                index={index}
-                leafState={leaf}
-              />
-            );
-          }
-          return <LeafModel key={index} editor={editor} index={index} leafState={leaf} />;
-        })}
-      </React.Fragment>
-    );
+    const nodes: JSX.Element[] = [];
+    leaves.forEach((leaf, index) => {
+      if (leaf.eol) {
+        // COMPAT: 空行则仅存在一个 Leaf, 此时需要渲染空的占位节点
+        !index && nodes.push(<EOLModel key={EOL} editor={editor} leafState={leaf} />);
+        return void 0;
+      }
+      nodes.push(<LeafModel key={index} editor={editor} index={index} leafState={leaf} />);
+    });
+    return nodes;
   }, [editor, leaves]);
 
   const context = useMemo(() => {

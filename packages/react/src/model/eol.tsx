@@ -7,9 +7,7 @@ import { ZeroSpace } from "../preset/zero";
 
 const EOLView: FC<{
   editor: Editor;
-  index: number;
   leafState: LeafState;
-  blockVoid?: boolean;
 }> = props => {
   const { editor, leafState } = props;
 
@@ -21,7 +19,7 @@ const EOLView: FC<{
 
   return (
     <span {...{ [LEAF_KEY]: true }} ref={setModel}>
-      <ZeroSpace enter hide={props.blockVoid} />
+      <ZeroSpace enter />
     </span>
   );
 };

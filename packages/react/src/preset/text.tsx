@@ -3,7 +3,6 @@ import { isDOMText, isFunction } from "block-kit-utils";
 import { forwardRef } from "react";
 
 export type TextProps = {
-  className?: string;
   children: string;
 };
 
@@ -32,7 +31,7 @@ export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
   };
 
   return (
-    <span ref={onRef} className={props.className} {...{ [LEAF_STRING]: true }}>
+    <span ref={onRef} {...{ [LEAF_STRING]: true }}>
       {props.children}
     </span>
   );

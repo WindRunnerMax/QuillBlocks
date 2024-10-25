@@ -74,7 +74,7 @@
 
 那么其实看以上这几点，我们的编辑器实际上是要完成类似于`slate`的架构，因为我们希望的是`core`与视图分离，所以选区、渲染这方面的实现都需要在`react`这个包里实现，相关的`state`是在`core`里实现的，通过`onContentChange`来实现通信，在内容变化的时候通知`react`去`setState`进行渲染。当然整个说起来容易，做起来就难了，这一套下来还是非常复杂的，需要大量时间不断调试才行。
 
-## Input
+## Input 模块
 到这里，其实可以感觉到我们主要是用到了浏览器的`ContentEditable`编辑、选区以及`DOM`的能力，那么我们的编辑器最重要的一个能力就是输入，有了之前聊到的一些设计与抽象，我们似乎可以比较简单的设计整个流程: 
 
 * 通过选区映射到我们自行维护的`Range Model`，包括选区变换时根据`DOMRange`映射到`Model`，这一步需要比较多的查找和遍历，还需要借助我们之前聊的`WeakMap`对象来查找`Model`来计算位置。
@@ -502,7 +502,7 @@ if (isVoidZero && offset !== 1) {
 }
 ```
 
-## 数据结构与协同
+## 数据结构与协同算法
 对编辑器而言数据结构的设计非常重要，我在最开始就是希望实现`blocks`化的编辑器，因此在基本包的设计中并没有设计块级的嵌套结构，而是更专注于基本图文混排的富文本能力。而在基本的块结构上实现`Blocks`能力，目前我能设想到两种设计，第一种是类似于`slate`的嵌套数据结构，即通过多层的`children`来组织所有的块结构，而`leaf`节点中的每个`delta`都是行结构内容。
 
 ```js
@@ -564,4 +564,43 @@ const undoable = new Delta().retain(1, { src: "http" });
 base = base.compose(undoable); // { insert: " ", attributes: { src: "http" } }
 invert1 = undoable.transform(invert1, true); // []
 base = base.compose(invert1); // { insert: " ", attrs: { src: "http" } }
+```
+
+## 行末零宽字符
+目前我们的视图渲染是完全对等于数据结构的，也就是说我们的行末必然存在一个零宽字符，用来对等数据结构中末尾的`\n`对应的`Leaf`节点，实现这个节点的目的主要有几个方面。
+
+1. 完全对等数据结构，与我们设计的`LineState`数据对齐，每个`LeafState`都必然渲染一个`DOM`节点，在空行时必然会留存有文本节点。
+2. `Mention`节点的渲染，如果行的最后一个节点是`Void`节点，则会导致光标无法放置于末尾，这个问题的处理我们则按需渲染一个零宽字符节点即可，`slate`即如此处理的末尾`Mention`节点。
+3. 在研究`Lark`的编辑器时发现每个文本行末尾必然会存在零宽字符，预计是为了解决`Blocks`的相关问题，请教了大佬还得知早起的`etherpad`每行也是实现了零宽字符，用来处理`DOM`与选区的相关问题。
+
+在这里我们实现了太多的兼容方案来处理这个问题，例如上边的选区校正部分以及`Void`选区变换部分内容，而如果实际上我们不渲染这个节点的话就不需要处理这两处相关问题，但是这样的话我们就需要处理其他的`case`来保证`DOM`与`Model`的对等性。那么此时我们需要解决空行的选区问题，此时如果直接使用空节点即`<span></span>`设置为子节点的话，则会由于此时并没有实际的文本内容，因此这里的高度并没有撑起来并且选区是无法聚焦到此处的，因此这里我们还是需要空节点的内容为零宽字符，这样的话就可以实现选区的聚焦。
+
+```js
+const nodes: JSX.Element[] = [];
+leaves.forEach((leaf, index) => {
+  if (leaf.eol) {
+    // COMPAT: 空行则仅存在一个 Leaf, 此时需要渲染空的占位节点
+    !index && nodes.push(<EOLModel key={EOL} editor={editor} leafState={leaf} />);
+    return void 0;
+  }
+  nodes.push(<LeafModel key={index} editor={editor} index={index} leafState={leaf} />);
+});
+return nodes;
+```
+
+实际上末尾的节点如果是`<br />`节点的话，是可以不需要零宽字符来解决这个问题的，选区节点是可以放置于此节点上的，且不会有`0/1`两个`offset`的偏移需要处理，`quill`对于空行就是如此处理的。不过对于我们来说，对于`Void`节点是需要处理零宽字符，因为`BR`节点仅存在`0 offset`，这就导致了选区在`Void`节点时依赖默认行为无法正常删除当前节点还需要特殊处理，此外监听`Arrow`方向键的处理还是需要处理的，所以当前还是保持了现状。
+
+```js
+export const getTextNode = (node: Node | null): Text | null => {
+  if (isDOMText(node)) {
+    return node;
+  }
+  if (isDOMElement(node)) {
+    const textNode = node.childNodes[0];
+    if (textNode && (isDOMText(textNode) || isBRNode(textNode))) {
+      return textNode;
+    }
+  }
+  return null;
+};
 ```
