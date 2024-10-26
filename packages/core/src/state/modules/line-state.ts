@@ -24,6 +24,8 @@ export class LineState {
   private leaves: LeafState[] = [];
   /** Ops 缓存 */
   private _ops: Op[] | null = null;
+  /** Leaf 到 Index 映射 */
+  public _leafToIndex: WeakMap<LeafState, number>;
 
   constructor(
     /** Delta 数据 */
@@ -33,11 +35,12 @@ export class LineState {
     /** 父级 BlockState */
     public readonly parent: BlockState
   ) {
+    this.size = 0;
     this.index = 0;
     this.start = 0;
-    this.key = Key.getId(this);
-    this.size = 0;
     this.length = 0;
+    this.key = Key.getId(this);
+    this._leafToIndex = new WeakMap();
     this._deltaToLeaves(delta);
   }
 
@@ -57,17 +60,20 @@ export class LineState {
   }
 
   /**
-   * 设置 Leaf 节点
+   *  设置 Leaf 节点
+   * @param leaf
+   * @param index
    */
-  public setLeaf(node: LeafState, index: number) {
-    if (this.leaves[index] === node) {
+  public setLeaf(leaf: LeafState, index: number) {
+    if (this.leaves[index] === leaf) {
       return this;
     }
     this.isDirty = true;
-    this.leaves[index] = node;
+    this.leaves[index] = leaf;
     if (this._ops) {
-      this._ops[index] = node.op;
+      this._ops[index] = leaf.op;
     }
+    this._leafToIndex.set(leaf, index);
     return this;
   }
 
@@ -76,6 +82,14 @@ export class LineState {
    */
   public getLeaves() {
     return this.leaves;
+  }
+
+  /**
+   * 获取行内第一个节点
+   */
+  public getFirstLeaf(): LeafState | null {
+    const leaves = this.getLeaves();
+    return leaves[0] || null;
   }
 
   /**
@@ -97,11 +111,12 @@ export class LineState {
     }
     let offset = 0;
     const ops: Op[] = [];
-    this.leaves.forEach(leaf => {
+    this.leaves.forEach((leaf, index) => {
       leaf.offset = offset;
       offset = offset + leaf.length;
       leaf.parent = this;
       ops.push(leaf.op);
+      this._leafToIndex.set(leaf, index);
     });
     this._ops = ops;
     this.length = offset;
@@ -175,6 +190,7 @@ export class LineState {
   public _appendLeaf(leaf: LeafState) {
     leaf.offset = this.length;
     this.leaves.push(leaf);
+    this._leafToIndex.set(leaf, this.size);
     this.size++;
     this.length = this.length + leaf.length;
   }
@@ -194,6 +210,7 @@ export class LineState {
         continue;
       }
       const leaf = new LeafState(op, offset, this);
+      this._leafToIndex.set(leaf, this._ops.length);
       this.leaves.push(leaf);
       this._ops.push(op);
       offset = offset + op.insert.length;

@@ -5,7 +5,7 @@ import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { EditorProvider } from "../hooks/use-editor";
 import { BlockModel } from "../model/block";
 
-export const Laser: React.FC<{
+export const Editable: React.FC<{
   editor: Editor;
   readonly?: boolean;
 }> = props => {

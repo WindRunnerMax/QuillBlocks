@@ -1,6 +1,7 @@
 import "../styles/selection.scss";
 
 import type { LeafState } from "block-kit-core";
+import type { Editor } from "block-kit-core";
 import { Range } from "block-kit-core";
 import { cs, getId } from "block-kit-utils";
 import React from "react";
@@ -19,15 +20,21 @@ type State = {
 };
 
 export class SelectionHOC extends React.PureComponent<Props, State> {
+  private editor: Editor;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       id: getId(),
       selected: false,
     };
+    this.editor = this.props.selection.editor;
   }
 
   public componentDidMount(): void {
+    // FIX: UNDO 时内容与选区变化同样需要更新状态
+    const range = this.editor.selection.get();
+    this.onSelectionChange(range);
     this.props.selection.mountView(this.state.id, this);
   }
 

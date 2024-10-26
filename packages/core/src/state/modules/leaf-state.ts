@@ -1,5 +1,6 @@
 import type { Op } from "block-kit-delta";
 import { EOL } from "block-kit-delta";
+import { isNil } from "block-kit-utils";
 
 import { Point } from "../../selection/modules/point";
 import { Range } from "../../selection/modules/range";
@@ -39,6 +40,38 @@ export class LeafState {
    */
   public getText() {
     return this.op.insert || "";
+  }
+
+  /**
+   * 获取前一个 LeafState
+   * @param span 跨行
+   */
+  public prev(span = true) {
+    const index = this.parent._leafToIndex.get(this);
+    if (isNil(index)) return null;
+    if (index > 0) {
+      return this.parent.getLeaf(index - 1);
+    }
+    // index <=0 的情况下, 存在 span 跨行
+    if (!span) return null;
+    const prevLine = this.parent.prev();
+    return prevLine ? prevLine.getLastLeaf() : null;
+  }
+
+  /**
+   * 获取下一个 LeafState
+   * @param span 跨行
+   */
+  public next(span = true) {
+    const index = this.parent._leafToIndex.get(this);
+    if (isNil(index)) return null;
+    if (index < this.parent.size - 1) {
+      return this.parent.getLeaf(index + 1);
+    }
+    // index >= line.size - 1 的情况下, 存在 span 跨行
+    if (!span) return null;
+    const nextLine = this.parent.next();
+    return nextLine ? nextLine.getFirstLeaf() : null;
   }
 
   /**

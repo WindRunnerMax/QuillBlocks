@@ -6,7 +6,7 @@ import type { SelectionHOC } from "../components/selection";
 export class SelectionPlugin {
   protected idToView: Map<string, SelectionHOC>;
 
-  constructor(protected editor: Editor, public readonly: boolean) {
+  constructor(public editor: Editor, public readonly: boolean) {
     this.idToView = new Map();
     editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, this.onSelectionChange);
   }

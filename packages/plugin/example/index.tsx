@@ -2,7 +2,7 @@ import "@arco-design/web-react/es/style/index.less";
 
 import { Editor, LOG_LEVEL } from "block-kit-core";
 import { BlockDelta } from "block-kit-delta";
-import { Laser } from "block-kit-react";
+import { Editable } from "block-kit-react";
 import type { FC } from "react";
 import { useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
@@ -12,7 +12,7 @@ import { ImagePlugin } from "../src/image";
 import { INIT } from "./block";
 import { schema } from "./schema";
 
-const LaserEditor: FC = () => {
+const App: FC = () => {
   const editor = useMemo(() => {
     const editor = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
     editor.plugin.register(new BoldPlugin(), new ImagePlugin(editor, false));
@@ -26,7 +26,7 @@ const LaserEditor: FC = () => {
     window.BlockDelta = BlockDelta;
   }, [editor]);
 
-  return <Laser editor={editor}></Laser>;
+  return <Editable editor={editor}></Editable>;
 };
 
-ReactDOM.render(<LaserEditor />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById("root"));
