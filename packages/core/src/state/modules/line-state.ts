@@ -1,7 +1,8 @@
 import type { AttributeMap } from "block-kit-delta";
 import type { Op } from "block-kit-delta";
-import { Delta } from "block-kit-delta";
+import { Delta, getOpLength } from "block-kit-delta";
 import { isInsertOp } from "block-kit-delta";
+import { OpIterator } from "block-kit-delta";
 
 import { Key } from "../utils/key";
 import type { BlockState } from "./block-state";
@@ -180,6 +181,32 @@ export class LineState {
    */
   public next(len = 1) {
     return this.parent.getLine(this.index + len);
+  }
+
+  /**
+   * 获取行片段
+   * @param start
+   * @param end
+   */
+  public slice(start: number, end: number) {
+    const ops = this.getOps();
+    if (!start && end >= this.length) {
+      return ops;
+    }
+    const nextOps: Op[] = [];
+    const iter = new OpIterator(ops);
+    let index = 0;
+    while (index < end && iter.hasNext()) {
+      let nextOp;
+      if (index < start) {
+        nextOp = iter.next(start - index);
+      } else {
+        nextOp = iter.next(end - index);
+        nextOps.push(nextOp);
+      }
+      index = index + getOpLength(nextOp);
+    }
+    return nextOps;
   }
 
   /**

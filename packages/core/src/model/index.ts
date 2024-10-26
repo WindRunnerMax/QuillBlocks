@@ -3,8 +3,18 @@ import type { LeafState } from "../state/modules/leaf-state";
 import type { LineState } from "../state/modules/line-state";
 
 export class Model {
-  private DOM_MODEL = new WeakMap<HTMLElement, BlockState | LineState | LeafState>();
-  private MODEL_DOM = new WeakMap<BlockState | LineState | LeafState, HTMLElement>();
+  private DOM_MODEL: WeakMap<HTMLElement, BlockState | LineState | LeafState>;
+  private MODEL_DOM: WeakMap<BlockState | LineState | LeafState, HTMLElement>;
+
+  constructor() {
+    this.DOM_MODEL = new WeakMap();
+    this.MODEL_DOM = new WeakMap();
+  }
+
+  public destroy() {
+    this.DOM_MODEL = new WeakMap();
+    this.MODEL_DOM = new WeakMap();
+  }
 
   public setBlockModel(node: HTMLDivElement, state: BlockState) {
     this.DOM_MODEL.set(node, state);
@@ -49,10 +59,5 @@ export class Model {
   public getLeafNode(state: LeafState | null): HTMLSpanElement | null {
     if (!state) return null;
     return <HTMLSpanElement>this.MODEL_DOM.get(state) || null;
-  }
-
-  destroy() {
-    this.DOM_MODEL = new WeakMap();
-    this.MODEL_DOM = new WeakMap();
   }
 }

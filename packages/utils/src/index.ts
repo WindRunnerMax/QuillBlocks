@@ -2,6 +2,7 @@ export { KEY_CODE } from "./constant";
 export type { EventFn, Func, Reflex } from "laser-utils";
 export {
   Bind,
+  Clipboard,
   cs,
   DEFAULT_PRIORITY,
   getId,
