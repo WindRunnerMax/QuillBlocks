@@ -1,3 +1,4 @@
+import "./index.scss";
 import "@arco-design/web-react/es/style/index.less";
 
 import { Editor, LOG_LEVEL } from "block-kit-core";
@@ -9,13 +10,18 @@ import ReactDOM from "react-dom";
 
 import { BoldPlugin } from "../src/bold";
 import { ImagePlugin } from "../src/image";
+import { MentionPlugin } from "../src/mention";
 import { INIT } from "./block";
 import { schema } from "./schema";
 
 const App: FC = () => {
   const editor = useMemo(() => {
     const editor = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
-    editor.plugin.register(new BoldPlugin(), new ImagePlugin(editor, false));
+    editor.plugin.register(
+      new BoldPlugin(),
+      new ImagePlugin(editor, false),
+      new MentionPlugin(editor, false)
+    );
     return editor;
   }, []);
 

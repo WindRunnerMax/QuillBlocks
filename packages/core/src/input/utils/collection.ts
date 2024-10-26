@@ -3,6 +3,7 @@ import { getOpLength } from "block-kit-delta";
 
 import type { Editor } from "../../editor";
 import type { Range } from "../../selection/modules/range";
+import type { LeafState } from "../../state/modules/leaf-state";
 
 /**
  * 基于 Ops 获取 Length 位置的 Op
@@ -43,4 +44,25 @@ export const pickOpAtRange = (editor: Editor, range: Range): Op | null => {
   if (!line) return null;
   const ops = line.getOps();
   return pickOpAtLength(ops, range.start.offset);
+};
+
+/**
+ * 基于 Range 获取索引位置的 Leaf
+ * @param editor
+ * @param range 折叠状态的 Range
+ */
+export const pickLeafAtRange = (editor: Editor, range: Range): LeafState | null => {
+  const block = editor.state.block;
+  const line = block.getLine(range.start.line);
+  if (!line) return null;
+  const leaves = line.getLeaves();
+  let index = length;
+  for (const leaf of leaves) {
+    const opLength = leaf.length;
+    if (opLength >= index) {
+      return leaf;
+    }
+    index = index - opLength;
+  }
+  return null;
 };

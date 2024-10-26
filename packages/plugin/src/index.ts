@@ -11,3 +11,5 @@ export {
   LOADING_STATUS,
   MIN_WIDTH,
 } from "./image/types";
+export { MentionPlugin } from "./mention";
+export { MENTION_KEY, MENTION_NAME } from "./mention/types";

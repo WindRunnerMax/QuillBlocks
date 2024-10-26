@@ -10,7 +10,7 @@ import { DIRECTION } from "../types";
  */
 export const getRootSelection = (root?: Element): DOMSelection | null => {
   if (root) {
-    // 在 shadowRoot 中需要获取 ownerDocument 的 Selection
+    // 在 iframe 中需要获取 ownerDocument 的 Selection
     const doc = root.ownerDocument;
     const sel = doc.getSelection();
     return sel;

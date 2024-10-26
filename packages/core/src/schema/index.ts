@@ -15,19 +15,10 @@ export class Schema {
 
   constructor(schema: EditorSchema) {
     for (const [key, value] of Object.entries(schema)) {
-      if (value.void) {
-        this.void.add(key);
-        this.block.add(key);
-      }
-      if (value.block) {
-        this.block.add(key);
-      }
-      if (value.inline) {
-        this.inline.add(key);
-      }
-      if (value.tailMark) {
-        this.tailMark.add(key);
-      }
+      value.void && this.void.add(key);
+      value.block && this.block.add(key);
+      value.inline && this.inline.add(key);
+      value.tailMark && this.tailMark.add(key);
     }
   }
 

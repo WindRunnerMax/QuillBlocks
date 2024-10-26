@@ -72,15 +72,17 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   // other siblings that may have been rendered alongside them.)
   const selector = `[${LEAF_STRING}], [${ZERO_SPACE_KEY}]`;
   // Maybe use LineState Model to iterate over node ?
+  // 所有文本类型标记的节点
   const leaves = Array.from(lineNode.querySelectorAll(selector));
   let start = 0;
   for (const leaf of leaves) {
     if (!leaf || !(leaf instanceof HTMLElement) || leaf.textContent === null) {
       continue;
     }
+    // Leaf 节点的长度, 即处理 offset 关注的实际偏移量
     let len = leaf.textContent.length;
     if (leaf.hasAttribute(ZERO_SPACE_KEY)) {
-      // TODO: void element & fake length
+      // 这里的长度可能会被 void element & fake length 影响
       len = 1;
     }
 

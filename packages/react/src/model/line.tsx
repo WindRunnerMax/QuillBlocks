@@ -34,13 +34,7 @@ const LineView: FC<{
       nodes.push(<EOLModel key={EOL} editor={editor} leafState={leaf} />);
       return nodes;
     }
-    const firstLeaf = textLeaves[0];
     const lastLeaf = textLeaves[textLeaves.length - 1];
-    // COMPAT: inline-void 在行首时需要预设零宽字符来放置光标
-    if (firstLeaf && firstLeaf.void && firstLeaf.inline) {
-      const leaf = new LeafState({ insert: EOL }, 0, lineState);
-      nodes.unshift(<EOLModel key={-1} editor={editor} leafState={leaf} />);
-    }
     // COMPAT: inline-void 在行未时需要预设零宽字符来放置光标
     if (lastLeaf && lastLeaf.void && lastLeaf.inline) {
       const leaf = new LeafState({ insert: EOL }, lastLeaf.offset + 1, lineState);

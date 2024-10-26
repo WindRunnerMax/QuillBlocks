@@ -10,6 +10,7 @@ import type { SelectionPlugin } from "../modules/selection";
 
 type Props = {
   leaf: LeafState;
+  border?: boolean;
   className?: string;
   selection: SelectionPlugin;
 };
@@ -52,11 +53,15 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
 
   public render() {
     const selected = this.state.selected;
+    const { border = true } = this.props;
     if (this.props.selection.readonly) {
       return this.props.children;
     }
     return (
-      <div className={cs(this.props.className, selected && "doc-block-selected")} data-selection>
+      <div
+        className={cs(this.props.className, selected && border && "doc-block-selected")}
+        data-selection
+      >
         {React.Children.map(this.props.children, child => {
           if (React.isValidElement(child)) {
             const { props } = child;

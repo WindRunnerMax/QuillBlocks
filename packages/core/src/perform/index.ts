@@ -1,7 +1,7 @@
 import { Delta, EOL } from "block-kit-delta";
 
 import type { Editor } from "../editor";
-import { pickOpAtRange } from "../input/utils/collection";
+import { pickLeafAtRange } from "../input/utils/collection";
 import type { Range } from "../selection/modules/range";
 import { RawRange } from "../selection/modules/raw-range";
 
@@ -22,11 +22,11 @@ export class Perform {
     if (!raw) {
       return void 0;
     }
-    const indexOp = pickOpAtRange(this.editor, sel);
-    if (this.editor.schema.isVoid(indexOp)) {
+    const leaf = pickLeafAtRange(this.editor, sel);
+    if (leaf && leaf.block && leaf.block) {
       return void 0;
     }
-    const attributes = this.editor.schema.filterTailMark(indexOp);
+    const attributes = this.editor.schema.filterTailMark(leaf && leaf.op);
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });
   };
