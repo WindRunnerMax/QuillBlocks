@@ -1,6 +1,7 @@
 import { Delta } from "block-kit-delta";
 
 import { Clipboard } from "../clipboard";
+import { Command } from "../command";
 import { Event } from "../event";
 import { History } from "../history";
 import { Input } from "../input";
@@ -40,6 +41,8 @@ export class Editor {
   public clipboard: Clipboard;
   /** 执行模块 */
   public perform: Perform;
+  /** 命令模块 */
+  public command: Command;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
@@ -55,6 +58,7 @@ export class Editor {
     this.history = new History(this);
     this.clipboard = new Clipboard(this);
     this.perform = new Perform(this);
+    this.command = new Command();
   }
 
   /**
@@ -94,6 +98,7 @@ export class Editor {
     this.selection.destroy();
     this.history.destroy();
     this.clipboard.destroy();
+    this.command.destroy();
     this.state.set(EDITOR_STATE.MOUNTED, false);
   }
 }
