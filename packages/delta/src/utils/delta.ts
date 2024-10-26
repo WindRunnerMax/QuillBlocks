@@ -26,8 +26,8 @@ export const deltaEndsWith = (delta: Delta, text: string): boolean => {
 
 /**
  * 标准化独立 EOL 字符
- * 方便处理 Ops 的换行操作
  * @param ops
+ * @note 方便处理 Ops 的换行操作
  */
 export const normalizeEOL = (ops: Ops) => {
   const collection: Ops = [];
@@ -50,9 +50,8 @@ export const normalizeEOL = (ops: Ops) => {
     const part = op.insert.split(EOL);
     part.forEach((text, index) => {
       text && collect({ insert: text, attributes });
-      if (index < part.length - 1) {
-        collect({ insert: EOL, attributes });
-      }
+      if (index === part.length - 1) return void 0;
+      collect({ insert: EOL, attributes });
     });
   }
   return collection;

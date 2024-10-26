@@ -11,8 +11,10 @@ import { Paste } from "./modules/paste";
 import { TEXT_DOC } from "./types";
 
 export class Clipboard {
-  private copyModule: Copy;
-  private pasteModule: Paste;
+  /** Copy Module */
+  public copyModule: Copy;
+  /** Paste Module */
+  public pasteModule: Paste;
 
   /**
    * 构造函数
@@ -21,8 +23,8 @@ export class Clipboard {
   constructor(private editor: Editor) {
     this.copyModule = new Copy(editor);
     this.pasteModule = new Paste(editor);
-    this.editor.event.on(EDITOR_EVENT.COPY, this.onCopy);
     this.editor.event.on(EDITOR_EVENT.CUT, this.onCut);
+    this.editor.event.on(EDITOR_EVENT.COPY, this.onCopy);
     this.editor.event.on(EDITOR_EVENT.PASTE, this.onPaste);
   }
 
@@ -30,8 +32,8 @@ export class Clipboard {
    * 销毁模块
    */
   public destroy() {
-    this.editor.event.off(EDITOR_EVENT.COPY, this.onCopy);
     this.editor.event.off(EDITOR_EVENT.CUT, this.onCut);
+    this.editor.event.off(EDITOR_EVENT.COPY, this.onCopy);
     this.editor.event.off(EDITOR_EVENT.PASTE, this.onPaste);
   }
 
@@ -58,7 +60,6 @@ export class Clipboard {
     if (!delta.ops.length) return void 0;
     this.copyModule.copy(delta);
     this.editor.selection.focus();
-    this.editor.selection.set(sel);
   };
 
   /**

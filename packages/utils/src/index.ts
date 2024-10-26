@@ -1,4 +1,4 @@
-export { KEY_CODE } from "./constant";
+export { FALSE, KEY_CODE, TRUE } from "./constant";
 export type { EventFn, Func, Reflex } from "laser-utils";
 export {
   Bind,
@@ -18,12 +18,14 @@ export {
   isDOMNode,
   isDOMText,
   isEmptyValue,
+  isFalsy,
   isFunction,
   isHTMLElement,
   isNil,
   isNumber,
   isObject,
   isString,
+  isTruly,
   Object,
   ROOT_BLOCK,
   TSON,

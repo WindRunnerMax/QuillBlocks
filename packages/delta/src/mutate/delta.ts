@@ -11,7 +11,7 @@ import { isEqualAttributes, isEqualOp } from "../utils/equal";
 import { MutateIterator } from "./iterator";
 
 export class MutateDelta extends Delta {
-  constructor(ops: Op[]) {
+  constructor(ops?: Op[]) {
     super(ops);
   }
 

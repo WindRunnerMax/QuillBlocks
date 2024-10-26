@@ -1,6 +1,6 @@
 import { EOL } from "block-kit-delta";
 
-import { LINE_TAG } from ".";
+import { LINE_TAG } from "../types";
 
 /**
  * 序列化 HTML 到 文本

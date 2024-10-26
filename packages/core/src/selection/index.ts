@@ -133,7 +133,9 @@ export class Selection {
    * 聚焦选区
    */
   public focus() {
-    if (this.editor.state.isFocused()) return void 0;
+    if (this.editor.state.isFocused()) {
+      return void 0;
+    }
     this.editor.getContainer().focus();
     this.current && this.updateDOMSelection();
   }

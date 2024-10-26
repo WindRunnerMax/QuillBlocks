@@ -3,7 +3,7 @@ import { isDOMText, TEXT_PLAIN } from "block-kit-utils";
 
 import type { Editor } from "../../editor";
 import { CALLER_TYPE } from "../../plugin/types";
-import type { ApplyPasteContext, PasteContext } from "../types";
+import type { DeserializeContext, PasteContext } from "../types";
 
 export class Paste {
   constructor(private editor: Editor) {}
@@ -13,7 +13,7 @@ export class Paste {
    * @param delta
    */
   public applyDelta(delta: Delta) {
-    const context: ApplyPasteContext = { delta };
+    const context: PasteContext = { delta };
     this.editor.plugin.call(CALLER_TYPE.WILL_PASTE_NODES, context);
     this.editor.logger.info("Editor Will Apply:", context.delta);
     try {
@@ -40,7 +40,7 @@ export class Paste {
    */
   public applyFiles(files: File[]) {
     const root = document.createDocumentFragment();
-    const context: PasteContext = { html: root, delta: new Delta(), files };
+    const context: DeserializeContext = { html: root, delta: new Delta(), files };
     this.editor.plugin.call(CALLER_TYPE.DESERIALIZE, context);
     this.applyDelta(context.delta);
   }
@@ -51,13 +51,13 @@ export class Paste {
    */
   public deserialize(current: Node): Delta {
     const delta = new Delta();
-    // 结束条件 `Text`、`Image`等节点都会在此时处理
+    // 结束条件 Text、Image 等节点都会在此时处理
     if (!current.childNodes.length) {
       if (isDOMText(current)) {
         const text = current.textContent || "";
         delta.insert(text);
       } else {
-        const context: PasteContext = { delta, html: current };
+        const context: DeserializeContext = { delta, html: current };
         this.editor.plugin.call(CALLER_TYPE.DESERIALIZE, context);
       }
       return delta;
@@ -67,7 +67,7 @@ export class Paste {
       const newDelta = this.deserialize(child);
       delta.ops.push(...newDelta.ops);
     }
-    const context: PasteContext = { delta, html: current };
+    const context: DeserializeContext = { delta, html: current };
     this.editor.plugin.call(CALLER_TYPE.DESERIALIZE, context);
     return context.delta;
   }

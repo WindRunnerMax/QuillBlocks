@@ -2,8 +2,8 @@ import type { AttributeMap, Op } from "block-kit-delta";
 import type { P } from "block-kit-utils/dist/es/types";
 
 import type {
-  ApplyPasteContext,
   CopyContext,
+  DeserializeContext,
   PasteContext,
   SerializeContext,
 } from "../../clipboard/types";
@@ -25,9 +25,9 @@ export abstract class CorePlugin {
   /** 将 Fragment 序列化为 HTML  */
   public serialize?(context: SerializeContext): void;
   /** 将 HTML 反序列化为 Fragment  */
-  public deserialize?(context: PasteContext): void;
+  public deserialize?(context: DeserializeContext): void;
   /** 内容即将写入剪贴板 */
   public willSetToClipboard?(context: CopyContext): void;
   /** 粘贴的内容即将应用到编辑器 */
-  public willApplyPasteNodes?(context: ApplyPasteContext): void;
+  public willApplyPasteNodes?(context: PasteContext): void;
 }

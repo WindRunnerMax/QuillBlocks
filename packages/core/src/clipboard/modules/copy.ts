@@ -1,12 +1,13 @@
 import type { Delta } from "block-kit-delta";
-import { isEOLOp } from "block-kit-delta";
+import type { Op } from "block-kit-delta";
+import { EOL, isEOLOp, normalizeEOL } from "block-kit-delta";
 import { Clipboard, TEXT_HTML, TEXT_PLAIN } from "block-kit-utils";
 
 import type { Editor } from "../../editor";
 import { CALLER_TYPE } from "../../plugin/types";
 import type { CopyContext, SerializeContext } from "../types";
 import { LINE_TAG, TEXT_DOC } from "../types";
-import { getFragmentText, serializeHTML } from "../types/serialize";
+import { getFragmentText, serializeHTML } from "../utils/serialize";
 
 export class Copy {
   constructor(private editor: Editor) {}
@@ -28,7 +29,7 @@ export class Copy {
       [TEXT_DOC]: editorText,
     };
     this.editor.logger.info("Set Clipboard Data:", dataTransfer);
-    Clipboard.write(dataTransfer);
+    Clipboard.execCopyCommand(dataTransfer);
   }
 
   /**
@@ -41,9 +42,10 @@ export class Copy {
   public serialize<T extends Node>(delta: Delta, rootNode?: T): T {
     const root = rootNode || document.createDocumentFragment();
     let lineFragment = document.createDocumentFragment();
-    for (const op of delta.ops) {
+    const ops = normalizeEOL(delta.ops);
+    for (const op of ops) {
       if (isEOLOp(op)) {
-        const context: SerializeContext = { op: op, html: lineFragment };
+        const context: SerializeContext = { op, html: lineFragment };
         this.editor.plugin.call(CALLER_TYPE.SERIALIZE, context);
         const lineNode = document.createElement("div");
         lineNode.setAttribute(LINE_TAG, "true");
@@ -54,9 +56,18 @@ export class Copy {
       }
       const text = op.insert || "";
       const textNode = document.createTextNode(text);
-      const context: SerializeContext = { op: op, html: textNode };
+      const context: SerializeContext = { op, html: textNode };
       this.editor.plugin.call(CALLER_TYPE.SERIALIZE, context);
       lineFragment.appendChild(context.html);
+    }
+    if (lineFragment.childNodes.length) {
+      const op: Op = { insert: EOL };
+      const context: SerializeContext = { op, html: lineFragment };
+      this.editor.plugin.call(CALLER_TYPE.SERIALIZE, context);
+      const lineNode = document.createElement("div");
+      lineNode.setAttribute(LINE_TAG, "true");
+      lineNode.appendChild(context.html);
+      root.appendChild(lineNode);
     }
     return root as T;
   }

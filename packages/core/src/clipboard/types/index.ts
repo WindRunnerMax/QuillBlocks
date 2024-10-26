@@ -16,12 +16,12 @@ export type CopyContext = {
   html: Node;
 };
 
-export type PasteContext = {
+export type DeserializeContext = {
   delta: Delta;
   html: Node;
   files?: File[];
 };
 
-export type ApplyPasteContext = {
+export type PasteContext = {
   delta: Delta;
 };

@@ -1,3 +1,16 @@
+export type {
+  CopyContext,
+  DeserializeContext,
+  PasteContext,
+  SerializeContext,
+} from "./clipboard/types/index";
+export {
+  applyLineMarker,
+  applyMarker,
+  BLOCK_TAG_NAME,
+  isMatchBlockTag,
+  isMatchHTMLTag,
+} from "./clipboard/utils/deserialize";
 export { Editor } from "./editor";
 export type { EventMapKeys } from "./event/bus/types";
 export type { ContentChangeEvent, SelectionChangeEvent } from "./event/bus/types";

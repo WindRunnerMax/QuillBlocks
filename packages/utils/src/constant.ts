@@ -21,3 +21,9 @@ export const KEY_CODE = {
   Y: 89,
   A: 65,
 };
+
+/** Truly */
+export const TRUE = "true";
+
+/** Falsy */
+export const FALSE = "false";

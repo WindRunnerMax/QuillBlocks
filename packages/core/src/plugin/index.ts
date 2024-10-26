@@ -1,4 +1,4 @@
-import { DEFAULT_PRIORITY } from "block-kit-utils";
+import { DEFAULT_PRIORITY, isFunction } from "block-kit-utils";
 
 import type { Editor } from "../editor";
 import type { CorePlugin } from "./modules/implement";
@@ -23,6 +23,7 @@ export class Plugin {
     for (const plugin of this.current) {
       plugin.destroy();
     }
+    this.current = [];
   }
 
   /**
@@ -30,7 +31,8 @@ export class Plugin {
    * @param plugins
    * @note 支持单次批量注册
    */
-  public register = (...plugins: CorePlugin[]) => {
+  public register(...plugins: CorePlugin[]) {
+    this.destroy();
     const map: Record<string, CorePlugin> = {};
     for (const plugin of plugins) {
       map[plugin.key] = plugin;
@@ -39,7 +41,7 @@ export class Plugin {
     this.current = Object.values(map).sort(
       (a, b) => (a.priority || priority) - (b.priority || priority)
     );
-  };
+  }
 
   /**
    * 批量调度插件 Hook
