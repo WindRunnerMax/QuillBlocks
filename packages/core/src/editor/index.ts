@@ -6,6 +6,7 @@ import { History } from "../history";
 import { Input } from "../input";
 import { LOG_LEVEL, Logger } from "../log";
 import { Model } from "../model";
+import { Perform } from "../perform";
 import { Plugin } from "../plugin";
 import { Schema } from "../schema";
 import { Selection } from "../selection";
@@ -16,7 +17,7 @@ import { BLOCK_LIKE } from "./utils/constant";
 
 export class Editor {
   /** 编辑容器 */
-  private container: HTMLDivElement;
+  private container: HTMLDivElement | null;
   /** 配置模块 */
   public schema: Schema;
   /** 事件模块 */
@@ -37,11 +38,12 @@ export class Editor {
   public history: History;
   /** 剪贴板模块 */
   public clipboard: Clipboard;
+  /** 执行模块 */
+  public perform: Perform;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
-    this.container = document.createElement("div");
-    this.container.setAttribute("data-type", "mock");
+    this.container = null;
     this.logger = new Logger(logLevel);
     this.schema = new Schema(schema);
     this.model = new Model();
@@ -52,6 +54,7 @@ export class Editor {
     this.plugin = new Plugin(this);
     this.history = new History(this);
     this.clipboard = new Clipboard(this);
+    this.perform = new Perform(this);
   }
 
   /**
@@ -72,6 +75,11 @@ export class Editor {
    * @returns
    */
   public getContainer() {
+    if (!this.container) {
+      const div = document.createElement("div");
+      div.setAttribute("data-type", "mock");
+      return div;
+    }
     return this.container;
   }
 

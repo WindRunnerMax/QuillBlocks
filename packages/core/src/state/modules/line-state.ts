@@ -197,7 +197,7 @@ export class LineState {
     const iter = new OpIterator(ops);
     let index = 0;
     while (index < end && iter.hasNext()) {
-      let nextOp;
+      let nextOp: Op | null = null;
       if (index < start) {
         nextOp = iter.next(start - index);
       } else {

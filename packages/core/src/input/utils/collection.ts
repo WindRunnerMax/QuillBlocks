@@ -35,7 +35,7 @@ export const pickOpAtIndex = (editor: Editor, length: number): Op | null => {
 /**
  * 基于 Range 获取索引位置的 Op
  * @param editor
- * @param range
+ * @param range 折叠状态的 Range
  */
 export const pickOpAtRange = (editor: Editor, range: Range): Op | null => {
   const block = editor.state.block;

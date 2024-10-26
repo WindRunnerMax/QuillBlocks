@@ -1,22 +1,19 @@
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
 import { EDITOR_STATE } from "../state/types";
-import {
-  deleteBackward,
-  deleteForward,
-  deleteFragment,
-  insertBreak,
-  insertText,
-} from "./modules/apply";
 
 export class Input {
+  /**
+   * 构造函数
+   * @param editor
+   */
   constructor(private editor: Editor) {
     this.editor.event.on(EDITOR_EVENT.BEFORE_INPUT, this.onBeforeInput);
     this.editor.event.on(EDITOR_EVENT.COMPOSITION_END, this.onCompositionEnd);
   }
 
   /**
-   * 销毁插件
+   * 销毁组件
    */
   public destroy() {
     this.editor.event.off(EDITOR_EVENT.BEFORE_INPUT, this.onBeforeInput);
@@ -41,23 +38,23 @@ export class Input {
       case "deleteByComposition":
       case "deleteByCut":
       case "deleteByDrag": {
-        deleteFragment(this.editor, sel);
+        this.editor.perform.deleteFragment(sel);
         break;
       }
       case "deleteWordBackward":
       case "deleteContentBackward": {
-        deleteBackward(this.editor, sel);
+        this.editor.perform.deleteBackward(sel);
         break;
       }
       case "deleteContent":
       case "deleteWordForward":
       case "deleteContentForward": {
-        deleteForward(this.editor, sel);
+        this.editor.perform.deleteForward(sel);
         break;
       }
       case "insertLineBreak":
       case "insertParagraph": {
-        insertBreak(this.editor, sel);
+        this.editor.perform.insertBreak(sel);
         break;
       }
       case "insertFromDrop":
@@ -65,7 +62,7 @@ export class Input {
       case "insertFromYank":
       case "insertReplacementText":
       case "insertText": {
-        data && insertText(this.editor, sel, data);
+        data && this.editor.perform.insertText(sel, data);
         break;
       }
       default:
@@ -80,7 +77,7 @@ export class Input {
   private onCompositionEnd = (event: CompositionEvent) => {
     const data = event.data;
     const sel = this.editor.selection.get();
-    data && sel && insertText(this.editor, sel, data);
+    data && sel && this.editor.perform.insertText(sel, data);
     event.preventDefault();
   };
 }

@@ -1,12 +1,15 @@
 import type { Delta } from "block-kit-delta";
-import { Clipboard } from "block-kit-utils";
 
+import type { Op } from "../../../../delta/dist";
 import { NODE_KEY } from "../../model/types";
 
 export const LINE_TAG = NODE_KEY;
-export const TEXT_HTML = Clipboard.TEXT_HTML;
-export const TEXT_PLAIN = Clipboard.TEXT_PLAIN;
 export const TEXT_DOC = "application/x-rich-text";
+
+export type SerializeContext = {
+  op: Op;
+  html: Node;
+};
 
 export type CopyContext = {
   delta: Delta;
@@ -19,6 +22,6 @@ export type PasteContext = {
   files?: File[];
 };
 
-export type PasteNodesContext = {
+export type ApplyPasteContext = {
   delta: Delta;
 };

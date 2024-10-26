@@ -1,7 +1,12 @@
 import type { AttributeMap, Op } from "block-kit-delta";
 import type { P } from "block-kit-utils/dist/es/types";
 
-import type { CopyContext, PasteContext, PasteNodesContext } from "../../clipboard/types";
+import type {
+  ApplyPasteContext,
+  CopyContext,
+  PasteContext,
+  SerializeContext,
+} from "../../clipboard/types";
 import type { LeafContext, LineContext } from "../types/context";
 
 export abstract class CorePlugin {
@@ -18,11 +23,11 @@ export abstract class CorePlugin {
   /** 渲染块级子节点 */
   public render?(context: LeafContext): P.Any;
   /** 将 Fragment 序列化为 HTML  */
-  public serialize?(context: CopyContext): void;
+  public serialize?(context: SerializeContext): void;
   /** 将 HTML 反序列化为 Fragment  */
   public deserialize?(context: PasteContext): void;
   /** 内容即将写入剪贴板 */
   public willSetToClipboard?(context: CopyContext): void;
   /** 粘贴的内容即将应用到编辑器 */
-  public willApplyPasteNodes?(context: PasteNodesContext): void;
+  public willApplyPasteNodes?(context: ApplyPasteContext): void;
 }

@@ -2,6 +2,15 @@ export { Editor } from "./editor";
 export type { EventMapKeys } from "./event/bus/types";
 export type { ContentChangeEvent, SelectionChangeEvent } from "./event/bus/types";
 export { EDITOR_EVENT } from "./event/bus/types";
+export { pickOpAtIndex, pickOpAtLength, pickOpAtRange } from "./input/utils/collection";
+export {
+  isArrowDown,
+  isArrowLeft,
+  isArrowRight,
+  isArrowUp,
+  isRedo,
+  isUndo,
+} from "./input/utils/hot-key";
 export { LOG_LEVEL } from "./log";
 export {
   BLOCK_KEY,
@@ -27,5 +36,8 @@ export { RawRange } from "./selection/modules/raw-range";
 export { BlockState } from "./state/modules/block-state";
 export { LeafState } from "./state/modules/leaf-state";
 export { LineState } from "./state/modules/line-state";
+export { Mutate } from "./state/mutate/index";
+export { Iterator } from "./state/mutate/iterator";
 export type { ApplyOptions } from "./state/types";
 export { APPLY_SOURCE, EDITOR_STATE } from "./state/types";
+export { Key, NODE_TO_KEY } from "./state/utils/key";
