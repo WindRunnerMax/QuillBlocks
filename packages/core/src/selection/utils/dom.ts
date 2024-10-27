@@ -1,6 +1,12 @@
 import { isDOMComment, isDOMElement, isDOMText } from "block-kit-utils";
 
-import { EDITABLE, ZERO_ENTER_KEY, ZERO_SPACE_KEY, ZERO_VOID_KEY } from "../../model/types";
+import {
+  EDITABLE,
+  ZERO_EMBED_KEY,
+  ZERO_ENTER_KEY,
+  ZERO_SPACE_KEY,
+  ZERO_VOID_KEY,
+} from "../../model/types";
 import type { Direction, DOMElement, DOMNode, DOMSelection, DOMStaticRange } from "../types";
 import { DIRECTION } from "../types";
 
@@ -184,4 +190,17 @@ export const isVoidZeroNode = (node: Node | null) => {
   return node instanceof HTMLElement
     ? node.hasAttribute(ZERO_VOID_KEY)
     : node.parentElement.hasAttribute(ZERO_VOID_KEY);
+};
+
+/**
+ * Embed Zero 节点 data-zero-embed
+ * @param node
+ */
+export const isEmbedZeroNode = (node: Node | null) => {
+  if (!node || !node.parentElement) {
+    return false;
+  }
+  return node instanceof HTMLElement
+    ? node.hasAttribute(ZERO_EMBED_KEY)
+    : node.parentElement.hasAttribute(ZERO_EMBED_KEY);
 };

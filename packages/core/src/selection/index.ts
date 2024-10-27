@@ -5,7 +5,7 @@ import { EDITOR_STATE } from "../state/types";
 import { Point } from "./modules/point";
 import { Range } from "./modules/range";
 import { RawRange } from "./modules/raw-range";
-import { getRootSelection, getStaticSelection } from "./utils/dom";
+import { getRootSelection, getStaticSelection, isEmbedZeroNode } from "./utils/dom";
 import { isBackward } from "./utils/dom";
 import { toModelRange } from "./utils/model";
 import { isEqualDOMRange, toDOMRange } from "./utils/native";
@@ -162,10 +162,8 @@ export class Selection {
     const firstLeaf = lineState.getLeaf(0);
     const isBlockVoid = firstLeaf && firstLeaf.block && firstLeaf.void;
     const isFocusLineStart = focus.offset === 0 || (isBlockVoid && focus.offset === 1);
-    // 选区会强制变换到末尾节点前
-    const isFocusLineEnd = focus.offset === lineState.length - 1;
+    // 左键且在非首行的首节点时 将选取设置为前一行的末尾
     if (leftArrow && isFocusLineStart) {
-      // 在非首行的首节点时将选取设置为前一行的末尾
       const prevLine = lineState.prev();
       if (!prevLine) return void 0;
       event.preventDefault();
@@ -177,9 +175,12 @@ export class Selection {
       const isBackward = event.shiftKey && range.isCollapsed ? true : range.isBackward;
       const newAnchor = event.shiftKey ? anchor : newFocus.clone();
       this.set(new Range(newAnchor, newFocus, isBackward), true);
+      return void 0;
     }
+    // 由于选区会强制变换到末尾节点前 因此需要取 length - 1
+    const isFocusLineEnd = focus.offset === lineState.length - 1;
+    // 右键且在非末行的末节点时 将选取设置为后一行的首节点
     if (rightArrow && isFocusLineEnd) {
-      // 在非末行的末节点时将选取设置为后一行的首节点
       const nextLine = lineState.next();
       if (!nextLine) return void 0;
       event.preventDefault();
@@ -189,6 +190,17 @@ export class Selection {
       const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
       const newAnchor = event.shiftKey ? anchor : newFocus.clone();
       this.set(new Range(newAnchor, newFocus, isBackward), true);
+      return void 0;
+    }
+    const sel = getStaticSelection();
+    // 右键且在嵌入节点时 将光标放在嵌入节点后
+    if (rightArrow && sel && isEmbedZeroNode(sel.startContainer)) {
+      event.preventDefault();
+      const newFocus = new Point(focus.line, focus.offset + 1);
+      const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
+      const newAnchor = event.shiftKey ? anchor : newFocus.clone();
+      this.set(new Range(newAnchor, newFocus, isBackward), true);
+      return void 0;
     }
   };
 }

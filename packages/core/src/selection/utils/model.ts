@@ -3,7 +3,7 @@ import { getLineNode, getModelElement } from "../../model/utils/dom";
 import { Point } from "../modules/point";
 import { Range } from "../modules/range";
 import type { DOMPoint } from "../types";
-import { isEnterZeroNode, isVoidZeroNode } from "./dom";
+import { isEmbedZeroNode, isEnterZeroNode, isVoidZeroNode } from "./dom";
 import { normalizeDOMPoint } from "./native";
 
 /**
@@ -46,6 +46,12 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   const isVoidZero = isVoidZeroNode(node);
   if (isVoidZero && offset !== 1) {
     return new Point(lineIndex, 1);
+  }
+  // Case 4: 光标位于 data-zero-embed 节点后时, 需要将其修正为节点前
+  // [embed][cursor]\n => [cursor][embed]\n
+  const isEmbedZero = isEmbedZeroNode(node);
+  if (isEmbedZero && offset) {
+    return new Point(lineIndex, leafOffset - 1);
   }
 
   return new Point(lineIndex, leafOffset);

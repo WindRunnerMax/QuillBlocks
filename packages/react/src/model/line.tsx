@@ -1,6 +1,5 @@
 import type { Editor, LineState } from "block-kit-core";
 import { NODE_KEY } from "block-kit-core";
-import { LeafState } from "block-kit-core";
 import { EOL } from "block-kit-delta";
 import type { FC } from "react";
 import React, { useMemo } from "react";
@@ -34,14 +33,14 @@ const LineView: FC<{
       nodes.push(<EOLModel key={EOL} editor={editor} leafState={leaf} />);
       return nodes;
     }
-    const lastLeaf = textLeaves[textLeaves.length - 1];
     // COMPAT: inline-void 在行未时需要预设零宽字符来放置光标
-    if (lastLeaf && lastLeaf.void && lastLeaf.inline) {
-      const leaf = new LeafState({ insert: EOL }, lastLeaf.offset + 1, lineState);
-      nodes.push(<EOLModel key={EOL} editor={editor} leafState={leaf} />);
+    const eolLeaf = leaves[leaves.length - 1];
+    const lastLeaf = textLeaves[textLeaves.length - 1];
+    if (lastLeaf && eolLeaf && lastLeaf.void && lastLeaf.inline) {
+      nodes.push(<EOLModel key={EOL} editor={editor} leafState={eolLeaf} />);
     }
     return nodes;
-  }, [editor, leaves, lineState]);
+  }, [editor, leaves]);
 
   const context = useMemo(() => {
     const context: ReactLineContext = {

@@ -604,3 +604,106 @@ export const getTextNode = (node: Node | null): Text | null => {
   return null;
 };
 ```
+
+## Embed 节点
+我们的`Embed`节点实际上应该是`InlineVoid`节点，但是因为组件名太长所以就起了别名为`Embed`，而在具体实现的时候遇到了太多了的问题，我只得感慨纸上得来终觉浅，绝知此事要躬行。在之前我一直都是在使用富文本引擎来实现应用层的功能，而虽然我也基本阅读过`slate`的代码并且提过了一些`pr`来解决一些问题，但在真正想对照实现的时候发现问题实在是太多。
+
+现在的问题是我们是借助浏览器本身的`contentable`来绘制的光标位置，而不是采用自绘选区的方式，这样就导致我们必须要依赖浏览器本身对于选区的实现。而此时如果我们是实现`InlineVoid`节点且行内只有该节点时，就会导致光标无法放在周围的位置上，这跟文本内容的表现是不一致的。在下面的例子中，中间的行是做不到单击时光标落在节点末尾的，虽然可以通过双击或者方向键来实现，但是此时的节点并不是在文本节点上的，与我们的选区设计不符。
+
+```html
+<div contenteditable style="outline: none">
+  <div data-node><span data-leaf><span>123</span></span></div>
+  <div data-node>
+    <span data-leaf><span contenteditable="false">321</span></span>
+  </div>
+  <div data-node><span data-leaf><span>123</span></span></div>
+</div>
+```
+
+对于这个问题的解决，无论是`quill`、`slate`都是在`Embed`节点的两侧添加了零宽字符`&#xFEFF;`用以放置光标，当然这仅仅是当`Embed`节点左右没有文本节点时的情况，如果两侧有文本则不需要这样的特殊处理。那么如果我们此时如果按照`slate`的设计，即此时存在三个可选位置可以放置光标作为选区，即`Embed`本身以及左右光标`CARET`，那么此时就会存在三个零宽字符位置。
+
+```html
+<span data-zero-enter> </span>
+<span data-zero-embed> </span>
+<span data-zero-enter> </span>
+```
+
+但是有个重要的问题是，零宽字符是存在两个光标位置的，即`0|1`两个`offset`，那么此时我们就存在了`4`个光标位置`|||`，而此时我们的`Model`在此时只有两个节点即` \n`，那么即使我们不允许光标放在`\n`后，也才能勉强对应上三个光标位置，而这里最重要的是我们前边说的一个零宽字符存在两个`offset`，那么对于`toDOMPoint`时同一个光标位置的处理就会存在两个情况。
+
+
+```html
+<span data-zero-enter> |</span>
+<span data-zero-embed>| </span>
+<span data-zero-enter> </span>
+```
+
+而我们最开始设计`toDOMPoint`的时候优先将光标放置于前一个节点的末尾，那么我们点击行末尾的时候，此时的光标会位于`zero-enter`节点后，那么此时的`offset`是`2`，而此时由于我们的选区校正存在，这里的`offset`会被校正为`1`。那么此时我们的选区则会被校正为第一个`data-zero-enter`节点，且`offset`的值为`1`，那么此时我们本应该希望放置于最后一个`data-zero-enter`节点上的光标，现在却被校正到首个节点上了。
+
+```html
+<span data-zero-enter> |</span>
+<span data-zero-embed> </span>
+<span data-zero-enter> </span>
+```
+
+那么假设我们最开始不将`offset`的`2`值校正为`1`的话，此时我们的选区则会被设置到`data-zero-embed`节点的`offset -> 1`位置上，依然不是我们希望的光标位置，因此这里依然不是正确的选区位置，这样依然需要存在额外校正的情况。
+
+```html
+<span data-zero-enter> </span>
+<span data-zero-embed> |</span>
+<span data-zero-enter> </span>
+```
+
+那么这里如果改造起来可能存在不少问题，主要是这里存在了两个节点的突变，那么我们如果换个思路减少零宽字符的节点，即去掉第一个零宽字符节点。那么我们这样就无法保持三个选区状态了，而如果希望`zero-embed`的`0 offset`为左光标，`offset 1`为嵌入内容的选中效果则是不容易实现的，因为光标本身不能是左出现右消失的状态，这里需要样式的额外处理才可以。
+
+那么根据上述的问题，`data-zero-embed`节点则会是我们要处理的左光标，右光标则依然是`data-zero-enter`节点，左光标的处理则需要让右侧的`Embed`内容存在`margin`样式。那么在默认情况下，此时我们在校正`\n`节点后的选区`offset`为`1`，默认的选区位置则如下所示。
+
+```html
+<span data-zero-embed> |</span>
+<span data-zero-enter> </span>
+```
+
+那么这里依然会有问题，我们点击行末尾时，此时的选区则会被调度到左光标的位置上，这里的效果显然是不合适的，因为这样的话我们无法聚焦到行末，因此这里我们需要为`toDOMPoint`设置额外的处理逻辑，即取消了默认的`offset`优先逻辑，而是采用`node`优先逻辑，在`data-zero-embed`节点且`offset`为`1`时，优先聚焦到后续的`data-zero-enter`节点`offset -> 0`上。
+
+```js
+const nodeOffset = Math.max(offset - start, 0);
+const nextLeaf = leaves[i + 1];
+// COMPAT: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
+// 即 <s>1|</s><s>1</s> / <s>1</s><s>|1</s>
+// 当前计算方法的默认行为是 1, 而 Embed 节点在末尾时则需要额外的零宽字符放置光标
+// 如果当前节点是 Embed 节点, 并且 offset 为 1, 且下一个节点是 ZeroSpace 节点
+// 需要将焦点转移到下一个节点, 并且 offset 为 0
+if (
+  leaf.hasAttribute(ZERO_EMBED_KEY) &&
+  nodeOffset === 1 &&
+  nextLeaf &&
+  nextLeaf.hasAttribute(ZERO_SPACE_KEY)
+) {
+  return { node: nextLeaf, offset: 0 };
+}
+```
+
+但是此时依然存在问题，因为同节点会存在两个`offset`位置，所以此时我们还是需要先校正`toModelPoint`的位置，即如果光标位于`data-zero-embed`节点后时, 需要将其修正为节点前。
+
+```js
+// Case 4: 光标位于 data-zero-embed 节点后时, 需要将其修正为节点前
+// [embed][cursor]\n => [cursor][embed]\n
+const isEmbedZero = isEmbedZeroNode(node);
+if (isEmbedZero && offset) {
+  return new Point(lineIndex, leafOffset - 1);
+}
+```
+
+那么此时又会出现新的问题，当光标位于节点左时，会导致我们按右键无法移动光标，因为此时的选区会被上述的逻辑校正回原本的位置，因此我们依然需要在`onKeyDown`事件中受控处理这个问题，当选区位于`data-zero-embed`节点时，按下右键则主动调整选区。
+
+```js
+const sel = getStaticSelection();
+if (rightArrow && sel && isEmbedZeroNode(sel.startContainer)) {
+  event.preventDefault();
+  const newFocus = new Point(focus.line, focus.offset + 1);
+  const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
+  const newAnchor = event.shiftKey ? anchor : newFocus.clone();
+  this.set(new Range(newAnchor, newFocus, isBackward), true);
+  return void 0;
+}
+```
+

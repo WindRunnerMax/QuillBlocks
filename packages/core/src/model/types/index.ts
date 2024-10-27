@@ -14,6 +14,7 @@ export const VOID_KEY = "data-void";
 export const ZERO_ENTER_KEY = "data-zero-enter";
 export const ZERO_SPACE_KEY = "data-zero-space";
 export const ZERO_VOID_KEY = "data-zero-void";
+export const ZERO_EMBED_KEY = "data-zero-embed";
 export const ZERO_SYMBOL = "\u200B";
 export const ZERO_NO_BREAK_SYMBOL = "\uFEFF";
 

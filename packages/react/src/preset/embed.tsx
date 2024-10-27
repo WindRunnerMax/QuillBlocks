@@ -20,17 +20,17 @@ export const Embed: FC<EmbedProps> = props => {
   const leafState = context.leafState;
 
   const onMouseDown = () => {
-    const point = new Point(leafState.parent.index, leafState.offset + leafState.length);
+    const point = new Point(leafState.parent.index, leafState.offset + 1);
     const range = new Range(point, point.clone());
     editor.selection.set(range, true);
   };
 
   return (
     <React.Fragment>
-      <ZeroSpace />
+      <ZeroSpace embed />
       <span
         className={props.className}
-        style={{ userSelect: "none", ...props.style }}
+        style={{ margin: "0 1px", ...props.style }}
         contentEditable={false}
         {...{ [VOID_KEY]: true }}
         onMouseDown={onMouseDown}

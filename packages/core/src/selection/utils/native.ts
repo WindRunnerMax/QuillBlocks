@@ -1,7 +1,7 @@
 import { isDOMElement, isDOMText } from "block-kit-utils";
 
 import type { Editor } from "../../editor";
-import { LEAF_STRING, ZERO_SPACE_KEY } from "../../model/types";
+import { LEAF_STRING, ZERO_EMBED_KEY, ZERO_SPACE_KEY } from "../../model/types";
 import type { Point } from "../modules/point";
 import type { Range } from "../modules/range";
 import type { DOMPoint, DOMStaticRange } from "../types";
@@ -75,25 +75,42 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   // 所有文本类型标记的节点
   const leaves = Array.from(lineNode.querySelectorAll(selector));
   let start = 0;
-  for (const leaf of leaves) {
+  for (let i = 0; i < leaves.length; i++) {
+    const leaf = leaves[i];
     if (!leaf || !(leaf instanceof HTMLElement) || leaf.textContent === null) {
       continue;
     }
     // Leaf 节点的长度, 即处理 offset 关注的实际偏移量
     let len = leaf.textContent.length;
     if (leaf.hasAttribute(ZERO_SPACE_KEY)) {
+      // 虽然理论上这里的长度应该为 0, 但此处我们通用地处理为 1
       // 这里的长度可能会被 void element & fake length 影响
       len = 1;
     }
 
     const end = start + len;
     if (offset <= end) {
-      // `Offset` will become the offset of this node
+      // Offset 在此处会被处理为相对于当前节点的偏移量
       // text1text2 offset: 7 -> text1te|xt2
       // current node is text2 -> start = 5
       // end = 5(start) + 5(len) = 10
       // offset = 7 < 10 -> new offset = 7(offset) - 5(start) = 2
-      return { node: leaf, offset: Math.max(offset - start, 0) };
+      const nodeOffset = Math.max(offset - start, 0);
+      const nextLeaf = leaves[i + 1];
+      // COMPAT: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
+      // 即 <s>1|</s><s>1</s> / <s>1</s><s>|1</s>
+      // 当前计算方法的默认行为是 1, 而 Embed 节点在末尾时则需要额外的零宽字符放置光标
+      // 如果当前节点是 Embed 节点, 并且 offset 为 1, 且下一个节点是 ZeroSpace 节点
+      // 需要将焦点转移到下一个节点, 并且 offset 为 0
+      if (
+        leaf.hasAttribute(ZERO_EMBED_KEY) &&
+        nodeOffset === 1 &&
+        nextLeaf &&
+        nextLeaf.hasAttribute(ZERO_SPACE_KEY)
+      ) {
+        return { node: nextLeaf, offset: 0 };
+      }
+      return { node: leaf, offset: nodeOffset };
     }
     start = end;
   }
