@@ -5,7 +5,7 @@ import { EDITOR_STATE } from "../state/types";
 import { Point } from "./modules/point";
 import { Range } from "./modules/range";
 import { RawRange } from "./modules/raw-range";
-import { getRootSelection, getStaticSelection, isEmbedZeroNode } from "./utils/dom";
+import { getRootSelection, getStaticSelection, isEmbedZeroNode, isVoidZeroNode } from "./utils/dom";
 import { isBackward } from "./utils/dom";
 import { toModelRange } from "./utils/model";
 import { isEqualDOMRange, toDOMRange } from "./utils/native";
@@ -159,48 +159,42 @@ export class Selection {
     const blockState = this.editor.state.block;
     const lineState = blockState && blockState.getLine(focus.line);
     if (!blockState || !lineState) return void 0;
-    const firstLeaf = lineState.getLeaf(0);
-    const isBlockVoid = firstLeaf && firstLeaf.block && firstLeaf.void;
-    const isFocusLineStart = focus.offset === 0 || (isBlockVoid && focus.offset === 1);
+    const sel = getSelection();
+    // 判断当前节点是否为 Block Void, 此时光标必定位于 offset 1 处
+    const isBlockVoid = sel && isVoidZeroNode(sel.focusNode);
+    const isFocusLineStart = focus.offset === 0 || isBlockVoid;
+    // 由于选区会强制变换到末尾节点前 因此需要取 length - 1
+    const isFocusLineEnd = focus.offset === lineState.length - 1;
+    let newFocus: Point | null = null;
     // 左键且在非首行的首节点时 将选取设置为前一行的末尾
     if (leftArrow && isFocusLineStart) {
       const prevLine = lineState.prev();
       if (!prevLine) return void 0;
-      event.preventDefault();
       // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
       // 而 Range => start -> end, 只需要判断 isBackward 标识
       // start -> end 实际方向会在 new Range 时处理, 无需在此处实现
-      const newFocus = new Point(prevLine.index, prevLine.length - 1);
-      // 边界条件 选区折叠时 shift + left 一定是反选, 否则取原始选区方向
-      const isBackward = event.shiftKey && range.isCollapsed ? true : range.isBackward;
-      const newAnchor = event.shiftKey ? anchor : newFocus.clone();
-      this.set(new Range(newAnchor, newFocus, isBackward), true);
-      return void 0;
+      newFocus = new Point(prevLine.index, prevLine.length - 1);
     }
-    // 由于选区会强制变换到末尾节点前 因此需要取 length - 1
-    const isFocusLineEnd = focus.offset === lineState.length - 1;
     // 右键且在非末行的末节点时 将选取设置为后一行的首节点
-    if (rightArrow && isFocusLineEnd) {
+    if (!newFocus && rightArrow && isFocusLineEnd) {
       const nextLine = lineState.next();
       if (!nextLine) return void 0;
-      event.preventDefault();
-      const newFocus = new Point(nextLine.index, 0);
-      // 边界条件 选区折叠时 shift + right 一定是正选, 否则取原始选区方向
-      // [focus]\n[anchor] 此时按 right, 会被认为是 反选+折叠, 实际状态会被 new Range 校正
-      const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
-      const newAnchor = event.shiftKey ? anchor : newFocus.clone();
-      this.set(new Range(newAnchor, newFocus, isBackward), true);
-      return void 0;
+      newFocus = new Point(nextLine.index, 0);
     }
-    const sel = getStaticSelection();
     // 右键且在嵌入节点时 将光标放在嵌入节点后
-    if (rightArrow && sel && isEmbedZeroNode(sel.startContainer)) {
+    if (rightArrow && sel && isEmbedZeroNode(sel.focusNode)) {
+      newFocus = new Point(newFocus ? newFocus.line : focus.line, focus.offset + 1);
+    }
+    // 如果存在新的焦点, 则统一更新选区
+    if (newFocus) {
       event.preventDefault();
-      const newFocus = new Point(focus.line, focus.offset + 1);
-      const isBackward = event.shiftKey && range.isCollapsed ? false : range.isBackward;
+      // 1. 选区折叠时 shift + left 一定是反选, 否则取原始选区方向
+      // 2. 选区折叠时 shift + right 一定是正选, 否则取原始选区方向
+      // 若 [focus]\n[anchor] 此时按 right, 会被认为是 反选+折叠, 实际状态会被 new Range 校正
+      const isBackward = event.shiftKey && range.isCollapsed ? !!leftArrow : range.isBackward;
       const newAnchor = event.shiftKey ? anchor : newFocus.clone();
-      this.set(new Range(newAnchor, newFocus, isBackward), true);
-      return void 0;
+      const newRange = new Range(newAnchor, newFocus, isBackward);
+      this.set(newRange, true);
     }
   };
 }

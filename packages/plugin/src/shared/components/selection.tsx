@@ -45,7 +45,8 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
 
   public onSelectionChange(range: Range | null) {
     const leaf = this.props.leaf;
-    const nextState = range ? Range.intersection(leaf.toRange(), range) : false;
+    const leafRange = leaf.toRange();
+    const nextState = range ? Range.intersection(leafRange, range) : false;
     if (this.state.selected !== nextState) {
       this.setState({ selected: nextState });
     }

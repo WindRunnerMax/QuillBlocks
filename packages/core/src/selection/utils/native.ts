@@ -60,12 +60,8 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   const blockState = editor.state.block;
   const lineState = blockState && blockState.getLine(line);
   const lineNode = editor.model.getLineNode(lineState);
-  if (!lineNode) {
-    return { node: null, offset: 0 };
-  }
-  if (isDOMText(lineNode)) {
-    return { node: lineNode, offset };
-  }
+  if (!lineNode) return { node: null, offset: 0 };
+  if (isDOMText(lineNode)) return { node: lineNode, offset: offset };
 
   // For each leaf, we need to isolate its content, which means filtering
   // to its direct text and zero-width spans. (We have to filter out any
@@ -97,23 +93,24 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
       // offset = 7 < 10 -> new offset = 7(offset) - 5(start) = 2
       const nodeOffset = Math.max(offset - start, 0);
       const nextLeaf = leaves[i + 1];
-      // COMPAT: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
+      // CASE1: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
       // 即 <s>1|</s><s>1</s> / <s>1</s><s>|1</s>
       // 当前计算方法的默认行为是 1, 而 Embed 节点在末尾时则需要额外的零宽字符放置光标
-      // 如果当前节点是 Embed 节点, 并且 offset 为 1, 且下一个节点是 ZeroSpace 节点
+      // 如果当前节点是 Embed 节点, 并且 offset 为 1, 并且存在下一个节点时
       // 需要将焦点转移到下一个节点, 并且 offset 为 0
-      if (
-        leaf.hasAttribute(ZERO_EMBED_KEY) &&
-        nodeOffset === 1 &&
-        nextLeaf &&
-        nextLeaf.hasAttribute(ZERO_SPACE_KEY)
-      ) {
+      if (leaf.hasAttribute(ZERO_EMBED_KEY) && nodeOffset && nextLeaf) {
+        return { node: nextLeaf, offset: 0 };
+      }
+      // CASE2: 当 Embed 元素前存在内容且光标位于节点末时, 需要校正到 Embed 节点上
+      // <s>1|</s><e> </e> => <s>1</s><e>| </e>
+      if (nodeOffset === len && nextLeaf && nextLeaf.hasAttribute(ZERO_EMBED_KEY)) {
         return { node: nextLeaf, offset: 0 };
       }
       return { node: leaf, offset: nodeOffset };
     }
     start = end;
   }
+
   return { node: null, offset: 0 };
 };
 
