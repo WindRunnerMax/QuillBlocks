@@ -60,8 +60,13 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   const blockState = editor.state.block;
   const lineState = blockState && blockState.getLine(line);
   const lineNode = editor.model.getLineNode(lineState);
-  if (!lineNode) return { node: null, offset: 0 };
-  if (isDOMText(lineNode)) return { node: lineNode, offset: offset };
+
+  if (!lineNode) {
+    return { node: null, offset: 0 };
+  }
+  if (isDOMText(lineNode)) {
+    return { node: lineNode, offset: offset };
+  }
 
   // For each leaf, we need to isolate its content, which means filtering
   // to its direct text and zero-width spans. (We have to filter out any
@@ -127,7 +132,7 @@ export const toDOMRange = (editor: Editor, range: Range): DOMStaticRange | null 
     return null;
   }
   const domRange = window.document.createRange();
-  // FIX: Range = start -> end
+  // FIX: 选区方向必然是 start -> end
   const { node: startNode, offset: startOffset } = startDOMPoint;
   const { node: endNode, offset: endOffset } = endDOMPoint;
   const startTextNode = getTextNode(startNode);

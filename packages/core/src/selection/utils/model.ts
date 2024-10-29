@@ -40,15 +40,18 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
     return new Point(lineIndex, leafOffset);
   }
   // Case 2: 光标位于 data-zero-void 节点前时, 需要将其修正为节点末
-  // [cursor][void]\n => [void][cursor]\n
-  // Case 3: 光标位于 data-zero-void 节点唤起 IME 输入, 修正为节点末
+  // 若不修正则会导致选区位置问题, 一些诸如删除之类的操作会失效
+  // [[cursor]void]\n => [void[cursor]]\n
+  // Case 3: 光标位于 data-zero-void 节点后其他位置时, 修正为节点末
+  // 唤起 IME 输入时会导致原本零宽字符出现过多文本, 导致选区映射问题
   // [ xxx[cursor]]\n => [ [cursor]xxx]\n
   const isVoidZero = isVoidZeroNode(node);
   if (isVoidZero && offset !== 1) {
     return new Point(lineIndex, 1);
   }
   // Case 4: 光标位于 data-zero-embed 节点后时, 需要将其修正为节点前
-  // [embed][cursor]\n => [cursor][embed]\n
+  // 若不校正会携带 DOM-Point CASE1 的零选区位置, 按下左键无法正常移动光标
+  // [embed[cursor]]\n => [[cursor]embed]\n
   const isEmbedZero = isEmbedZeroNode(node);
   if (isEmbedZero && offset) {
     return new Point(lineIndex, leafOffset - 1);
@@ -68,7 +71,7 @@ export const toModelRange = (editor: Editor, staticSel: StaticRange, isBackward:
   let anchorRangePoint: Point;
   let focusRangePoint: Point;
   if (!collapsed) {
-    // FIX: ModelRange = start -> end, 无需根据 Backward 修正
+    // FIX: ModelRange 必然是 start -> end, 无需根据 Backward 修正
     const anchorDOMPoint = normalizeDOMPoint({
       node: startContainer,
       offset: startOffset,
