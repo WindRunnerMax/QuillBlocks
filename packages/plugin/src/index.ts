@@ -13,3 +13,5 @@ export {
 } from "./image/types";
 export { MentionPlugin } from "./mention";
 export { MENTION_KEY, MENTION_NAME } from "./mention/types";
+export { SelectionHOC } from "./shared/components/selection";
+export { SelectionPlugin } from "./shared/modules/selection";

@@ -1,6 +1,7 @@
 /// <reference types="./script/global.d.ts" />
 import type { Configuration } from "@rspack/cli";
 import { default as HtmlPlugin } from "@rspack/plugin-html";
+import CopyPlugin from "copy-webpack-plugin";
 import path from "path";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -19,9 +20,10 @@ const config: Configuration = {
     index: "./example/index.tsx",
   },
   plugins: [
+    new CopyPlugin([{ from: "./example/static", to: "." }]),
     new HtmlPlugin({
       filename: "index.html",
-      template: "./example/index.html",
+      template: "./example/static/index.html",
     }),
   ],
   resolve: {

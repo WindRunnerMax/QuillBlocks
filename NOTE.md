@@ -686,7 +686,8 @@ if (
 
 ```js
 // Case 4: 光标位于 data-zero-embed 节点后时, 需要将其修正为节点前
-// [embed][cursor]\n => [cursor][embed]\n
+// 若不校正会携带 DOM-Point CASE1 的零选区位置, 按下左键无法正常移动光标
+// [embed[cursor]]\n => [[cursor]embed]\n
 const isEmbedZero = isEmbedZeroNode(node);
 if (isEmbedZero && offset) {
   return new Point(lineIndex, leafOffset - 1);
@@ -707,3 +708,39 @@ if (rightArrow && sel && isEmbedZeroNode(sel.startContainer)) {
 }
 ```
 
+## 零宽字符选区移动
+在实现`Embed`节点时，我是将内置的零宽字符`0/1`两个位置作为光标的放置位置，而`offset 1`的位置会被实际移动到后一个节点的`offset 0`上，那么实际上如果此时我们仅使用该偏移方案而不校正`ModelPoint`的话，理论上而言是可行的，然而在实际的操作中，我们发现如果两个选区节点之间不连续的话，按左键会导致选区从`n2 offset 0`移动到`n1 offset 1`的位置，而如果连续的话则是会正常移动到`n1 offset l-1`的位置。
+
+```html
+<div contenteditable style="outline: none">
+  <div><span id="$1">123</span><span contenteditable="false">Embed</span><span id="$2">456</span></div>
+  <div><span id="$3">123</span><span id="$4">456</span></div>
+</div>
+<div>
+  <button id="$5">Embed</button>
+  <button id="$6">Span</button>
+</div>
+<script>
+  const sel = window.getSelection();
+  document.addEventListener("selectionchange", () => {
+    console.log("selection", sel?.anchorNode.parentElement, sel?.focusOffset);
+  });
+  $5.onclick = () => {
+    const text = $2.firstChild;
+    sel.setBaseAndExtent(text, 0, text, 0); 
+  };
+  $6.onclick = () => {
+    const text = $4.firstChild;
+    sel.setBaseAndExtent(text, 0, text, 0);
+  };
+</script>
+```
+
+在这个例子中按`Embed`按钮后再按左键选区变换的`offset`会得到`3`，而使用`Span`按钮后则会得到`2`。而如果直接将零宽字符节点放到`Embed`节点后的话虽然可以解决这个问题，但是这样就无法将光标放置于`Emebd`节点前了，此时这就需要在最前边再放一个零宽字符，这样额外的交互处理更是麻烦，且在`slate`我还提过零宽字符打断中文`IME`的输入问题`PR`。
+
+其实这里的选区映射也有个有趣的问题，光标位于`data-zero-embed`节点后时, 需要将其修正为节点前，那么此时我们按右键选区会被这段`toModelPoint`中的逻辑重新映射回原本的位置，即`L => L`并没有变化，那么也就无法触发`Model Sel Change`，而`DOM`选区则会从`offset 1`重新被`force`校正为`0`。那么如果我们在按下右键主动调整选区的话，则会先出发`Model Sel Change`进而`UpdateDOM`，然后再由`DOM Sel Change`来校正选区，因为这时候选区不在`Embed`零宽字符上了，就不会命中校正逻辑，因而可以正常进行选区的移动。
+
+```js
+// [[cursor]embed]\n => right => [embed[cursor]]\n => [[cursor]embed]\n
+// SET(1) => [embed[cursor]]\n => [embed][[cursor]\n] => SET(1) => EQUAL
+```

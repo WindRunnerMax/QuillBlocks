@@ -32,11 +32,7 @@ export class ImagePlugin extends EditorPlugin {
     return (
       <Void className="editor-image-void" context={context}>
         <SelectionHOC selection={this.selection} leaf={context.leafState}>
-          <img
-            src="https://windrunnermax.github.io/DocEditor/favicon.ico"
-            width={200}
-            height={200}
-          ></img>
+          <img src="./favicon.ico" width={200} height={200}></img>
         </SelectionHOC>
       </Void>
     );

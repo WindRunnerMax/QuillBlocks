@@ -11,7 +11,13 @@ import { toModelRange } from "./utils/model";
 import { isEqualDOMRange, toDOMRange } from "./utils/native";
 
 export class Selection {
+  /** 上次时间片快照 */
+  private lastRecord: number = 0;
+  /** 时间片内执行次数 */
+  private execution: number = 0;
+  /** 先前选区 */
   private previous: Range | null = null;
+  /** 当前选区 */
   private current: Range | null = null;
 
   /**
@@ -46,6 +52,24 @@ export class Selection {
   }
 
   /**
+   * 检查时间片执行次数限制
+   */
+  private limit() {
+    const now = Date.now();
+    // 如果距离上次记录时间超过 500ms, 重置执行次数
+    if (now - this.lastRecord >= 500) {
+      this.execution = 0;
+      this.lastRecord = now;
+    }
+    // 如果执行次数超过 100 次的限制, 需要打断执行
+    if (this.execution++ >= 100) {
+      this.editor.logger.error("Selection Exec Limit", this.execution);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * 处理选区变换事件
    */
   private onNativeSelectionChange = () => {
@@ -55,7 +79,7 @@ export class Selection {
     const root = this.editor.getContainer();
     const sel = getRootSelection(root);
     const staticSel = getStaticSelection(sel);
-    if (!sel || !staticSel) {
+    if (!sel || !staticSel || this.limit()) {
       return void 0;
     }
     // 选区必然是从 startContainer 到 endContainer
@@ -170,9 +194,6 @@ export class Selection {
     if (leftArrow && isFocusLineStart) {
       const prevLine = lineState.prev();
       if (!prevLine) return void 0;
-      // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
-      // 而 Range => start -> end, 只需要判断 isBackward 标识
-      // start -> end 实际方向会在 new Range 时处理, 无需在此处实现
       newFocus = new Point(prevLine.index, prevLine.length - 1);
     }
     // 右键且在非末行的末节点时 将选取设置为后一行的首节点
@@ -195,6 +216,9 @@ export class Selection {
       // 若 [focus]\n[anchor] 此时按 right, 会被认为是 反选+折叠, 实际状态会被 new Range 校正
       const isBackward = event.shiftKey && range.isCollapsed ? !!leftArrow : range.isBackward;
       const newAnchor = event.shiftKey ? anchor : newFocus.clone();
+      // COMPAT: 选区正向 则只会影响到 end 节点, 选区反向 则只会影响到 start 节点
+      // 而 Range => start -> end, 只需要判断 isBackward 标识
+      // start -> end 实际方向会在 new Range 时处理, 无需在此处实现
       const newRange = new Range(newAnchor, newFocus, isBackward);
       this.set(newRange, true);
     }

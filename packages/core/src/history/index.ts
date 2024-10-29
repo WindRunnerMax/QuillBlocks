@@ -16,7 +16,7 @@ export class History {
   /** 堆栈最大值 */
   private readonly STACK_SIZE = 100;
   /** 前次执行记录时间 */
-  private lastRecorded: number;
+  private lastRecord: number;
   /** UNDO 栈 */
   private undoStack: StackItem[];
   /** REDO 栈 */
@@ -31,7 +31,7 @@ export class History {
   constructor(private editor: Editor) {
     this.redoStack = [];
     this.undoStack = [];
-    this.lastRecorded = 0;
+    this.lastRecord = 0;
     this.currentRange = null;
     this.editor.event.on(EDITOR_EVENT.KEY_DOWN, this.onKeyDown);
     this.editor.event.on(EDITOR_EVENT.CONTENT_CHANGE, this.onContentChange);
@@ -62,7 +62,7 @@ export class History {
       delta: inverted,
       range: this.transformRange(item.range, inverted),
     });
-    this.lastRecorded = 0;
+    this.lastRecord = 0;
     this.editor.state.apply(item.delta, { source: APPLY_SOURCE.HISTORY });
     this.restoreSelection(item);
   }
@@ -80,7 +80,7 @@ export class History {
       delta: inverted,
       range: this.transformRange(item.range, inverted),
     });
-    this.lastRecorded = 0;
+    this.lastRecord = 0;
     this.editor.state.apply(item.delta, { source: APPLY_SOURCE.HISTORY });
     this.restoreSelection(item);
   }
@@ -111,14 +111,14 @@ export class History {
     let inverted = changes.invert(previous);
     let undoRange = this.currentRange;
     const timestamp = Date.now();
-    if (this.lastRecorded + this.DELAY > timestamp && this.undoStack.length > 0) {
+    if (this.lastRecord + this.DELAY > timestamp && this.undoStack.length > 0) {
       const item = this.undoStack.pop();
       if (item) {
         inverted = inverted.compose(item.delta);
         undoRange = item.range;
       }
     } else {
-      this.lastRecorded = timestamp;
+      this.lastRecord = timestamp;
     }
     if (!inverted.ops.length) {
       return void 0;
