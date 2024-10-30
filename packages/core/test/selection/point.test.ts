@@ -16,7 +16,7 @@ describe("point", () => {
   it("from-raw", () => {
     const rawPoint = new RawPoint(9);
     const point = Point.fromRaw(editor, rawPoint);
-    expect(point).toEqual(new Point(1, 0));
+    expect(point).toEqual(new Point(1, 0, 0));
   });
 
   it("from-raw overflow", () => {
@@ -26,19 +26,19 @@ describe("point", () => {
   });
 
   it("is-equal", () => {
-    const point1 = new Point(1, 0);
-    const point2 = new Point(1, 0);
-    const point3 = new Point(1, 1);
+    const point1 = new Point(1, 0, 0);
+    const point2 = new Point(1, 0, 0);
+    const point3 = new Point(1, 1, 1);
     expect(Point.isEqual(point1, point2)).toBe(true);
     expect(Point.isEqual(point1, point3)).toBe(false);
     expect(Point.isEqual(point3.clone(), point3)).toBe(true);
   });
 
   it("is-before", () => {
-    const point1 = new Point(1, 0);
-    const point2 = new Point(1, 1);
-    const point3 = new Point(2, 0);
-    const point4 = new Point(1, 0);
+    const point1 = new Point(1, 0, 0);
+    const point2 = new Point(1, 0, 1);
+    const point3 = new Point(2, 0, 0);
+    const point4 = new Point(1, 0, 0);
     expect(Point.isBefore(point1, point2)).toBe(true);
     expect(Point.isBefore(point1, point3)).toBe(true);
     expect(Point.isBefore(point2, point3)).toBe(true);
@@ -46,10 +46,10 @@ describe("point", () => {
   });
 
   it("is-after", () => {
-    const point1 = new Point(1, 1);
-    const point2 = new Point(1, 1);
-    const point3 = new Point(2, 0);
-    const point4 = new Point(1, 0);
+    const point1 = new Point(1, 0, 1);
+    const point2 = new Point(1, 0, 1);
+    const point3 = new Point(2, 0, 0);
+    const point4 = new Point(1, 0, 0);
     expect(Point.isAfter(point1, point2)).toBe(false);
     expect(Point.isAfter(point1, point3)).toBe(false);
     expect(Point.isAfter(point2, point3)).toBe(false);

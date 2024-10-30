@@ -43,7 +43,7 @@ export class Mutate {
     const newOp = newLeaf.op;
     // 如果 NewOp/LastOp 是 EOL 则直接追加
     const isNewEOLOp = isEOLOp(newOp);
-    const isLastEOLOp = isEOLOp(newOp);
+    const isLastEOLOp = isEOLOp(lastOp);
     if (isNewEOLOp || isLastEOLOp) {
       const key = newLeaf.parent.key;
       lineState._appendLeaf(newLeaf);

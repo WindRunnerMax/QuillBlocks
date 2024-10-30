@@ -213,6 +213,7 @@ export class LineState {
    */
   public _appendLeaf(leaf: LeafState) {
     leaf.index = this.size;
+    leaf.parent = this;
     this.leaves.push(leaf);
     this.size++;
     this.length = this.length + leaf.length;

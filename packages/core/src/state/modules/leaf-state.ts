@@ -84,10 +84,10 @@ export class LeafState {
    * 创建 LeafState
    * @param op
    * @param index
-   * @param offset
+   * @param index
    * @param parent
    */
-  public static create(op: Op, offset: number, parent: LineState) {
-    return new LeafState(op, offset, parent);
+  public static create(op: Op, index: number, parent: LineState) {
+    return new LeafState(op, index, parent);
   }
 }
