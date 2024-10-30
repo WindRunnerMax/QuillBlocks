@@ -1,6 +1,6 @@
 import { LEAF_KEY, NODE_KEY } from "../types";
 
-export const getModelElement = (node: Node | null): HTMLElement | null => {
+export const getLeafNode = (node: Node | null): HTMLElement | null => {
   if (!node) {
     return null;
   }
@@ -14,7 +14,7 @@ export const getModelElement = (node: Node | null): HTMLElement | null => {
 };
 
 export const getLineNode = (node: Node | null): HTMLElement | null => {
-  const element = getModelElement(node);
+  const element = getLeafNode(node);
   if (!element) {
     return null;
   }

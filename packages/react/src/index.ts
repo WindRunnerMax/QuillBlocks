@@ -7,6 +7,7 @@ export type { ReactLeafContext, ReactLineContext } from "./plugin/index";
 export { EditorPlugin } from "./plugin/index";
 export { Editable } from "./preset/editable";
 export { Embed } from "./preset/embed";
+export { Isolate } from "./preset/isolate";
 export { Text } from "./preset/text";
 export { Void } from "./preset/void";
 export { ZeroSpace } from "./preset/zero";

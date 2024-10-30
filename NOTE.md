@@ -744,3 +744,37 @@ if (rightArrow && sel && isEmbedZeroNode(sel.startContainer)) {
 // [[cursor]embed]\n => right => [embed[cursor]]\n => [[cursor]embed]\n
 // SET(1) => [embed[cursor]]\n => [embed][[cursor]\n] => SET(1) => EQUAL
 ```
+
+## L-I-O Range
+当前我们的选区实现是`L-O`的实现，也就是`Line`与`Offset`索引级别的实现，而这里的`Offset`是会跨越多个实际的`LeafState`节点的，那么这里的`Offset`就会导致我们在实现选区查找的时候需要额外的迭代，也就是在通过`Range`来获取实际`DOM`节点的`toDOMPoint`，是需要从`lineNode`为基准查找文本节点。
+
+```js
+const lineNode = editor.model.getLineNode(lineState);
+const selector = `[${LEAF_STRING}], [${ZERO_SPACE_KEY}]`;
+const leaves = Array.from(lineNode.querySelectorAll(selector));
+let start = 0;
+for (let i = 0; i < leaves.length; i++) {
+  const leaf = leaves[i];
+  let len = leaf.textContent.length;
+  const end = start + len;
+  if (offset <= end) {
+    return { node: leaf, offset: Math.max(offset - start, 0) };
+  }
+}
+return { node: null, offset: 0 };
+```
+
+而在先前我们处理`Embed`节点的时候其实能够很明显地发现由于此时我们需要按行查找内容，那么实际要处理的文本前存在的零宽字符都会被记入偏移序列，这样就让我们很难把这件事情处理好，每次都迭代一遍`Leaf`的`Offset`来查找也并不太现实。但其实话又说回来了，这样做的实际上就很像是`slate`的数据结构了，只不过我们将其简化为`3`级，而不是像`slate`一样可以无限层即嵌套下去。
+
+```js
+export class Point {
+  constructor(
+    /** 行索引 */
+    public line: number,
+    /** 节点索引 */
+    public offset: number,
+    /** 节点内偏移 */
+    public offset: number
+  ) {}
+}
+```

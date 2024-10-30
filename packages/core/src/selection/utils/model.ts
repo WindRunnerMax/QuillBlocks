@@ -1,5 +1,5 @@
 import type { Editor } from "../../editor";
-import { getLineNode, getModelElement } from "../../model/utils/dom";
+import { getLeafNode, getLineNode } from "../../model/utils/dom";
 import { Point } from "../modules/point";
 import { Range } from "../modules/range";
 import type { DOMPoint } from "../types";
@@ -14,18 +14,18 @@ import { normalizeDOMPoint } from "./native";
 export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   const { offset, node } = normalizeDOMPoint;
 
-  const modelNode = getModelElement(node);
+  const leafNode = getLeafNode(node);
   let lineIndex = 0;
   let leafOffset = 0;
 
-  const lineNode = getLineNode(modelNode);
+  const lineNode = getLineNode(leafNode);
   const lineModel = editor.model.getLineState(lineNode);
   // COMPAT: 在没有 LineModel 的情况, 选区会置于 BlockState 最前
   if (lineModel) {
     lineIndex = lineModel.index;
   }
 
-  const leafModel = editor.model.getLeafState(modelNode);
+  const leafModel = editor.model.getLeafState(leafNode);
   // COMPAT: 在没有 LeafModel 的情况, 选区会置于 Line 最前
   if (leafModel) {
     leafOffset = leafModel.offset + offset;
