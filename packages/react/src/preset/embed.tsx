@@ -17,10 +17,10 @@ export type EmbedProps = PropsWithChildren<{
 export const Embed: FC<EmbedProps> = props => {
   const { context } = props;
   const editor = useEditor();
-  const leafState = context.leafState;
+  const leaf = context.leafState;
 
   const onMouseDown = () => {
-    const point = new Point(leafState.parent.index, leafState.offset + 1);
+    const point = new Point(leaf.parent.index, leaf.index, 1);
     const range = new Range(point, point.clone());
     editor.selection.set(range, true);
   };

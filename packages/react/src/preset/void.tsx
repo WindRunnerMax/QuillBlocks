@@ -17,10 +17,10 @@ export type VoidProps = PropsWithChildren<{
 export const Void: FC<VoidProps> = props => {
   const { context } = props;
   const editor = useEditor();
-  const leafState = context.leafState;
+  const leaf = context.leafState;
 
   const onMouseDown = () => {
-    const point = new Point(leafState.parent.index, leafState.offset + leafState.length);
+    const point = new Point(leaf.parent.index, leaf.index, 1);
     const range = new Range(point, point.clone());
     editor.selection.set(range, true);
   };

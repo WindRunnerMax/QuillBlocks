@@ -9,7 +9,9 @@ export class Point {
   constructor(
     /** 行索引 */
     public line: number,
-    /** 行内偏移 */
+    /** 节点索引 */
+    public index: number,
+    /** 节点内偏移 */
     public offset: number
   ) {}
 
@@ -17,7 +19,7 @@ export class Point {
    * 克隆 Point
    */
   public clone() {
-    return new Point(this.line, this.offset);
+    return new Point(this.line, this.index, this.offset);
   }
 
   /**
@@ -25,8 +27,8 @@ export class Point {
    * @param line
    * @param offset
    */
-  public static from(line: number, offset: number) {
-    return new Point(line, offset);
+  public static from(line: number, index: number, offset: number) {
+    return new Point(line, index, offset);
   }
 
   /**
@@ -39,7 +41,18 @@ export class Point {
     const lines = block.getLines();
     const line = binarySearch(lines, rawPoint.offset);
     if (line) {
-      return new Point(line.index, rawPoint.offset - line.start);
+      let offset = rawPoint.offset;
+      const leaves = line.getLeaves();
+      for (const leaf of leaves) {
+        const length = leaf.length;
+        if (offset <= length) {
+          return new Point(line.index, leaf.index, offset);
+        }
+        offset = offset - length;
+      }
+      editor.logger.warning("Offset Overflow", rawPoint);
+      // 未查找到的情况下, 返回行首位置
+      return new Point(line.index, 0, 0);
     }
     return null;
   }

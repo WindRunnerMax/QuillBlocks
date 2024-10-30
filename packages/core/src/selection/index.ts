@@ -194,19 +194,20 @@ export class Selection {
     if (leftArrow && isFocusLineStart) {
       const prevLine = lineState.prev();
       if (!prevLine) return void 0;
-      newFocus = new Point(prevLine.index, prevLine.length - 1);
+      const leaf = prevLine.getLastLeaf();
+      newFocus = new Point(prevLine.index, leaf.index, leaf.length - 1);
     }
     // 右键且在非末行的末节点时 将选取设置为后一行的首节点
     if (rightArrow && isFocusLineEnd) {
       const nextLine = lineState.next();
       if (!nextLine) return void 0;
-      newFocus = new Point(nextLine.index, 0);
+      newFocus = new Point(nextLine.index, 0, 0);
     }
     // 右键且在嵌入节点时 将光标放在嵌入节点后
     if (rightArrow && sel && isEmbedZeroNode(sel.focusNode)) {
       const line = newFocus ? newFocus.line : focus.line;
-      const offset = newFocus ? newFocus.offset : focus.offset;
-      newFocus = new Point(line, offset + 1);
+      const index = newFocus ? newFocus.index : focus.index;
+      newFocus = new Point(line, index + 1, 0);
     }
     // 如果存在新的焦点, 则统一更新选区
     if (newFocus) {

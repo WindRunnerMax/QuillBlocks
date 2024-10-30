@@ -31,16 +31,23 @@ export class RawPoint {
    * @param point
    */
   public static fromPoint(editor: Editor, point: Point | null): RawPoint | null {
-    if (!point) {
-      return null;
-    }
+    if (!point) return null;
     const block = editor.state.block;
     const line = block.getLine(point.line);
-    if (!line || point.offset > line.length) {
+    if (!line) {
       editor.logger.warning("Line Not Found", point.line);
       return null;
     }
-    return new RawPoint(line.start + point.offset);
+    const leaves = line.getLeaves();
+    let offset = 0;
+    for (let i = 0; i < point.index; i++) {
+      if (!leaves[i]) {
+        editor.logger.warning("Leaf Not Found", point.index);
+        break;
+      }
+      offset = offset + leaves[i].length;
+    }
+    return new RawPoint(offset + point.offset);
   }
 
   /**

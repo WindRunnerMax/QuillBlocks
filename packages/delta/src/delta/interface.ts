@@ -9,13 +9,13 @@ export interface Op {
   attributes?: AttributeMap;
 }
 
-export const EOL = "\n";
-
 export const OP_TYPES = {
   INSERT: "insert",
   RETAIN: "retain",
   DELETE: "delete",
 };
+export const EOL = "\n";
+export const EOLOp: InsertOp = { insert: EOL };
 
 export type Ops = Op[];
 export type DeleteOp = { delete: number };

@@ -1,6 +1,6 @@
 import type { AttributeMap } from "block-kit-delta";
 import type { Op } from "block-kit-delta";
-import { Delta, getOpLength } from "block-kit-delta";
+import { Delta, EOLOp, getOpLength } from "block-kit-delta";
 import { isInsertOp } from "block-kit-delta";
 import { OpIterator } from "block-kit-delta";
 
@@ -25,8 +25,6 @@ export class LineState {
   private leaves: LeafState[] = [];
   /** Ops 缓存 */
   private _ops: Op[] | null = null;
-  /** Leaf 到 Index 映射 */
-  public _leafToIndex: WeakMap<LeafState, number>;
 
   constructor(
     /** Delta 数据 */
@@ -41,7 +39,6 @@ export class LineState {
     this.start = 0;
     this.length = 0;
     this.key = Key.getId(this);
-    this._leafToIndex = new WeakMap();
     this._deltaToLeaves(delta);
   }
 
@@ -69,12 +66,13 @@ export class LineState {
     if (this.leaves[index] === leaf) {
       return this;
     }
+    leaf.index = index;
+    leaf.parent = this;
     this.isDirty = true;
     this.leaves[index] = leaf;
     if (this._ops) {
       this._ops[index] = leaf.op;
     }
-    this._leafToIndex.set(leaf, index);
     return this;
   }
 
@@ -88,17 +86,17 @@ export class LineState {
   /**
    * 获取行内第一个节点
    */
-  public getFirstLeaf(): LeafState | null {
+  public getFirstLeaf(): LeafState {
     const leaves = this.getLeaves();
-    return leaves[0] || null;
+    return leaves[0] || LeafState.create(EOLOp, 0, this);
   }
 
   /**
    * 获取行内最后一个节点
    */
-  public getLastLeaf(): LeafState | null {
+  public getLastLeaf(): LeafState {
     const leaves = this.getLeaves();
-    return leaves[leaves.length - 1] || null;
+    return leaves[leaves.length - 1] || LeafState.create(EOLOp, 0, this);
   }
 
   /**
@@ -113,11 +111,10 @@ export class LineState {
     let offset = 0;
     const ops: Op[] = [];
     this.leaves.forEach((leaf, index) => {
-      leaf.offset = offset;
-      offset = offset + leaf.length;
+      leaf.index = index;
       leaf.parent = this;
       ops.push(leaf.op);
-      this._leafToIndex.set(leaf, index);
+      offset = offset + leaf.length;
     });
     this._ops = ops;
     this.length = offset;
@@ -215,9 +212,8 @@ export class LineState {
    * @internal 仅编辑器内部使用
    */
   public _appendLeaf(leaf: LeafState) {
-    leaf.offset = this.length;
+    leaf.index = this.size;
     this.leaves.push(leaf);
-    this._leafToIndex.set(leaf, this.size);
     this.size++;
     this.length = this.length + leaf.length;
   }
@@ -236,8 +232,7 @@ export class LineState {
         this.parent.editor.logger.warning("Invalid op in LineState", op);
         continue;
       }
-      const leaf = new LeafState(op, offset, this);
-      this._leafToIndex.set(leaf, this._ops.length);
+      const leaf = new LeafState(op, this.leaves.length, this);
       this.leaves.push(leaf);
       this._ops.push(op);
       offset = offset + op.insert.length;
