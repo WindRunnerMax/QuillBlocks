@@ -15,13 +15,13 @@ describe("raw-range", () => {
   const editor = new Editor({ delta });
 
   it("from-range", () => {
-    const range = new Range(new Point(0, 0, 0), new Point(1, 0, 0));
+    const range = new Range(new Point(0, 0), new Point(1, 0));
     const rawRange = RawRange.fromRange(editor, range);
     expect(rawRange).toEqual(new RawRange(0, 9));
   });
 
   it("from-range overflow", () => {
-    const range = new Range(new Point(0, 0, 0), new Point(1, 3, 1));
+    const range = new Range(new Point(0, 0), new Point(1, 10));
     const rawRange = RawRange.fromRange(editor, range);
     expect(rawRange).toEqual(null);
   });

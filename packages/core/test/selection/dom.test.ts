@@ -47,7 +47,7 @@ describe("getSelectedText", () => {
   });
 
   it("range to dom", () => {
-    const range = new Range(new Point(0, 1, 1), new Point(1, 0, 2));
+    const range = new Range(new Point(0, 5), new Point(1, 2));
     const sel = toDOMRange(editor, range) as StaticRange;
     expect(sel).not.toBe(null);
     const { startContainer, startOffset, endContainer, endOffset } = sel;

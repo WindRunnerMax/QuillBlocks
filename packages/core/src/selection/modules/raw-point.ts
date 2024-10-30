@@ -34,17 +34,11 @@ export class RawPoint {
     if (!point) return null;
     const block = editor.state.block;
     const line = block.getLine(point.line);
-    if (!line) {
-      editor.logger.warning("Line Not Found", point.line);
+    if (!line || point.offset > line.length) {
+      editor.logger.warning("Line Offset Error", point.line);
       return null;
     }
-    const leaves = line.getLeaves();
-    let offset = point.offset;
-    for (let i = 0; i < point.index; i++) {
-      if (!leaves[i]) return null;
-      offset = offset + leaves[i].length;
-    }
-    return new RawPoint(line.start + offset);
+    return new RawPoint(line.start + point.offset);
   }
 
   /**

@@ -20,10 +20,10 @@ const config: Configuration = {
     index: "./example/index.tsx",
   },
   plugins: [
-    new CopyPlugin([{ from: "./example/static", to: "." }]),
+    new CopyPlugin([{ from: "./public", to: "./" }]),
     new HtmlPlugin({
       filename: "index.html",
-      template: "./example/static/index.html",
+      template: "./public/index.html",
     }),
   ],
   resolve: {

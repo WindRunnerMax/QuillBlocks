@@ -1,5 +1,6 @@
 import type { Op } from "block-kit-delta";
 import { EOL } from "block-kit-delta";
+import { isNil } from "block-kit-utils";
 
 import { Point } from "../../selection/modules/point";
 import { Range } from "../../selection/modules/range";
@@ -20,8 +21,8 @@ export class LeafState {
   constructor(
     /** Op 引用 */
     public op: Op,
-    /** Op 索引 */
-    public index: number,
+    /** Op 起始偏移量 */
+    public offset: number,
     /** 父级 LineState */
     public parent: LineState
   ) {
@@ -46,7 +47,8 @@ export class LeafState {
    * @param span 跨行
    */
   public prev(span = true) {
-    const index = this.index;
+    const index = this.parent._leafToIndex.get(this);
+    if (isNil(index)) return null;
     if (index > 0) {
       return this.parent.getLeaf(index - 1);
     }
@@ -61,7 +63,8 @@ export class LeafState {
    * @param span 跨行
    */
   public next(span = true) {
-    const index = this.index;
+    const index = this.parent._leafToIndex.get(this);
+    if (isNil(index)) return null;
     if (index < this.parent.size - 1) {
       return this.parent.getLeaf(index + 1);
     }
@@ -75,8 +78,8 @@ export class LeafState {
    * 将 LeafState 转换为 Range
    */
   public toRange() {
-    const start = new Point(this.parent.index, this.index, 0);
-    const end = new Point(this.parent.index, this.index, this.length);
+    const start = new Point(this.parent.index, this.offset);
+    const end = new Point(this.parent.index, this.offset + this.length);
     return new Range(start, end);
   }
 
@@ -84,10 +87,10 @@ export class LeafState {
    * 创建 LeafState
    * @param op
    * @param index
-   * @param index
+   * @param offset
    * @param parent
    */
-  public static create(op: Op, index: number, parent: LineState) {
-    return new LeafState(op, index, parent);
+  public static create(op: Op, offset: number, parent: LineState) {
+    return new LeafState(op, offset, parent);
   }
 }

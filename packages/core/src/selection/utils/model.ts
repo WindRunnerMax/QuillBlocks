@@ -16,7 +16,6 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
 
   const leafNode = getLeafNode(node);
   let lineIndex = 0;
-  let leafIndex = 0;
   let leafOffset = 0;
 
   const lineNode = getLineNode(leafNode);
@@ -29,8 +28,7 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   const leafModel = editor.model.getLeafState(leafNode);
   // COMPAT: 在没有 LeafModel 的情况, 选区会置于 Line 最前
   if (leafModel) {
-    leafIndex = leafModel.index;
-    leafOffset = offset;
+    leafOffset = leafModel.offset + offset;
   }
 
   // COMPAT: 此处开始根据 case 修正 zero/void offset [节点级别]
@@ -38,7 +36,8 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   // content\n[cursor] => content[cursor]\n
   const isEnterZero = isEnterZeroNode(node);
   if (isEnterZero && offset) {
-    return new Point(lineIndex, leafIndex, 0);
+    leafOffset = Math.max(leafOffset - 1, 0);
+    return new Point(lineIndex, leafOffset);
   }
   // Case 2: 光标位于 data-zero-void 节点前时, 需要将其修正为节点末
   // 若不修正则会导致选区位置问题, 一些诸如删除之类的操作会失效
@@ -48,17 +47,17 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   // [ xxx[cursor]]\n => [ [cursor]xxx]\n
   const isVoidZero = isVoidZeroNode(node);
   if (isVoidZero && offset !== 1) {
-    return new Point(lineIndex, leafIndex, 1);
+    return new Point(lineIndex, 1);
   }
   // Case 4: 光标位于 data-zero-embed 节点后时, 需要将其修正为节点前
   // 若不校正会携带 DOM-Point CASE1 的零选区位置, 按下左键无法正常移动光标
   // [embed[cursor]]\n => [[cursor]embed]\n
   const isEmbedZero = isEmbedZeroNode(node);
   if (isEmbedZero && offset) {
-    return new Point(lineIndex, leafIndex, 0);
+    return new Point(lineIndex, leafOffset - 1);
   }
 
-  return new Point(lineIndex, leafIndex, leafOffset);
+  return new Point(lineIndex, leafOffset);
 };
 
 /**

@@ -14,13 +14,13 @@ describe("raw-point", () => {
   const editor = new Editor({ delta });
 
   it("from-point", () => {
-    const point = new Point(1, 0, 1);
+    const point = new Point(1, 1);
     const rawPoint = RawPoint.fromPoint(editor, point);
     expect(rawPoint).toEqual(new RawPoint(10));
   });
 
   it("from-point overflow", () => {
-    const point = new Point(10, 0, 1);
+    const point = new Point(10, 1);
     const rawPoint = RawPoint.fromPoint(editor, point);
     expect(rawPoint).toEqual(null);
   });
