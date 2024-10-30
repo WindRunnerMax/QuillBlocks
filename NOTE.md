@@ -667,10 +667,10 @@ export const getTextNode = (node: Node | null): Text | null => {
 ```js
 const nodeOffset = Math.max(offset - start, 0);
 const nextLeaf = leaves[i + 1];
-// COMPAT: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
+// CASE1: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
 // 即 <s>1|</s><s>1</s> / <s>1</s><s>|1</s>
 // 当前计算方法的默认行为是 1, 而 Embed 节点在末尾时则需要额外的零宽字符放置光标
-// 如果当前节点是 Embed 节点, 并且 offset 为 1, 且下一个节点是 ZeroSpace 节点
+// 如果当前节点是 Embed 节点, 并且 offset 为 1, 并且存在下一个节点时
 // 需要将焦点转移到下一个节点, 并且 offset 为 0
 if (
   leaf.hasAttribute(ZERO_EMBED_KEY) &&
@@ -741,6 +741,11 @@ if (rightArrow && sel && isEmbedZeroNode(sel.startContainer)) {
 其实这里的选区映射也有个有趣的问题，光标位于`data-zero-embed`节点后时, 需要将其修正为节点前，那么此时我们按右键选区会被这段`toModelPoint`中的逻辑重新映射回原本的位置，即`L => L`并没有变化，那么也就无法触发`Model Sel Change`，而`DOM`选区则会从`offset 1`重新被`force`校正为`0`。那么如果我们在按下右键主动调整选区的话，则会先出发`Model Sel Change`进而`UpdateDOM`，然后再由`DOM Sel Change`来校正选区，因为这时候选区不在`Embed`零宽字符上了，就不会命中校正逻辑，因而可以正常进行选区的移动。
 
 ```js
+// CASE2: 当 Embed 元素前存在内容且光标位于节点末时, 需要校正到 Embed 节点上
+// <s>1|</s><e> </e> => <s>1</s><e>| </e>
+if (nodeOffset === len && nextLeaf && nextLeaf.hasAttribute(ZERO_EMBED_KEY)) {
+  return { node: nextLeaf, offset: 0 };
+}
 // [[cursor]embed]\n => right => [embed[cursor]]\n => [[cursor]embed]\n
 // SET(1) => [embed[cursor]]\n => [embed][[cursor]\n] => SET(1) => EQUAL
 ```

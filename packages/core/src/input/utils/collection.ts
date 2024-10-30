@@ -41,9 +41,9 @@ export const pickOpAtIndex = (editor: Editor, length: number): Op | null => {
 export const pickOpAtRange = (editor: Editor, range: Range): Op | null => {
   const block = editor.state.block;
   const line = block.getLine(range.start.line);
-  if (!line) return null;
-  const ops = line.getOps();
-  return pickOpAtLength(ops, range.start.offset);
+  const leaf = line && line.getLeaf(range.start.index);
+  if (!leaf) return null;
+  return leaf.op;
 };
 
 /**
@@ -54,15 +54,7 @@ export const pickOpAtRange = (editor: Editor, range: Range): Op | null => {
 export const pickLeafAtRange = (editor: Editor, range: Range): LeafState | null => {
   const block = editor.state.block;
   const line = block.getLine(range.start.line);
-  if (!line) return null;
-  const leaves = line.getLeaves();
-  let index = length;
-  for (const leaf of leaves) {
-    const opLength = leaf.length;
-    if (opLength >= index) {
-      return leaf;
-    }
-    index = index - opLength;
-  }
-  return null;
+  const leaf = line && line.getLeaf(range.start.index);
+  if (!leaf) return null;
+  return leaf;
 };

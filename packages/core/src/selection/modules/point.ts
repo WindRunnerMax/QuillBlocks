@@ -40,21 +40,19 @@ export class Point {
     const block = editor.state.block;
     const lines = block.getLines();
     const line = binarySearch(lines, rawPoint.offset);
-    if (line) {
-      let offset = rawPoint.offset;
-      const leaves = line.getLeaves();
-      for (const leaf of leaves) {
-        const length = leaf.length;
-        if (offset <= length) {
-          return new Point(line.index, leaf.index, offset);
-        }
-        offset = offset - length;
+    if (!line) return null;
+    let offset = rawPoint.offset - line.start;
+    const leaves = line.getLeaves();
+    for (const leaf of leaves) {
+      const length = leaf.length;
+      if (offset <= length) {
+        return new Point(line.index, leaf.index, offset);
       }
-      editor.logger.warning("Offset Overflow", rawPoint);
-      // 未查找到的情况下, 返回行首位置
-      return new Point(line.index, 0, 0);
+      offset = offset - length;
     }
-    return null;
+    editor.logger.warning("Offset Overflow", rawPoint);
+    // 越界/未查找到的情况下, 则兜底返回行首位置
+    return new Point(line.index, 0, 0);
   }
 
   /**
@@ -65,7 +63,11 @@ export class Point {
   public static isEqual(origin: Point | null, target: Point | null): boolean {
     if (origin === target) return true;
     if (!origin || !target) return false;
-    return origin.line === target.line && origin.offset === target.offset;
+    return (
+      origin.line === target.line &&
+      origin.index === target.index &&
+      origin.offset === target.offset
+    );
   }
 
   /**
@@ -77,9 +79,10 @@ export class Point {
   public static isBefore(point1: Point | null, point2: Point | null): boolean {
     if (!point1 || !point2) return false;
     if (point1.line < point2.line) return true;
-    if (point1.line === point2.line && point1.offset < point2.offset) {
-      return true;
-    }
+    if (point1.line > point2.line) return false;
+    if (point1.index < point2.index) return true;
+    if (point1.index > point2.index) return false;
+    if (point1.offset < point2.offset) return true;
     return false;
   }
 
@@ -92,9 +95,10 @@ export class Point {
   public static isAfter(point1: Point | null, point2: Point | null): boolean {
     if (!point1 || !point2) return false;
     if (point1.line > point2.line) return true;
-    if (point1.line === point2.line && point1.offset > point2.offset) {
-      return true;
-    }
+    if (point1.line < point2.line) return false;
+    if (point1.index > point2.index) return true;
+    if (point1.index < point2.index) return false;
+    if (point1.offset > point2.offset) return true;
     return false;
   }
 }

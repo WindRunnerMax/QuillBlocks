@@ -36,7 +36,7 @@ export class BoldPlugin extends EditorPlugin {
       isMatchHTMLTag(html, "b") ||
       html.style.fontWeight === "bold"
     ) {
-      applyMarker(delta, BOLD_KEY, TRUE);
+      applyMarker(delta, { [BOLD_KEY]: TRUE });
     }
   }
 

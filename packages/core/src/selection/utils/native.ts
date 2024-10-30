@@ -1,7 +1,7 @@
 import { isDOMElement, isDOMText } from "block-kit-utils";
 
 import type { Editor } from "../../editor";
-import { LEAF_STRING, ZERO_EMBED_KEY, ZERO_SPACE_KEY } from "../../model/types";
+import { LEAF_STRING, ZERO_SPACE_KEY } from "../../model/types";
 import type { Point } from "../modules/point";
 import type { Range } from "../modules/range";
 import type { DOMPoint, DOMStaticRange } from "../types";
@@ -56,16 +56,21 @@ export const normalizeDOMPoint = (domPoint: DOMPoint): DOMPoint => {
  * @param point
  */
 export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
-  const { line, offset } = point;
+  const { line, index, offset } = point;
   const blockState = editor.state.block;
   const lineState = blockState && blockState.getLine(line);
+  const leafState = lineState && lineState.getLeaf(index);
   const lineNode = editor.model.getLineNode(lineState);
+  const leafNode = editor.model.getLeafNode(leafState);
 
-  if (!lineNode) {
+  // 不存在 LineNode 或 LeafNode 时, 返回空位置
+  if (!lineNode || !leafNode) {
     return { node: null, offset: 0 };
   }
-  if (isDOMText(lineNode)) {
-    return { node: lineNode, offset: offset };
+
+  // 如果是文本节点则直接返回其位置
+  if (isDOMText(leafNode)) {
+    return { node: leafNode, offset: offset };
   }
 
   // For each leaf, we need to isolate its content, which means filtering
@@ -74,7 +79,7 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   const selector = `[${LEAF_STRING}], [${ZERO_SPACE_KEY}]`;
   // Maybe use LineState Model to iterate over node ?
   // 所有文本类型标记的节点
-  const leaves = Array.from(lineNode.querySelectorAll(selector));
+  const leaves = Array.from(leafNode.querySelectorAll(selector));
   let start = 0;
   for (let i = 0; i < leaves.length; i++) {
     const leaf = leaves[i];
@@ -96,22 +101,7 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
       // current node is text2 -> start = 5
       // end = 5(start) + 5(len) = 10
       // offset = 7 < 10 -> new offset = 7(offset) - 5(start) = 2
-      const nodeOffset = Math.max(offset - start, 0);
-      const nextLeaf = leaves[i + 1];
-      // CASE1: 对同个光标位置, 且存在两个节点相邻时, 实际上是存在两种表达
-      // 即 <s>1|</s><s>1</s> / <s>1</s><s>|1</s>
-      // 当前计算方法的默认行为是 1, 而 Embed 节点在末尾时则需要额外的零宽字符放置光标
-      // 如果当前节点是 Embed 节点, 并且 offset 为 1, 并且存在下一个节点时
-      // 需要将焦点转移到下一个节点, 并且 offset 为 0
-      if (leaf.hasAttribute(ZERO_EMBED_KEY) && nodeOffset && nextLeaf) {
-        return { node: nextLeaf, offset: 0 };
-      }
-      // CASE2: 当 Embed 元素前存在内容且光标位于节点末时, 需要校正到 Embed 节点上
-      // <s>1|</s><e> </e> => <s>1</s><e>| </e>
-      if (nodeOffset === len && nextLeaf && nextLeaf.hasAttribute(ZERO_EMBED_KEY)) {
-        return { node: nextLeaf, offset: 0 };
-      }
-      return { node: leaf, offset: nodeOffset };
+      return { node: leaf, offset: Math.max(offset - start, 0) };
     }
     start = end;
   }

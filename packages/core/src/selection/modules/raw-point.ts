@@ -39,15 +39,12 @@ export class RawPoint {
       return null;
     }
     const leaves = line.getLeaves();
-    let offset = 0;
+    let offset = point.offset;
     for (let i = 0; i < point.index; i++) {
-      if (!leaves[i]) {
-        editor.logger.warning("Leaf Not Found", point.index);
-        break;
-      }
+      if (!leaves[i]) return null;
       offset = offset + leaves[i].length;
     }
-    return new RawPoint(offset + point.offset);
+    return new RawPoint(line.start + offset);
   }
 
   /**

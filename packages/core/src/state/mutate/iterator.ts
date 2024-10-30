@@ -14,6 +14,10 @@ export class Iterator {
   /** LineState 组 */
   private lines: LineState[];
 
+  /**
+   * 构造函数
+   * @param lines
+   */
   constructor(lines: LineState[]) {
     this.lines = lines;
     this.row = 0;

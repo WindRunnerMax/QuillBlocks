@@ -22,6 +22,10 @@ export class Mutate {
   /** 初始 Lines */
   private lines: LineState[];
 
+  /**
+   * 构造函数
+   * @param block
+   */
   constructor(private block: BlockState) {
     this.lines = block.getLines();
   }

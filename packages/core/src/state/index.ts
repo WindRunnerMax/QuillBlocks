@@ -94,6 +94,7 @@ export class EditorState {
     // 更新 BlockSet Model
     const mutate = new Mutate(this.block);
     const newLines = mutate.compose(delta);
+    console.log("newLines :>> ", newLines, raw);
     this.block.updateLines(newLines);
 
     // 更新选区位置
