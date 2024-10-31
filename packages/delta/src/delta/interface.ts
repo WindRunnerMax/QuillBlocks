@@ -15,7 +15,7 @@ export const OP_TYPES = {
   DELETE: "delete",
 };
 export const EOL = "\n";
-export const EOLOp: InsertOp = { insert: EOL };
+export const EOL_OP: InsertOp = { insert: EOL };
 
 export type Ops = Op[];
 export type DeleteOp = { delete: number };

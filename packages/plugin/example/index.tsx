@@ -10,6 +10,7 @@ import ReactDOM from "react-dom";
 
 import { BoldPlugin } from "../src/bold";
 import { ImagePlugin } from "../src/image";
+import { InlineCodePlugin } from "../src/inline-code";
 import { MentionPlugin } from "../src/mention";
 import { INIT } from "./block";
 import { schema } from "./schema";
@@ -20,7 +21,8 @@ const App: FC = () => {
     editor.plugin.register(
       new BoldPlugin(),
       new ImagePlugin(editor, false),
-      new MentionPlugin(editor, false)
+      new MentionPlugin(),
+      new InlineCodePlugin()
     );
     return editor;
   }, []);

@@ -6,7 +6,7 @@ export type { BlockDeltaLike, BlockSetLike, DeltaLike } from "./cluster/interfac
 export { BLOCK_TYPE } from "./cluster/interface";
 export { Delta } from "./delta/delta";
 export type { DeleteOp, InsertOp, Op, Ops, RetainOp } from "./delta/interface";
-export { EOL, EOLOp, OP_TYPES } from "./delta/interface";
+export { EOL, EOL_OP, OP_TYPES } from "./delta/interface";
 export { iterator, OpIterator } from "./delta/iterator";
 export { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "./delta/op";
 export { MutateDelta } from "./mutate/delta";

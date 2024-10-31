@@ -2,7 +2,7 @@ import type { Op } from "block-kit-delta";
 import { getOpLength } from "block-kit-delta";
 
 import type { Editor } from "../../editor";
-import type { Range } from "../../selection/modules/range";
+import type { Point } from "../../selection/modules/point";
 import type { LeafState } from "../../state/modules/leaf-state";
 
 /**
@@ -36,32 +36,30 @@ export const pickOpAtIndex = (editor: Editor, length: number): Op | null => {
 /**
  * 基于 Range 获取索引位置的 Op
  * @param editor
- * @param range 折叠状态的 Range
+ * @param point
  */
-export const pickOpAtRange = (editor: Editor, range: Range): Op | null => {
+export const pickOpAtPoint = (editor: Editor, point: Point): Op | null => {
   const block = editor.state.block;
-  const line = block.getLine(range.start.line);
+  const line = block.getLine(point.line);
   if (!line) return null;
   const ops = line.getOps();
-  return pickOpAtLength(ops, range.start.offset);
+  return pickOpAtLength(ops, point.offset);
 };
 
 /**
  * 基于 Range 获取索引位置的 Leaf
  * @param editor
- * @param range 折叠状态的 Range
+ * @param point
  */
-export const pickLeafAtRange = (editor: Editor, range: Range): LeafState | null => {
+export const pickLeafAtPoint = (editor: Editor, point: Point): LeafState | null => {
   const block = editor.state.block;
-  const line = block.getLine(range.start.line);
+  const line = block.getLine(point.line);
   if (!line) return null;
   const leaves = line.getLeaves();
-  let index = length;
+  let index = point.offset;
   for (const leaf of leaves) {
     const opLength = leaf.length;
-    if (opLength >= index) {
-      return leaf;
-    }
+    if (opLength >= index) return leaf;
     index = index - opLength;
   }
   return null;

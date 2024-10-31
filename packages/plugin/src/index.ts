@@ -11,6 +11,8 @@ export {
   LOADING_STATUS,
   MIN_WIDTH,
 } from "./image/types";
+export { InlineCodePlugin } from "./inline-code";
+export { INLINE_CODE } from "./inline-code/types/index";
 export { MentionPlugin } from "./mention";
 export { MENTION_KEY, MENTION_NAME } from "./mention/types";
 export { SelectionHOC } from "./shared/components/selection";

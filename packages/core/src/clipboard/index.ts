@@ -4,7 +4,7 @@ import { TEXT_HTML, TEXT_PLAIN, TSON } from "block-kit-utils";
 
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
-import { pickOpAtRange } from "../input/utils/collection";
+import { pickOpAtPoint } from "../input/utils/collection";
 import type { Range } from "../selection/modules/range";
 import { Copy } from "./modules/copy";
 import { Paste } from "./modules/paste";
@@ -49,7 +49,7 @@ export class Clipboard {
     const delta = new Delta();
     if (sel.isCollapsed) {
       // 在选区折叠的情况下需要特判 Void 节点类型
-      const op = pickOpAtRange(this.editor, sel);
+      const op = pickOpAtPoint(this.editor, sel.start);
       if (op && this.editor.schema.isVoid(op)) {
         delta.push(op);
       }

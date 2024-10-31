@@ -6,19 +6,22 @@ import type { EditorSchema } from "./types";
 export class Schema {
   /** Void */
   public readonly void: Set<string> = new Set<string>();
+  /** Mark */
+  public readonly mark: Set<string> = new Set<string>();
   /** Block */
   public readonly block: Set<string> = new Set<string>();
   /** Inline */
   public readonly inline: Set<string> = new Set<string>();
-  /** Tail Mark */
-  public readonly tailMark: Set<string> = new Set<string>();
+  /** Not Tail Mark */
+  public readonly notTailMark: Set<string> = new Set<string>();
 
   constructor(schema: EditorSchema) {
     for (const [key, value] of Object.entries(schema)) {
       value.void && this.void.add(key);
+      value.mark && this.mark.add(key);
       value.block && this.block.add(key);
       value.inline && this.inline.add(key);
-      value.tailMark && this.tailMark.add(key);
+      value.notTailMark && this.notTailMark.add(key);
     }
   }
 
@@ -53,16 +56,19 @@ export class Schema {
   }
 
   /**
-   * 过滤出 Tail Mark
+   * 过滤需要追踪的属性
    * @param op
    */
-  public filterTailMark(op: Op | null): AttributeMap | undefined {
+  public filterTailMark(op: Op | null, isLeafTail: boolean): AttributeMap | undefined {
     if (!op || !op.attributes || isEOLOp(op)) return void 0;
     const keys = Object.keys(op.attributes);
     const result: AttributeMap = {};
     for (const key of keys) {
-      if (this.tailMark.has(key)) {
+      if (this.mark.has(key)) {
         result[key] = op.attributes[key];
+      }
+      if (isLeafTail && this.notTailMark.has(key)) {
+        delete result[key];
       }
     }
     return Object.keys(result).length ? result : void 0;

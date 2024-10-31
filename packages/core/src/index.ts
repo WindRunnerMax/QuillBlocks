@@ -16,10 +16,10 @@ export type { EventMapKeys } from "./event/bus/types";
 export type { ContentChangeEvent, SelectionChangeEvent } from "./event/bus/types";
 export { EDITOR_EVENT } from "./event/bus/types";
 export {
-  pickLeafAtRange,
+  pickLeafAtPoint,
   pickOpAtIndex,
   pickOpAtLength,
-  pickOpAtRange,
+  pickOpAtPoint,
 } from "./input/utils/collection";
 export {
   isArrowDown,

@@ -5,8 +5,10 @@ export type SchemaRule = {
   inline?: boolean;
   /** 空节点 */
   void?: boolean;
-  /** 追踪 Mark */
-  tailMark?: boolean;
+  /** Mark */
+  mark?: boolean;
+  /** 不追踪末尾 Mark */
+  notTailMark?: boolean;
 };
 
 export type EditorSchema = Record<string, SchemaRule>;

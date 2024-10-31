@@ -14,6 +14,8 @@ export const INIT = new Delta({
     { insert: "\n" },
     { insert: " ", attributes: { mention: "true", name: "Czy" } },
     { insert: "\n" },
+    { insert: "text4" },
+    { insert: "text5", attributes: { "inline-code": "true" } },
     { insert: "\n" },
   ],
 });
