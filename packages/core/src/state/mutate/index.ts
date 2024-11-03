@@ -101,6 +101,7 @@ export class Mutate {
         lineState._appendLeaf(leaf);
       }
       if (firstOther.retain - firstLeft > 0) {
+        // 若处理过的数据 > 0, 将 OtherIter 的指针前移
         otherIter.next(firstOther.retain - firstLeft);
       }
     }
