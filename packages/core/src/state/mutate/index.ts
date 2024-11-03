@@ -44,18 +44,20 @@ export class Mutate {
     // 如果 NewOp/LastOp 是 EOL 则直接追加
     const isNewEOLOp = isEOLOp(newOp);
     const isLastEOLOp = isEOLOp(lastOp);
-    if (isNewEOLOp || isLastEOLOp) {
-      const key = newLeaf.parent.key;
+    if (isLastEOLOp) {
       lineState._appendLeaf(newLeaf);
-      if (isNewEOLOp) {
-        lines.push(lineState);
-        // this.key => 复用 other.key => 更新
-        lineState.updateKey(key);
-        lineState.updateLeaves();
-        lineState.attributes = newOp.attributes || {};
-        return LineState.create([], {}, this.block);
-      }
       return lineState;
+    }
+    if (isNewEOLOp) {
+      lineState._appendLeaf(newLeaf);
+      // 1. Other 则为新 \n 2. This 则为原 \n
+      const key = newLeaf.parent.key;
+      lines.push(lineState);
+      // this.key => 复用 other.key => 更新
+      lineState.updateKey(key);
+      lineState.updateLeaves();
+      lineState.attributes = newOp.attributes || {};
+      return LineState.create([], {}, this.block);
     }
     if (
       isObject<Op>(lastOp) &&
@@ -106,32 +108,32 @@ export class Mutate {
       if (otherIter.peekType() === OP_TYPES.INSERT) {
         const leaf = new LeafState(otherIter.next(), 0, lineState);
         lineState = this.insert(lines, lineState, leaf);
-      } else {
-        const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
-        const thisLeaf = thisIter.next(length);
-        const otherOp = otherIter.next(length);
-        // 1. 预设 retain 2. Infinity
-        if (isRetainOp(otherOp)) {
-          let newLeaf = thisLeaf;
-          if (!thisLeaf || !newLeaf) {
-            continue;
+        continue;
+      }
+      const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
+      const thisLeaf = thisIter.next(length);
+      const otherOp = otherIter.next(length);
+      // 1. 预设 retain 2. Infinity
+      if (isRetainOp(otherOp)) {
+        let newLeaf = thisLeaf;
+        if (!thisLeaf || !newLeaf) {
+          continue;
+        }
+        if (otherOp.attributes) {
+          const attrs = composeAttributes(thisLeaf.op.attributes, otherOp.attributes);
+          const newOp = cloneOp(thisLeaf.op);
+          newOp.attributes = attrs || {};
+          newLeaf = LeafState.create(newOp, 0, thisLeaf.parent);
+        }
+        lineState = this.insert(lines, lineState, newLeaf);
+        if (!otherIter.hasNext() && newLeaf === thisLeaf) {
+          // 处理剩余的 Leaves 和 Lines
+          const rest = thisIter.rest();
+          for (const leaf of rest.leaf) {
+            lineState = this.insert(lines, lineState, leaf);
           }
-          if (otherOp.attributes) {
-            const attrs = composeAttributes(thisLeaf.op.attributes, otherOp.attributes);
-            const newOp = cloneOp(thisLeaf.op);
-            newOp.attributes = attrs || {};
-            newLeaf = LeafState.create(newOp, 0, thisLeaf.parent);
-          }
-          lineState = this.insert(lines, lineState, newLeaf);
-          if (!otherIter.hasNext() && newLeaf === thisLeaf) {
-            // 处理剩余的 Leaves 和 Lines
-            const rest = thisIter.rest();
-            for (const leaf of rest.leaf) {
-              lineState = this.insert(lines, lineState, leaf);
-            }
-            lines.push(...rest.line);
-            return lines;
-          }
+          lines.push(...rest.line);
+          return lines;
         }
       }
     }

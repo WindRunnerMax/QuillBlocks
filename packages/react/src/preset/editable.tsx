@@ -33,10 +33,10 @@ export const Editable: React.FC<{
         suppressContentEditableWarning
         style={{
           outline: "none",
-          overflowWrap: "break-word",
           position: "relative",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
+          overflowWrap: "break-word",
         }}
       >
         <BlockModel editor={editor} state={editor.state.block}></BlockModel>

@@ -128,38 +128,21 @@ export class Iterator {
         this.offset = this.offset + length;
       }
       const op = nextLeaf.op;
-      if (isDeleteOp(op)) {
-        // 剩余 OpLength 与 NextOp 相等 => Immutable
-        if (op.delete === length) {
+      if (isInsertOp(op)) {
+        // 起始与裁剪位置等同 NextOp => Immutable
+        if (offset === 0 && op.insert.length <= length) {
           return nextLeaf;
         }
-        const deleteOp: Op = { delete: length };
-        return new LeafState(deleteOp, 0, nextLeaf.parent);
-      } else {
         const retOp: Op = {};
         if (nextLeaf.op.attributes) {
           retOp.attributes = nextLeaf.op.attributes;
         }
-        if (isRetainOp(op)) {
-          // 剩余 OpLength 与 NextOp 相等 => Immutable
-          if (op.retain === length) {
-            return nextLeaf;
-          }
-          retOp.retain = length;
-        } else if (isInsertOp(op)) {
-          // 起始与裁剪位置等同 NextOp => Immutable
-          if (offset === 0 && op.insert.length <= length) {
-            return nextLeaf;
-          }
-          retOp.insert = op.insert.substr(offset, length);
-        } else {
-          return nextLeaf;
-        }
+        retOp.insert = op.insert.substr(offset, length);
         return new LeafState(retOp, 0, nextLeaf.parent);
       }
-    } else {
-      return null;
+      return nextLeaf;
     }
+    return null;
   }
 
   /**
@@ -169,10 +152,12 @@ export class Iterator {
     type Rest = { leaf: LeafState[]; line: LineState[] };
     const rest: Rest = { leaf: [], line: [] };
     if (!this.hasNext()) {
+      // 不存在未迭代的部分
       return rest;
     } else if (this.offset === 0) {
-      // col === 0 && offset === 0 则直接返回剩余的 Line
+      // 当前指针位置剩余完整的 Leaf
       if (this.col === 0) {
+        // col === 0 && offset === 0 则直接返回剩余的 Line
         rest.line = this.lines.slice(this.row);
         return rest;
       }
@@ -183,6 +168,7 @@ export class Iterator {
       }
       return rest;
     } else {
+      // 当前指针位置非完整 Leaf
       const offset = this.offset;
       const row = this.row;
       const col = this.col;

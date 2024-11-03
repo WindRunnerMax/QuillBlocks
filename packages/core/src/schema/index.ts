@@ -12,16 +12,17 @@ export class Schema {
   public readonly block: Set<string> = new Set<string>();
   /** Inline */
   public readonly inline: Set<string> = new Set<string>();
-  /** Not Tail Mark */
-  public readonly notTailMark: Set<string> = new Set<string>();
 
+  /**
+   * 构造函数
+   * @param schema
+   */
   constructor(schema: EditorSchema) {
     for (const [key, value] of Object.entries(schema)) {
       value.void && this.void.add(key);
       value.mark && this.mark.add(key);
       value.block && this.block.add(key);
       value.inline && this.inline.add(key);
-      value.notTailMark && this.notTailMark.add(key);
     }
   }
 
@@ -67,7 +68,7 @@ export class Schema {
       if (this.mark.has(key)) {
         result[key] = op.attributes[key];
       }
-      if (isLeafTail && this.notTailMark.has(key)) {
+      if (isLeafTail && this.inline.has(key)) {
         delete result[key];
       }
     }

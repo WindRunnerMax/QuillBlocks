@@ -19,6 +19,6 @@ export const schema: EditorSchema = {
   },
   [INLINE_CODE]: {
     mark: true,
-    notTailMark: true,
+    inline: true,
   },
 };
