@@ -15,6 +15,7 @@ QuillJs for React implementation.
 * [初探富文本之在线文档交付](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之在线文档交付.md)   
 * [初探富文本之划词评论能力](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之划词评论能力.md)   
 * [初探富文本之文档虚拟滚动](https://github.com/WindrunnerMax/EveryDay/blob/master/Plugin/初探富文本之文档虚拟滚动.md)   
+* [初探富文本之搜索替换算法](https://github.com/WindRunnerMax/EveryDay/blob/master/Plugin/初探富文本之搜索替换算法.md)   
 
 ## Example
 
@@ -29,3 +30,4 @@ QuillJs for React implementation.
 * [pdf-with-outline.ts](./examples/pdf-with-outline.ts): 将存量`PDF`文件写入大纲`Outline`。
 * [comment-ot.html](./examples/comment-ot.html): 划词评论能力的`OT`实现。
 * [comment-crdt.html](https://github.com/WindrunnerMax/webpack-simple-environment/tree/master/packages/quill-crdt-comment): 划词评论能力的`CRDT`实现。
+* [find-replace.html](./examples/find-replace.ts): `Delta`搜索替换能力实现。
