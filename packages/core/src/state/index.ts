@@ -88,8 +88,12 @@ export class EditorState {
 
     // 获取当前选区位置
     const raw: RawRange | null = options.range || this.editor.selection.toRaw();
-    const payload = { previous, current: previous, source, changes: delta };
-    this.editor.event.trigger(EDITOR_EVENT.CONTENT_WILL_CHANGE, payload);
+    this.editor.event.trigger(EDITOR_EVENT.CONTENT_WILL_CHANGE, {
+      previous,
+      current: previous,
+      source,
+      changes: delta,
+    });
 
     // 更新 BlockSet Model
     const mutate = new Mutate(this.block);
@@ -105,10 +109,8 @@ export class EditorState {
     }
 
     const current = this.toBlockSet();
-    Promise.resolve().then(() => {
-      const payload: ContentChangeEvent = { previous, current, source, changes: delta };
-      this.editor.logger.debug("Editor Content Change", payload);
-      this.editor.event.trigger(EDITOR_EVENT.CONTENT_CHANGE, payload);
-    });
+    const payload: ContentChangeEvent = { previous, current, source, changes: delta };
+    this.editor.logger.debug("Editor Content Change", payload);
+    this.editor.event.trigger(EDITOR_EVENT.CONTENT_CHANGE, payload);
   }
 }

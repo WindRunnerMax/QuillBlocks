@@ -20,8 +20,11 @@ const BlockView: FC<{
   };
 
   const onContentChange = useMemoFn(() => {
-    setLines(state.getLines());
-    editor.state.set(EDITOR_STATE.PAINTING, true);
+    // 数据同步变更, 异步绘制变更
+    Promise.resolve().then(() => {
+      setLines(state.getLines());
+      editor.state.set(EDITOR_STATE.PAINTING, true);
+    });
   });
 
   useLayoutEffect(() => {
@@ -49,7 +52,9 @@ const BlockView: FC<{
     // 视图更新需要触发视图绘制完成事件 无依赖数组
     editor.logger.debug("OnPaint");
     editor.state.set(EDITOR_STATE.PAINTING, false);
-    editor.event.trigger(EDITOR_EVENT.PAINT, {});
+    Promise.resolve().then(() => {
+      editor.event.trigger(EDITOR_EVENT.PAINT, {});
+    });
   });
 
   return (

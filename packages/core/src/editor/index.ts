@@ -9,6 +9,7 @@ import { LOG_LEVEL, Logger } from "../log";
 import { Model } from "../model";
 import { Perform } from "../perform";
 import { Plugin } from "../plugin";
+import { Ref } from "../ref";
 import { Schema } from "../schema";
 import { Selection } from "../selection";
 import { EditorState } from "../state";
@@ -43,6 +44,8 @@ export class Editor {
   public perform: Perform;
   /** 命令模块 */
   public command: Command;
+  /** 引用模块 */
+  public ref: Ref;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
@@ -59,6 +62,7 @@ export class Editor {
     this.clipboard = new Clipboard(this);
     this.perform = new Perform(this);
     this.command = new Command();
+    this.ref = new Ref(this);
   }
 
   /**
@@ -99,6 +103,7 @@ export class Editor {
     this.history.destroy();
     this.clipboard.destroy();
     this.command.destroy();
+    this.ref.destroy();
     this.state.set(EDITOR_STATE.MOUNTED, false);
   }
 }

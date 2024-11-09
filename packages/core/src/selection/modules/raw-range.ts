@@ -34,6 +34,7 @@ export class RawRange {
    * 构建 RawRange
    * @param start
    * @param len
+   * @usage RawRange.from(3, 6) => RawRange { start: 3, len: 6 }
    */
   public static from(start: number, len: number) {
     return new RawRange(start, len);
@@ -43,6 +44,7 @@ export class RawRange {
    * 从边界构建 RawRange
    * @param start
    * @param len
+   * @usage RawRange.fromEdge(3, 6) => RawRange { start: 3, len: 3 }
    */
   public static fromEdge(start: number, end: number) {
     const s = Math.min(start, end);
