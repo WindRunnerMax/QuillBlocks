@@ -23,17 +23,6 @@ export const pickOpAtLength = (ops: Op[], length: number): Op | null => {
 };
 
 /**
- * 获取索引位置的 Op
- * @param editor
- * @param length
- */
-export const pickOpAtIndex = (editor: Editor, length: number): Op | null => {
-  const delta = editor.state.toBlockSet();
-  const ops = delta.ops;
-  return pickOpAtLength(ops, length);
-};
-
-/**
  * 基于 Range 获取索引位置的 Op
  * @param editor
  * @param point
