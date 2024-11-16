@@ -79,3 +79,16 @@ export const createEditorModel = (editor: Editor, root: HTMLElement) => {
     });
   });
 };
+
+export const createElement = (
+  key: string,
+  attributes: Record<string, string>,
+  children: HTMLElement[]
+) => {
+  const dom = document.createElement(key);
+  for (const [key, value] of Object.entries(attributes)) {
+    dom.setAttribute(key, value);
+  }
+  children.forEach(child => dom.appendChild(child));
+  return dom;
+};

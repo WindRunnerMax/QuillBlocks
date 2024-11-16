@@ -4,7 +4,7 @@ import { Delta } from "block-kit-delta";
 import { Editor } from "../../src/editor";
 import { Mutate } from "../../src/state/mutate";
 
-describe("mutate iterator", () => {
+describe("state mutate", () => {
   const text1 = { insert: "text" };
   const text2 = { insert: "text", attributes: { bold: "true" } };
   const eol1 = { insert: "\n" };

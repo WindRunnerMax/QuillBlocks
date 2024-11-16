@@ -157,21 +157,28 @@ export class Perform {
     if (!startLine || !rawPoint) return void 0;
     const delta = new Delta();
     delta.retain(rawPoint.offset);
-    const endOffset = start.line === end.line ? end.offset : startLine.length - 1;
+    const endOffset = startLine.length - 1;
+    // 如果是同行则直接 slice
+    if (start.line === end.line) {
+      const minOffset = Math.min(end.offset, endOffset);
+      delta.retain(minOffset - start.offset, attributes);
+      return this.editor.state.apply(delta.chop());
+    }
+    // 处理首行
     delta.retain(endOffset - start.offset, attributes);
     delta.retain(1);
+    // 处理中间行
     for (let i = start.line + 1; i < end.line; i++) {
       const lineState = block.getLine(i);
       if (!lineState) break;
       delta.retain(lineState.length - 1, attributes);
       delta.retain(1);
     }
-    if (start.line !== end.line) {
-      const endLine = block.getLine(end.line);
-      if (endLine) {
-        const minOffset = Math.min(end.offset, endLine.length - 1);
-        delta.retain(minOffset, attributes);
-      }
+    // 处理尾行
+    const endLine = block.getLine(end.line);
+    if (endLine) {
+      const minOffset = Math.min(end.offset, endLine.length - 1);
+      delta.retain(minOffset, attributes);
     }
     this.editor.state.apply(delta.chop());
   }

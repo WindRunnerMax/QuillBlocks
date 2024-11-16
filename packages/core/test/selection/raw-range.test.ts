@@ -5,7 +5,7 @@ import { Point } from "../../src/selection/modules/point";
 import { Range } from "../../src/selection/modules/range";
 import { RawRange } from "../../src/selection/modules/raw-range";
 
-describe("raw-range", () => {
+describe("selection raw-range", () => {
   const delta = new Delta()
     .insert("text")
     .insert("text", { bold: "true" })

@@ -4,7 +4,7 @@ import { Editor } from "../../src/editor";
 import { Point } from "../../src/selection/modules/point";
 import { RawPoint } from "../../src/selection/modules/raw-point";
 
-describe("point", () => {
+describe("selection point", () => {
   const delta = new Delta()
     .insert("text")
     .insert("text", { bold: "true" })

@@ -2,7 +2,7 @@ import "./index.scss";
 import "@arco-design/web-react/es/style/index.less";
 
 import { Editor, LOG_LEVEL } from "block-kit-core";
-import { BlockDelta } from "block-kit-delta";
+import { Delta } from "block-kit-delta";
 import { Editable } from "block-kit-react";
 import type { FC } from "react";
 import { useEffect, useMemo } from "react";
@@ -12,6 +12,7 @@ import { BoldPlugin } from "../src/bold";
 import { ImagePlugin } from "../src/image";
 import { InlineCodePlugin } from "../src/inline-code";
 import { MentionPlugin } from "../src/mention";
+import { MenuToolbar } from "../src/toolbar";
 import { INIT } from "./block";
 import { schema } from "./schema";
 
@@ -31,10 +32,15 @@ const App: FC = () => {
     // @ts-expect-error editor
     window.editor = editor;
     // @ts-expect-error BlockDelta
-    window.BlockDelta = BlockDelta;
+    window.Delta = Delta;
   }, [editor]);
 
-  return <Editable editor={editor}></Editable>;
+  return (
+    <div className="editor-container">
+      <MenuToolbar editor={editor}></MenuToolbar>
+      <Editable editor={editor} className="editable-node"></Editable>
+    </div>
+  );
 };
 
 ReactDOM.render(<App />, document.getElementById("root"));

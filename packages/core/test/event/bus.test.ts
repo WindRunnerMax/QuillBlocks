@@ -3,7 +3,7 @@ import { Delta } from "block-kit-delta";
 import { EventBus } from "../../src/event/bus";
 import { EDITOR_EVENT } from "../../src/index";
 
-describe("event", () => {
+describe("event bus", () => {
   const event = new EventBus();
   const delta = new Delta();
 

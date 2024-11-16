@@ -8,6 +8,7 @@ import { BlockModel } from "../model/block";
 export const Editable: React.FC<{
   editor: Editor;
   readonly?: boolean;
+  className?: string;
 }> = props => {
   const { editor, readonly } = props;
   const ref = useRef<HTMLDivElement>(null);
@@ -28,6 +29,7 @@ export const Editable: React.FC<{
     <EditorProvider editor={editor}>
       <div
         ref={ref}
+        className={props.className}
         {...{ [EDITOR_KEY]: true }}
         contentEditable={!readonly}
         suppressContentEditableWarning

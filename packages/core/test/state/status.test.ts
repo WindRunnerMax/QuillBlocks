@@ -4,7 +4,7 @@ import { Editor } from "../../src/editor";
 import { EditorState } from "../../src/state";
 import { EDITOR_STATE } from "../../src/state/types";
 
-describe("state", () => {
+describe("state status", () => {
   const delta = new Delta();
   const editor = new Editor();
 

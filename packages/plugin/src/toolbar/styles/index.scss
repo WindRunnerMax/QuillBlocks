@@ -1,0 +1,18 @@
+.menu-toolbar {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-3);
+  display: flex;
+  padding: 6px 5px;
+
+  .menu-toolbar-item {
+    color: var(--color-text-2);
+    cursor: pointer;
+    margin: 0 5px;
+    padding: 3px 7px;
+
+    &.active {
+      background-color: var(--color-fill-2);
+      color: var(--color-text-1);
+    }
+  }
+}

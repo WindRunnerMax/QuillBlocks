@@ -3,7 +3,7 @@ import { Delta } from "block-kit-delta";
 import { getFragmentText, serializeHTML } from "../../src/clipboard/utils/serialize";
 import { Editor } from "../../src/editor";
 
-describe("copy", () => {
+describe("clipboard copy", () => {
   const editor = new Editor();
 
   it("serialize", () => {

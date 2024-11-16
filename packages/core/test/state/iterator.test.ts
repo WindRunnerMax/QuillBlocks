@@ -4,7 +4,7 @@ import { Editor } from "../../src/editor";
 import type { LineState } from "../../src/state/modules/line-state";
 import { Iterator } from "../../src/state/mutate/iterator";
 
-describe("mutate state", () => {
+describe("state iterator", () => {
   const text1 = { insert: "text" };
   const text2 = { insert: "text", attributes: { bold: "true" } };
   const eol1 = { insert: "\n" };

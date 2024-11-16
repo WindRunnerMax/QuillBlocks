@@ -1,3 +1,10 @@
-.root {
-  padding: 10px;
+.editor-container {
+  border: 1px solid var(--color-border-3);
+  box-sizing: border-box;
+  margin: 5px;
+  position: relative;
+
+  .editable-node {
+    padding: 10px;
+  }
 }

@@ -4,7 +4,7 @@ import { isHTMLElement, TEXT_HTML } from "block-kit-utils";
 import { applyLineMarker, isMatchBlockTag } from "../../src/clipboard/utils/deserialize";
 import { Editor } from "../../src/editor";
 
-describe("paste", () => {
+describe("clipboard paste", () => {
   const editor = new Editor();
 
   it("deserialize", () => {

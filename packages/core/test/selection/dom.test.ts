@@ -16,7 +16,7 @@ import {
   createStringDOM,
 } from "../config/dom";
 
-describe("getSelectedText", () => {
+describe("selection dom", () => {
   const delta = new Delta({
     ops: [
       { insert: "text" },
