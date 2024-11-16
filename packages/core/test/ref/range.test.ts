@@ -3,7 +3,7 @@ import { Delta } from "block-kit-delta";
 import { Editor } from "../../src/editor";
 import { RawRange } from "../../src/selection/modules/raw-range";
 
-describe("range", () => {
+describe("ref range", () => {
   const editor = new Editor();
 
   it("base", () => {

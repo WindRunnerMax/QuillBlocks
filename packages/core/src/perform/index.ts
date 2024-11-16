@@ -1,8 +1,12 @@
+import type { AttributeMap } from "block-kit-delta";
 import { Delta, EOL } from "block-kit-delta";
+import type { P } from "block-kit-utils/dist/es/types";
 
 import type { Editor } from "../editor";
 import { pickLeafAtPoint } from "../input/utils/collection";
+import { Point } from "../selection/modules/point";
 import type { Range } from "../selection/modules/range";
+import { RawPoint } from "../selection/modules/raw-point";
 import { RawRange } from "../selection/modules/raw-range";
 
 export class Perform {
@@ -17,7 +21,7 @@ export class Perform {
    * @param sel
    * @param text
    */
-  public insertText = (sel: Range, text: string) => {
+  public insertText(sel: Range, text: string) {
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) {
       return void 0;
@@ -31,13 +35,13 @@ export class Perform {
     const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });
-  };
+  }
 
   /**
    * 删除选区片段
    * @param sel
    */
-  public deleteFragment = (sel: Range) => {
+  public deleteFragment(sel: Range) {
     if (sel.isCollapsed) {
       return void 0;
     }
@@ -52,13 +56,13 @@ export class Perform {
     }
     const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
-  };
+  }
 
   /**
    * 向前删除字符
    * @param sel
    */
-  public deleteBackward = (sel: Range) => {
+  public deleteBackward(sel: Range) {
     if (!sel.isCollapsed) {
       this.deleteFragment(sel);
       return void 0;
@@ -73,13 +77,13 @@ export class Perform {
     }
     const delta = new Delta().retain(start).delete(1);
     this.editor.state.apply(delta, { range: raw });
-  };
+  }
 
   /**
    * 向后删除字符
    * @param sel
    */
-  public deleteForward = (sel: Range) => {
+  public deleteForward(sel: Range) {
     if (!sel.isCollapsed) {
       this.deleteFragment(sel);
       return void 0;
@@ -94,16 +98,26 @@ export class Perform {
     }
     const delta = new Delta().retain(start).delete(1);
     this.editor.state.apply(delta, { range: raw });
-  };
+  }
 
   /**
    * 插入换行符
    * @param sel
+   * @param attributes
    */
-  public insertBreak = (sel: Range) => {
+  public insertBreak(sel: Range, attributes?: AttributeMap) {
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) {
       return void 0;
+    }
+    let attrs: AttributeMap | P.Undef = attributes;
+    if (sel.isCollapsed) {
+      const block = this.editor.state.block;
+      const state = block.getLine(sel.start.line);
+      const lineAttrs = state && state.attributes;
+      if (lineAttrs) {
+        attrs = { ...lineAttrs, ...attributes };
+      }
     }
     const start = raw.start;
     const len = raw.len;
@@ -112,21 +126,74 @@ export class Perform {
     }
     const delta = new Delta().retain(start);
     len && delta.delete(len);
-    delta.insert(EOL);
+    delta.insert(EOL, attrs);
     this.editor.state.apply(delta, { range: raw });
-  };
+  }
 
   /**
    * 在选区处应用 Delta
    * @param sel
    * @param delta
    */
-  public insertFragment = (sel: Range, delta: Delta) => {
+  public insertFragment(sel: Range, delta: Delta) {
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) {
       return void 0;
     }
     const newDelta = new Delta().retain(raw.start).delete(raw.len).concat(delta);
     this.editor.state.apply(newDelta, { range: raw });
-  };
+  }
+
+  /**
+   * 在选区处应用 Mark
+   * @param sel
+   * @param attributes
+   */
+  public applyMarks(sel: Range, attributes: AttributeMap) {
+    const { start, end } = sel;
+    const block = this.editor.state.block;
+    const startLine = block.getLine(start.line);
+    const rawPoint = RawPoint.fromPoint(this.editor, start);
+    if (!startLine || !rawPoint) return void 0;
+    const delta = new Delta();
+    delta.retain(rawPoint.offset);
+    const endOffset = start.line === end.line ? end.offset : startLine.length - 1;
+    delta.retain(endOffset - start.offset, attributes);
+    delta.retain(1);
+    for (let i = start.line + 1; i < end.line; i++) {
+      const lineState = block.getLine(i);
+      if (!lineState) break;
+      delta.retain(lineState.length - 1, attributes);
+      delta.retain(1);
+    }
+    if (start.line !== end.line) {
+      const endLine = block.getLine(end.line);
+      if (endLine) {
+        const minOffset = Math.min(end.offset, endLine.length - 1);
+        delta.retain(minOffset, attributes);
+      }
+    }
+    this.editor.state.apply(delta.chop());
+  }
+
+  /**
+   * 在选区处应用行 Mark
+   * @param sel
+   * @param attributes
+   */
+  public applyLineMarks(sel: Range, attributes: AttributeMap) {
+    const { start, end } = sel;
+    const block = this.editor.state.block;
+    const rawPoint = RawPoint.fromPoint(this.editor, Point.from(start.line, 0));
+    if (!rawPoint) return void 0;
+    const delta = new Delta();
+    delta.retain(rawPoint.offset);
+    for (let i = start.line; i <= end.line; i++) {
+      const lineState = block.getLine(i);
+      if (!lineState) break;
+      delta.retain(lineState.length - 1);
+      delta.retain(1, attributes);
+    }
+    this.editor.state.apply(delta);
+  }
 }

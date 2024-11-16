@@ -123,7 +123,7 @@ export class Mutate {
         if (otherOp.attributes) {
           const attrs = composeAttributes(thisLeaf.op.attributes, otherOp.attributes);
           const newOp = cloneOp(thisLeaf.op);
-          newOp.attributes = attrs || {};
+          newOp.attributes = attrs;
           newLeaf = LeafState.create(newOp, 0, thisLeaf.parent);
         }
         lineState = this.insert(lines, lineState, newLeaf);
