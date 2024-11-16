@@ -810,6 +810,16 @@ export class Point {
 quill.updateContents([{ retain: 3 }, { insert: "\n" }]);
 ```
 
+那么在这里就需要区分多种情况，此时插入回车的时候可以携带`attributes`。那么如果是在行首，就将当前属性全部带入下一行，这实际上就是默认的行为。如果此时光标在末尾插入回车，则需要将下一行的属性全部清空，当然此时也需要合并传入的属性。如果在行中间插入属性，则需要拷贝当前行属性放置于当前插入的新行属性，而如果此时存在传入的属性则同样需要合并。
+
+```js
+// |xx(\n {y:1}) => (\n)xx(\n {y:1})
+// xx|(\n {y:1}) => xx(\n {y:1})(\n)
+// xx|(\n {y:1}) => xx(\n {y:1})(\n & attributes)
+// x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1})
+// x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1 & attributes})
+```
+
 ## 块结构变更
 对于块结构的更新，如果是`JSON`嵌套结构的组织方式，对于块结构的变更如果直接参考`OT-JSON`的数据结构变更是不会有什么问题的，但是这样就就会导致我们的数据结构变得复杂，那么这样我们就失去了最开始使用`Delta`作为扁平数据结构所带来的优势，此时`Mutate`的设计同样也会变得复杂。那么如果我们将数据结构扁平化结构，即`Map<id, Delta>`的设计，此时我们的整体设计就可以完整复用，以引用的方式组织块嵌套也会清晰很多。
 
@@ -822,3 +832,87 @@ quill.updateContents([{ retain: 3 }, { insert: "\n" }]);
 * 实际渲染的时候记录树结构的状态，在渲染`Editable`的时候，我们需要将此时渲染的`context`状态传递到组件当中，那么此时我们就可以借助组件的生命周期来记录块的状态，树形结构自然也可以通过`parent`状态来实现，而`children`集合理论上应该不实际需要建立。
 * 在`Mutate`的时候记录块的状态，也就是我们约定`_blockId`关键字来记录块状态的变更，或者实现`Op - Id`映射关系的模式注册，而我们使用`Delta`描述变更时是无法得知是哪些`op`内容实现了插入/删除/更新，这部分实现就涉及到了`Mutate/State`模块的改造，最好是实现`State - Id`的相互映射模块，并且实现行的状态的变更来更新映射关系。
 * 动态获取并解析树结构状态，这里的重点是关注于树的状态，既然我们维护的`Block/Line/Leaf`状态是完备的，那么我们可以直接借助内建状态来获取当前绑定在各个`State`状态上的块，这里的映射关系同样需要上述约定或者注册，甚至于我们粒度做的粗一些可以基于`LineState`来按需收集，无论是`Leaf`还是`Line`产生变更的时候都会重新实例化并且计算状态。
+
+## Key 值的维护
+在`LineState`节点的`key`值维护中，如果是初始值则是根据`state`引用自增的值，在变更的时候则是尽可能地复用原始行的`key`，这样可以避免过多的行节点重建并且可以控制整行的强刷。而对于`LeafState`节点的`key`值目前是直接使用`index`值，这样实际上会存在隐性的问题，而如果直接根据`Immutable`来生成`key`值的话，任何文本内容的更改都会导致`key`值改变进而导致`DOM`节点的频繁重建。
+
+```js
+export const NODE_TO_KEY = new WeakMap<Object.Any, Key>();
+export class Key {
+  /** 当前节点 id */
+  public id: string;
+  /** 自动递增标识符 */
+  public static n = 0;
+
+  constructor() {
+    this.id = `${Key.n++}`;
+  }
+
+  /**
+   * 根据节点获取 id
+   * @param node
+   */
+  public static getId(node: Object.Any): string {
+    let key = NODE_TO_KEY.get(node);
+    if (!key) {
+      key = new Key();
+      NODE_TO_KEY.set(node, key);
+    }
+    return key.id;
+  }
+}
+```
+
+通常使用`index`作为`key`是可行的，然而在一些非受控场景下则会由于原地复用造成渲染问题，`diff`算法导致的性能问题我们暂时先不考虑。在下面的例子中我们可以看出，每次我们都是从数组顶部删除元素，而实际的`input`值效果表现出来则是删除了尾部的元素，这就是原地复用的问题，在非受控场景下比较明显，而我们的`ContentEditable`组件就是一个非受控场景，因此这里的`key`值需要再考虑一下。
+
+```js
+const { useState, Fragment, useRef, useEffect } = React;
+function App() {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [nodes, setNodes] = useState(() => Array.from({ length: 10 }, (_, i) => i));
+
+  const onClick = () => {
+    const [_, ...rest] = nodes;
+    console.log(rest);
+    setNodes(rest);
+  };
+
+  useEffect(() => {
+    const el = ref.current;
+    el && Array.from(el.children).forEach((it, i) => ((it as HTMLInputElement).value = i + ""));
+  }, []);
+
+  return (
+    <Fragment>
+      <p ref={ref}>
+        {nodes.map((_, i) => (<input key={i}></input>))}
+      </p>
+      <button onClick={onClick}>slice</button>
+    </Fragment>
+  );
+}
+```
+
+考虑到先前提到的我们不希望任何文本内容的更改都导致`key`值改变引发重建，因此就不能直接使用计算的`immutable`对象引用来处理`key`值，而描述单个`op`的方法除了`insert`就只剩下`attributes`了，但是如果基于`attributes`来获得就需要精准控制合并`insert`的时候取需要取旧的对象引用，且没有属性的`op`就不好处理了，因此这里可能只能将其转为字符串处理，但是这样同样不能保持`key`的完全稳定，因此前值的索引改变就会导致后续的值出现变更。
+
+```js
+const prefix = new WeakMap<LineState, Record<string, number>>();
+const suffix = new WeakMap<LineState, Record<string, number>>();
+const mapToString = (map: Record<string, string>): string => {
+  return Object.keys(map)
+    .map(key => `${key}:${map[key]}`)
+    .join(",");
+};
+const toKey = (state: LineState, op: Op): string => {
+  const key = op.attributes ? mapToString(op.attributes) : "";
+  const prefixMap = prefix.get(state) || {};
+  prefix.set(state, prefixMap);
+  const suffixMap = suffix.get(state) || {};
+  suffix.set(state, suffixMap);
+  const prefixKey = prefixMap[key] ? prefixMap[key] + 1 : 0;
+  const suffixKey = suffixMap[key] ? suffixMap[key] + 1 : 0;
+  prefixMap[key] = prefixKey;
+  suffixMap[key] = suffixKey;
+  return `${prefixKey}-${suffixKey}`;
+};
+```

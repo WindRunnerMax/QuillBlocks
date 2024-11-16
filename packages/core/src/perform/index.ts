@@ -106,8 +106,8 @@ export class Perform {
     const delta = new Delta().retain(start);
     len && delta.delete(len);
     delta.insert(EOL, attrs);
-    // COMPAT: 如果存在预设的属性 则需要合并到当前的行属性中
-    // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1,attributes})
+    // COMPAT: 如果存在预设的属性 则需要合并到拆分的行属性中
+    // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1 & attributes})
     if (sel.isCollapsed && attributes && state) {
       const nextAttrs = attributes;
       const lineOffset = state.length - 1;

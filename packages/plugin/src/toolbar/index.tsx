@@ -69,7 +69,7 @@ export const MenuToolbar: FC<{
           </div>
         )}
       >
-        <div className="menu-toolbar-item" style={{ width: 20 }}>
+        <div className="menu-toolbar-item" style={{ width: 20, textAlign: "center" }}>
           {keys[HEADING_KEY]?.toUpperCase() || "Text"}
         </div>
       </Trigger>

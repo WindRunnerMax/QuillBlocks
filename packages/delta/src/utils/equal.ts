@@ -7,6 +7,7 @@ import type { Op } from "../delta/interface";
  * @param t
  */
 export const isEqualAttributes = (o: AttributeMap | undefined, t: AttributeMap | undefined) => {
+  if (!o && !t) return true;
   const origin = o || {};
   const target = t || {};
   const originKeys = Object.keys(origin);

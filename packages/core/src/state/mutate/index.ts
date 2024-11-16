@@ -67,8 +67,8 @@ export class Mutate {
     ) {
       // 合并相同属性的 insert
       const op: InsertOp = { insert: lastOp.insert + newOp.insert };
-      if (isObject<AttributeMap>(newOp.attributes)) {
-        op.attributes = newOp.attributes;
+      if (isObject<AttributeMap>(lastOp.attributes)) {
+        op.attributes = lastOp.attributes;
       }
       lineState.setLeaf(new LeafState(op, 0, lineState), index - 1);
       return lineState;
