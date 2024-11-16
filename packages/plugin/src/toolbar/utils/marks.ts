@@ -1,3 +1,25 @@
+import type { Op } from "block-kit-delta";
+import { NOOP } from "block-kit-utils";
+
 export const toggleMark = (key: string, value: string, preset: Record<string, string>) => {
-  return { ...preset, [key]: preset[key] === value ? "" : value };
+  return { ...preset, [key]: preset[key] === value ? NOOP : value };
+};
+
+export const filterMarkMap = (ops: Op[]): Record<string, string> => {
+  const firstOp = ops[0];
+  if (!firstOp || !firstOp.attributes) return {};
+  const target: Record<string, string> = firstOp.attributes;
+  // 全部存在且相同的属性才认为是此时存在的 mark
+  for (let i = 1; i < ops.length; i++) {
+    const op = ops[i];
+    const attrs = op.attributes;
+    const keys = attrs && Object.keys(attrs);
+    if (!keys || !keys.length) return {};
+    for (const key of keys) {
+      if (attrs[key] !== target[key]) {
+        delete target[key];
+      }
+    }
+  }
+  return target;
 };

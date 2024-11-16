@@ -26,6 +26,6 @@ export class InlineCodePlugin extends EditorPlugin {
   }
 
   public render(context: ReactLeafContext): ReactNode {
-    return <code className="editor-inline-code">{context.children}</code>;
+    return <code className="inline-code">{context.children}</code>;
   }
 }

@@ -28,5 +28,5 @@ export const TRUE = "true";
 /** Falsy */
 export const FALSE = "false";
 
-/** NULL */
-export const NULL = "";
+/** NOOP */
+export const NOOP = "";

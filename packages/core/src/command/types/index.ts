@@ -1,5 +1,5 @@
 export type CMDPayload = {
-  key: string;
+  value: string;
   [key: string]: unknown;
 };
 

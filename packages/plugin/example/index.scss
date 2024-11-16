@@ -1,3 +1,4 @@
+/* stylelint-disable selector-no-qualifying-type */
 .editor-container {
   border: 1px solid var(--color-border-3);
   box-sizing: border-box;
@@ -6,5 +7,9 @@
 
   .editable-node {
     padding: 10px;
+  }
+
+  div[data-node] {
+    padding: 1px 0;
   }
 }

@@ -20,7 +20,7 @@ const App: FC = () => {
   const editor = useMemo(() => {
     const editor = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
     editor.plugin.register(
-      new BoldPlugin(),
+      new BoldPlugin(editor),
       new ImagePlugin(editor, false),
       new MentionPlugin(),
       new InlineCodePlugin()

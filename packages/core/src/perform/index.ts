@@ -110,14 +110,13 @@ export class Perform {
     if (!raw) {
       return void 0;
     }
-    let attrs: AttributeMap | P.Undef = attributes;
-    if (sel.isCollapsed) {
-      const block = this.editor.state.block;
-      const state = block.getLine(sel.start.line);
-      const lineAttrs = state && state.attributes;
-      if (lineAttrs) {
-        attrs = { ...lineAttrs, ...attributes };
-      }
+    let attrs: AttributeMap | P.Undef = void 0;
+    const block = this.editor.state.block;
+    const state = block.getLine(sel.start.line);
+    // COMPAT: 折叠选区状态下 则复制行属性到当前插入的行
+    // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1})
+    if (sel.isCollapsed && state) {
+      attrs = state.attributes;
     }
     const start = raw.start;
     const len = raw.len;
@@ -127,6 +126,12 @@ export class Perform {
     const delta = new Delta().retain(start);
     len && delta.delete(len);
     delta.insert(EOL, attrs);
+    // COMPAT: 如果存在预设的属性 则需要合并到当前的行属性中
+    // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1,attributes})
+    if (sel.isCollapsed && attributes && state) {
+      const lineOffset = state.length - 1;
+      delta.retain(lineOffset - sel.start.offset).retain(1, attributes);
+    }
     this.editor.state.apply(delta, { range: raw });
   }
 
@@ -150,6 +155,7 @@ export class Perform {
    * @param attributes
    */
   public applyMarks(sel: Range, attributes: AttributeMap) {
+    if (sel.isCollapsed) return void 0;
     const { start, end } = sel;
     const block = this.editor.state.block;
     const startLine = block.getLine(start.line);

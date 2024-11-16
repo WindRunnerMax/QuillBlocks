@@ -1,4 +1,4 @@
-export { FALSE, KEY_CODE, NULL, TRUE } from "./constant";
+export { FALSE, KEY_CODE, NOOP, TRUE } from "./constant";
 export type { EventFn, Func, Reflex } from "laser-utils";
 export {
   Bind,

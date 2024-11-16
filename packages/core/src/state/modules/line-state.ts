@@ -46,13 +46,6 @@ export class LineState {
   }
 
   /**
-   * 获取行文本
-   */
-  public getText() {
-    return this.leaves.map(leaf => leaf.getText()).join("");
-  }
-
-  /**
    * 获取 Leaf 节点
    * @param index
    */
@@ -138,10 +131,12 @@ export class LineState {
   }
 
   /**
-   * 获取行索引
+   * 获取行文本
    */
-  public getIndex() {
-    return this.index;
+  public getText() {
+    return this.getOps()
+      .map(op => op.insert)
+      .join("");
   }
 
   /**
