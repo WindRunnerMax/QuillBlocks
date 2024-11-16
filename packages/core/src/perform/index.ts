@@ -1,5 +1,6 @@
 import type { AttributeMap } from "block-kit-delta";
 import { Delta, EOL } from "block-kit-delta";
+import { NOOP } from "block-kit-utils";
 import type { P } from "block-kit-utils/dist/es/types";
 
 import type { Editor } from "../editor";
@@ -23,14 +24,10 @@ export class Perform {
    */
   public insertText(sel: Range, text: string) {
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) {
-      return void 0;
-    }
+    if (!raw) return void 0;
     const point = sel.start;
     const leaf = pickLeafAtPoint(this.editor, point);
-    if (leaf && leaf.block && leaf.block) {
-      return void 0;
-    }
+    if (leaf && leaf.block && leaf.block) return void 0;
     const isLeafTail = leaf ? point.offset - leaf.offset - leaf.length >= 0 : false;
     const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
@@ -42,18 +39,12 @@ export class Perform {
    * @param sel
    */
   public deleteFragment(sel: Range) {
-    if (sel.isCollapsed) {
-      return void 0;
-    }
+    if (sel.isCollapsed) return void 0;
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) {
-      return void 0;
-    }
+    if (!raw) return void 0;
     const len = Math.max(raw.len, 0);
     const start = Math.max(raw.start, 0);
-    if (start < 0 || len <= 0) {
-      return void 0;
-    }
+    if (start < 0 || len <= 0) return void 0;
     const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
   }
@@ -63,18 +54,11 @@ export class Perform {
    * @param sel
    */
   public deleteBackward(sel: Range) {
-    if (!sel.isCollapsed) {
-      this.deleteFragment(sel);
-      return void 0;
-    }
+    if (!sel.isCollapsed) return this.deleteFragment(sel);
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) {
-      return void 0;
-    }
+    if (!raw) return void 0;
     const start = raw.start - 1;
-    if (start < 0) {
-      return void 0;
-    }
+    if (start < 0) return void 0;
     const delta = new Delta().retain(start).delete(1);
     this.editor.state.apply(delta, { range: raw });
   }
@@ -84,18 +68,11 @@ export class Perform {
    * @param sel
    */
   public deleteForward(sel: Range) {
-    if (!sel.isCollapsed) {
-      this.deleteFragment(sel);
-      return void 0;
-    }
+    if (!sel.isCollapsed) return this.deleteFragment(sel);
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) {
-      return void 0;
-    }
+    if (!raw) return void 0;
     const start = raw.start;
-    if (start < 0) {
-      return void 0;
-    }
+    if (start < 0) return void 0;
     const delta = new Delta().retain(start).delete(1);
     this.editor.state.apply(delta, { range: raw });
   }
@@ -107,30 +84,34 @@ export class Perform {
    */
   public insertBreak(sel: Range, attributes?: AttributeMap) {
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) {
-      return void 0;
-    }
+    if (!raw) return void 0;
     let attrs: AttributeMap | P.Undef = void 0;
     const block = this.editor.state.block;
     const state = block.getLine(sel.start.line);
-    // COMPAT: 折叠选区状态下 则复制行属性到当前插入的行
+    // COMPAT: 折叠选区状态且非行首情况下, 复制行属性到当前插入的行
     // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1})
-    if (sel.isCollapsed && state) {
+    if (sel.isCollapsed && state && sel.start.offset) {
       attrs = state.attributes;
+      const lineOffset = state.length - 1;
+      // 如果此时光标在行末, 则需要将 NextLine 的属性移除
+      if (sel.start.offset === lineOffset && attrs) {
+        const nextAttrs = attributes || {};
+        Object.keys(attrs).forEach(key => (nextAttrs[key] = NOOP));
+        attributes = nextAttrs;
+      }
     }
     const start = raw.start;
     const len = raw.len;
-    if (start < 0) {
-      return void 0;
-    }
+    if (start < 0) return void 0;
     const delta = new Delta().retain(start);
     len && delta.delete(len);
     delta.insert(EOL, attrs);
     // COMPAT: 如果存在预设的属性 则需要合并到当前的行属性中
     // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1,attributes})
     if (sel.isCollapsed && attributes && state) {
+      const nextAttrs = attributes;
       const lineOffset = state.length - 1;
-      delta.retain(lineOffset - sel.start.offset).retain(1, attributes);
+      delta.retain(lineOffset - sel.start.offset).retain(1, nextAttrs);
     }
     this.editor.state.apply(delta, { range: raw });
   }
@@ -142,9 +123,7 @@ export class Perform {
    */
   public insertFragment(sel: Range, delta: Delta) {
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) {
-      return void 0;
-    }
+    if (!raw) return void 0;
     const newDelta = new Delta().retain(raw.start).delete(raw.len).concat(delta);
     this.editor.state.apply(newDelta, { range: raw });
   }

@@ -1,4 +1,5 @@
 import type { Op } from "block-kit-delta";
+import type { AttributeMap } from "block-kit-delta";
 import { NOOP } from "block-kit-utils";
 
 export const toggleMark = (key: string, value: string, preset: Record<string, string>) => {
@@ -17,6 +18,21 @@ export const filterMarkMap = (ops: Op[]): Record<string, string> => {
     if (!keys || !keys.length) return {};
     for (const key of keys) {
       if (attrs[key] !== target[key]) {
+        delete target[key];
+      }
+    }
+  }
+  return target;
+};
+
+export const filterLineMarkMap = (attrs: AttributeMap[]): Record<string, string> => {
+  if (!attrs.length) return {};
+  const target: Record<string, string> = attrs[0];
+  for (let i = 1; i < attrs.length; i++) {
+    const keys = Object.keys(attrs[i]);
+    if (!keys || !keys.length) return {};
+    for (const key of keys) {
+      if (attrs[i][key] !== target[key]) {
         delete target[key];
       }
     }

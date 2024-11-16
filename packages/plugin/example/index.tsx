@@ -9,6 +9,7 @@ import { useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 
 import { BoldPlugin } from "../src/bold";
+import { HeadingPlugin } from "../src/heading";
 import { ImagePlugin } from "../src/image";
 import { InlineCodePlugin } from "../src/inline-code";
 import { MentionPlugin } from "../src/mention";
@@ -23,7 +24,8 @@ const App: FC = () => {
       new BoldPlugin(editor),
       new ImagePlugin(editor, false),
       new MentionPlugin(),
-      new InlineCodePlugin()
+      new InlineCodePlugin(editor),
+      new HeadingPlugin(editor)
     );
     return editor;
   }, []);

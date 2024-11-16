@@ -1,6 +1,7 @@
 import "./styles/index.scss";
 
 import type { SerializeContext } from "block-kit-core";
+import type { Editor } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
@@ -11,6 +12,14 @@ import { INLINE_CODE } from "./types";
 export class InlineCodePlugin extends EditorPlugin {
   public key = INLINE_CODE;
   public destroy(): void {}
+
+  constructor(editor: Editor) {
+    super();
+    editor.command.register(INLINE_CODE, context => {
+      const sel = editor.selection.get();
+      sel && editor.perform.applyMarks(sel, { [INLINE_CODE]: context.value });
+    });
+  }
 
   public match(attrs: AttributeMap): boolean {
     return !!attrs[INLINE_CODE];

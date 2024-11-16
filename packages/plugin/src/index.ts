@@ -1,5 +1,7 @@
 export { BoldPlugin } from "./bold";
 export { BOLD_KEY } from "./bold/types";
+export { HeadingPlugin } from "./heading/index";
+export { HEADING_KEY } from "./heading/types";
 export { ImagePlugin } from "./image/index";
 export {
   IMAGE_HEIGHT,

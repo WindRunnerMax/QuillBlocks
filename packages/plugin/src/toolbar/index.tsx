@@ -1,20 +1,25 @@
 import "./styles/index.scss";
 
-import { IconBold } from "@arco-design/web-react/icon";
+import { Trigger } from "@arco-design/web-react";
+import { IconBold, IconCode } from "@arco-design/web-react/icon";
 import type { Editor } from "block-kit-core";
 import { EDITOR_EVENT, pickOpAtPoint } from "block-kit-core";
 import type { Op } from "block-kit-delta";
 import { stopReactEvent } from "block-kit-react";
 import { cs, NOOP, TRUE, useMemoFn } from "block-kit-utils";
 import type { FC } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BOLD_KEY } from "../bold/types";
-import { filterMarkMap } from "./utils/marks";
+import { HEADING_KEY } from "../heading/types";
+import { INLINE_CODE } from "../inline-code/types";
+import { filterLineMarkMap, filterMarkMap } from "./utils/marks";
 
 export const MenuToolbar: FC<{
   editor: Editor;
 }> = props => {
+  const { editor } = props;
+  const triggerRef = useRef<Trigger>(null);
   const [keys, setKeys] = useState<Record<string, string>>({});
 
   const onComputeMarks = useMemoFn(() => {
@@ -29,7 +34,12 @@ export const MenuToolbar: FC<{
       fragment && ops.push(...fragment.ops);
     }
     const markMap = filterMarkMap(ops);
-    setKeys(markMap);
+    const lines = props.editor.state.block.getLines();
+    const { start, end } = current;
+    const lineMarkMap = filterLineMarkMap(
+      lines.slice(start.line, end.line + 1).map(line => line.attributes)
+    );
+    setKeys({ ...markMap, ...lineMarkMap });
   });
 
   useEffect(() => {
@@ -41,6 +51,28 @@ export const MenuToolbar: FC<{
 
   return (
     <div className="menu-toolbar" onMouseDown={stopReactEvent}>
+      <Trigger
+        ref={triggerRef}
+        trigger="click"
+        popup={() => (
+          <div
+            className="toolbar-dropdown"
+            onClick={() => {
+              onComputeMarks();
+              triggerRef.current?.setPopupVisible(false);
+            }}
+          >
+            <div onClick={() => editor.command.exec(HEADING_KEY, { value: NOOP })}>Text</div>
+            <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h1" })}>H1</div>
+            <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h2" })}>H2</div>
+            <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h3" })}>H3</div>
+          </div>
+        )}
+      >
+        <div className="menu-toolbar-item" style={{ width: 20 }}>
+          {keys[HEADING_KEY]?.toUpperCase() || "Text"}
+        </div>
+      </Trigger>
       <div
         className={cs("menu-toolbar-item", keys[BOLD_KEY] && "active")}
         onClick={() => {
@@ -49,6 +81,15 @@ export const MenuToolbar: FC<{
         }}
       >
         <IconBold />
+      </div>
+      <div
+        className={cs("menu-toolbar-item", keys[INLINE_CODE] && "active")}
+        onClick={() => {
+          props.editor.command.exec(INLINE_CODE, { value: keys[INLINE_CODE] ? NOOP : TRUE });
+          onComputeMarks();
+        }}
+      >
+        <IconCode />
       </div>
     </div>
   );

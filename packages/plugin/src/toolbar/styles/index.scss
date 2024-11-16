@@ -1,3 +1,5 @@
+@import '../../shared/styles/variable';
+
 .menu-toolbar {
   align-items: center;
   border-bottom: 1px solid var(--color-border-3);
@@ -6,14 +8,32 @@
   user-select: none;
 
   .menu-toolbar-item {
-    color: var(--color-text-2);
+    color: var(--color-text-1);
     cursor: pointer;
-    margin: 0 5px;
+    margin: 0 3px;
     padding: 3px 7px;
 
     &.active {
       background-color: var(--color-fill-2);
       color: var(--color-text-1);
+    }
+  }
+}
+
+.toolbar-dropdown {
+  @include frame-region;
+
+  >div {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    height: 30px;
+    justify-content: center;
+    margin: 5px;
+    min-width: 50px;
+
+    &:hover {
+      background-color: var(--color-fill-2);
     }
   }
 }

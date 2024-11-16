@@ -28,7 +28,7 @@
   border-radius: 3px;
 }
 
-@mixin frame-border {
+@mixin frame-region {
   @include border-radius-3;
 
   background-color: var(--color-bg-1);
