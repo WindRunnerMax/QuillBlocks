@@ -15,7 +15,6 @@ export { Editor } from "./editor";
 export type { EventMapKeys } from "./event/bus/types";
 export type { ContentChangeEvent, SelectionChangeEvent } from "./event/bus/types";
 export { EDITOR_EVENT } from "./event/bus/types";
-export { pickLeafAtPoint, pickOpAtLength, pickOpAtPoint } from "./input/utils/collection";
 export {
   isArrowDown,
   isArrowLeft,

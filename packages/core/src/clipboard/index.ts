@@ -4,8 +4,6 @@ import { TEXT_HTML, TEXT_PLAIN, TSON } from "block-kit-utils";
 
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
-import { pickOpAtPoint } from "../input/utils/collection";
-import type { Range } from "../selection/modules/range";
 import { Copy } from "./modules/copy";
 import { Paste } from "./modules/paste";
 import { TEXT_DOC } from "./types";
@@ -49,13 +47,13 @@ export class Clipboard {
     const delta = new Delta();
     if (sel.isCollapsed) {
       // 在选区折叠的情况下需要特判 Void 节点类型
-      const op = pickOpAtPoint(this.editor, sel.start);
+      const op = this.editor.collect.pickOpAtPoint(sel.start);
       if (op && this.editor.schema.isVoid(op)) {
         delta.push(op);
       }
     } else {
-      const fragment = this.getFragment();
-      fragment && delta.ops.push(...fragment.ops);
+      const fragment = this.editor.collect.getFragment();
+      fragment && delta.ops.push(...fragment);
     }
     if (!delta.ops.length) return void 0;
     this.copyModule.copy(delta);
@@ -115,37 +113,4 @@ export class Clipboard {
       return this.pasteModule.applyPlainText(transfer);
     }
   };
-
-  /**
-   * 通过 Range 获取 Delta 片段
-   * @param range
-   */
-  public getFragment(range?: Range) {
-    const at = range || this.editor.selection.get();
-    if (!at || at.isCollapsed) return null;
-    const { start, end } = at;
-    const block = this.editor.state.block;
-    // 如果是同行则直接 slice
-    if (start.line === end.line) {
-      const lineState = block.getLine(start.line);
-      const nextOps = lineState ? lineState.slice(start.offset, end.offset) : [];
-      return new Delta(nextOps);
-    }
-    const ops: Op[] = [];
-    // 处理首行
-    const firstLine = block.getLine(start.line);
-    const firstOps = firstLine ? firstLine.slice(start.offset, firstLine.length) : [];
-    ops.push(...firstOps);
-    // 处理中间行
-    for (let i = start.line + 1, len = end.line - 1; i <= len; i++) {
-      const lineState = block.getLine(i);
-      if (!lineState) continue;
-      ops.push(...lineState.getOps());
-    }
-    // 处理尾行
-    const lastLine = block.getLine(end.line);
-    const lastOps = lastLine ? lastLine.slice(0, end.offset) : [];
-    ops.push(...lastOps);
-    return new Delta(ops);
-  }
 }

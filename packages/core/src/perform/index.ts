@@ -4,7 +4,6 @@ import { NOOP } from "block-kit-utils";
 import type { P } from "block-kit-utils/dist/es/types";
 
 import type { Editor } from "../editor";
-import { pickLeafAtPoint } from "../input/utils/collection";
 import { Point } from "../selection/modules/point";
 import type { Range } from "../selection/modules/range";
 import { RawPoint } from "../selection/modules/raw-point";
@@ -26,7 +25,7 @@ export class Perform {
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const point = sel.start;
-    const leaf = pickLeafAtPoint(this.editor, point);
+    const leaf = this.editor.collect.pickLeafAtPoint(point);
     if (leaf && leaf.block && leaf.block) return void 0;
     const isLeafTail = leaf ? point.offset - leaf.offset - leaf.length >= 0 : false;
     const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);

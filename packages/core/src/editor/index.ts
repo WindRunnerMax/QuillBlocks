@@ -1,6 +1,7 @@
 import { Delta } from "block-kit-delta";
 
 import { Clipboard } from "../clipboard";
+import { Collect } from "../collect";
 import { Command } from "../command";
 import { Event } from "../event";
 import { History } from "../history";
@@ -46,6 +47,8 @@ export class Editor {
   public command: Command;
   /** 引用模块 */
   public ref: Ref;
+  /** 集合模块 */
+  public collect: Collect;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
@@ -63,6 +66,7 @@ export class Editor {
     this.perform = new Perform(this);
     this.command = new Command();
     this.ref = new Ref(this);
+    this.collect = new Collect(this);
   }
 
   /**

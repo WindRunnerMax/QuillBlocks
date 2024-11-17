@@ -3,7 +3,7 @@ import "./styles/index.scss";
 import { Trigger } from "@arco-design/web-react";
 import { IconBold, IconCode } from "@arco-design/web-react/icon";
 import type { Editor } from "block-kit-core";
-import { EDITOR_EVENT, pickOpAtPoint } from "block-kit-core";
+import { EDITOR_EVENT } from "block-kit-core";
 import type { Op } from "block-kit-delta";
 import { stopReactEvent } from "block-kit-react";
 import { cs, NOOP, TRUE, useMemoFn } from "block-kit-utils";
@@ -27,11 +27,11 @@ export const MenuToolbar: FC<{
     if (!current) return setKeys({});
     const ops: Op[] = [];
     if (current.isCollapsed) {
-      const op = pickOpAtPoint(props.editor, current.start);
+      const op = editor.collect.pickOpAtPoint(current.start);
       op && ops.push(op);
     } else {
-      const fragment = props.editor.clipboard.getFragment();
-      fragment && ops.push(...fragment.ops);
+      const fragment = props.editor.collect.getFragment();
+      fragment && ops.push(...fragment);
     }
     const markMap = filterMarkMap(ops);
     const lines = props.editor.state.block.getLines();
