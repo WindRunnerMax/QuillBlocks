@@ -1,3 +1,5 @@
+import { Bind } from "block-kit-utils";
+
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
 import { isArrowLeft, isArrowRight } from "../input/utils/hot-key";
@@ -72,7 +74,8 @@ export class Selection {
   /**
    * 处理选区变换事件
    */
-  private onNativeSelectionChange = () => {
+  @Bind
+  private onNativeSelectionChange() {
     if (this.editor.state.isComposing()) {
       return void 0;
     }
@@ -93,7 +96,7 @@ export class Selection {
     const backward = isBackward(sel, staticSel);
     const range = toModelRange(this.editor, staticSel, backward);
     this.set(range, true);
-  };
+  }
 
   /**
    * 更新选区模型
@@ -168,7 +171,8 @@ export class Selection {
    * 处理方向键选区事件
    * @param event
    */
-  private onArrowKeyDown = (event: KeyboardEvent) => {
+  @Bind
+  private onArrowKeyDown(event: KeyboardEvent) {
     const leftArrow = isArrowLeft(event);
     const rightArrow = isArrowRight(event);
     if (!(leftArrow || rightArrow) || event.metaKey || event.altKey) {
@@ -222,5 +226,5 @@ export class Selection {
       const newRange = new Range(newAnchor, newFocus, isBackward);
       this.set(newRange, true);
     }
-  };
+  }
 }

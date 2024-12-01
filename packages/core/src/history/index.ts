@@ -1,5 +1,6 @@
 import type { Delta } from "block-kit-delta";
 import { isRetainOp } from "block-kit-delta";
+import { Bind } from "block-kit-utils";
 
 import type { Editor } from "../editor";
 import type { ContentChangeEvent } from "../event/bus/types";
@@ -88,16 +89,18 @@ export class History {
   /**
    * 获取最新选区
    */
-  private onContentWillChange = () => {
+  @Bind
+  private onContentWillChange() {
     const range = this.editor.selection.toRaw();
     this.currentRange = range;
-  };
+  }
 
   /**
    * 处理内容变更事件
    * @param event
    */
-  private onContentChange = (event: ContentChangeEvent) => {
+  @Bind
+  private onContentChange(event: ContentChangeEvent) {
     const { changes, previous, source } = event;
     if (!changes.ops.length || source === APPLY_SOURCE.HISTORY) {
       return void 0;
@@ -127,7 +130,7 @@ export class History {
     if (this.undoStack.length > this.STACK_SIZE) {
       this.undoStack.shift();
     }
-  };
+  }
 
   /**
    * 变换远程堆栈
@@ -184,7 +187,8 @@ export class History {
    * 键盘事件
    * @param event
    */
-  private onKeyDown = (event: KeyboardEvent) => {
+  @Bind
+  private onKeyDown(event: KeyboardEvent) {
     if (isUndo(event)) {
       this.undo();
       event.preventDefault();
@@ -193,5 +197,5 @@ export class History {
       this.redo();
       event.preventDefault();
     }
-  };
+  }
 }

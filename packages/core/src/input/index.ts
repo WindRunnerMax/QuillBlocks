@@ -1,3 +1,5 @@
+import { Bind } from "block-kit-utils";
+
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
 import { EDITOR_STATE } from "../state/types";
@@ -24,7 +26,8 @@ export class Input {
    * BeforeInput
    * @param event
    */
-  private onBeforeInput = (event: InputEvent) => {
+  @Bind
+  private onBeforeInput(event: InputEvent) {
     if (this.editor.state.get(EDITOR_STATE.COMPOSING)) {
       return null;
     }
@@ -68,16 +71,17 @@ export class Input {
       default:
         break;
     }
-  };
+  }
 
   /**
    * 组合输入结束
    * @param event
    */
-  private onCompositionEnd = (event: CompositionEvent) => {
+  @Bind
+  private onCompositionEnd(event: CompositionEvent) {
     const data = event.data;
     const sel = this.editor.selection.get();
     data && sel && this.editor.perform.insertText(sel, data);
     event.preventDefault();
-  };
+  }
 }

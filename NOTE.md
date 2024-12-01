@@ -916,3 +916,51 @@ const toKey = (state: LineState, op: Op): string => {
   return `${prefixKey}-${suffixKey}`;
 };
 ```
+
+## 事件绑定
+在事件绑定的时候，在类中使用箭头函数的方式进行事件绑定能够保证`this`的正确指向，这种方式编译后是在`constructor`中将箭头函数直接绑定到实例上。通常情况下这是没有问题的，然而在继承的情况下，如果子类中存在同名的箭头函数虽然可以实现继承，但是由于`super`调用的时机问题，事件绑定的回调函数实际上是父类的箭头函数，而不是我们希望的子类方法。
+
+因此在继承的情况下，如果在子类中将`super`的事件绑定函数移除，然后重新绑定事件函数的话，这样是可以保证事件绑定是子类的方法，但是这就必须要非常了解父类的实现才可以。而如果我们使用装饰器来实现事件绑定的话，则可以解决这个问题，但是这里依然需要明确该方法是需要绑定的，否则仍然会因为事件实际被调用的时候没有`this`指向而导致问题。
+
+```js
+// experimentalDecorators: Enable experimental support for TC39 stage 2 draft decorators.
+function Bind<T>(_: T, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+  const originalMethod = descriptor.value;
+  return {
+    configurable: true,
+    get() {
+      const boundFunction = originalMethod.bind(this);
+      Object.defineProperty(this, key, { value: boundFunction, configurable: true, enumerable: false });
+      return boundFunction;
+    },
+  };
+}
+
+class A {
+  protected value = 1;
+  constructor(){
+    document.addEventListener("mousedown", this.c);
+    document.addEventListener("mousedown", this.d);
+  }
+  protected c = () => {
+    console.log(this.value);
+  }
+  @Bind
+  protected d() {
+    console.log(this.value);
+  }
+}
+
+class B extends A {
+  protected value2 = 2;
+  protected c = () => {
+    console.log(this.value2);
+  }
+  @Bind
+  protected d() {
+    console.log(this.value2);
+  }
+}
+
+new B();
+```

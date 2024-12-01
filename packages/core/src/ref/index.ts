@@ -1,3 +1,5 @@
+import { Bind } from "block-kit-utils";
+
 import type { Editor } from "../editor";
 import type { ContentChangeEvent } from "../event/bus/types";
 import { EDITOR_EVENT } from "../event/bus/types";
@@ -57,7 +59,8 @@ export class Ref {
    * 转换引用
    * @param event
    */
-  private transform = (event: ContentChangeEvent) => {
+  @Bind
+  private transform(event: ContentChangeEvent) {
     const { changes } = event;
     for (const ref of this.rangeRefs) {
       const raw = ref.current;
@@ -67,5 +70,5 @@ export class Ref {
       const range = new RawRange(start, end - start);
       ref.current = range;
     }
-  };
+  }
 }

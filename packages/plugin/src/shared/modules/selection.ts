@@ -1,5 +1,6 @@
 import type { Editor, SelectionChangeEvent } from "block-kit-core";
 import { EDITOR_EVENT } from "block-kit-core";
+import { Bind } from "block-kit-utils";
 
 import type { SelectionHOC } from "../components/selection";
 
@@ -24,10 +25,11 @@ export class SelectionPlugin {
     this.idToView.delete(id);
   }
 
-  public onSelectionChange = (e: SelectionChangeEvent) => {
+  @Bind
+  public onSelectionChange(e: SelectionChangeEvent) {
     const current = e.current;
     this.idToView.forEach(view => {
       view.onSelectionChange(current);
     });
-  };
+  }
 }

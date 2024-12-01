@@ -20,6 +20,10 @@ export const KEY_CODE = {
   Z: 90,
   Y: 89,
   A: 65,
+  B: 66,
+  I: 73,
+  K: 75,
+  U: 85,
 };
 
 /** Truly */

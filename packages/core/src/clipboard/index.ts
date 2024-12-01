@@ -1,6 +1,6 @@
 import type { Op } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
-import { TEXT_HTML, TEXT_PLAIN, TSON } from "block-kit-utils";
+import { Bind, TEXT_HTML, TEXT_PLAIN, TSON } from "block-kit-utils";
 
 import type { Editor } from "../editor";
 import { EDITOR_EVENT } from "../event/bus/types";
@@ -39,7 +39,8 @@ export class Clipboard {
    * OnCopy 事件
    * @param event
    */
-  private onCopy = (event: ClipboardEvent) => {
+  @Bind
+  private onCopy(event: ClipboardEvent) {
     event.preventDefault();
     event.stopPropagation();
     const sel = this.editor.selection.get();
@@ -58,26 +59,28 @@ export class Clipboard {
     if (!delta.ops.length) return void 0;
     this.copyModule.copy(delta);
     this.editor.selection.focus();
-  };
+  }
 
   /**
    * OnCut 事件
    * @param event
    */
-  private onCut = (event: ClipboardEvent) => {
+  @Bind
+  private onCut(event: ClipboardEvent) {
     event.preventDefault();
     event.stopPropagation();
     const sel = this.editor.selection.get();
     if (!sel) return void 0;
     !sel.isCollapsed && this.editor.perform.deleteFragment(sel);
     this.onCopy(event);
-  };
+  }
 
   /**
    * OnPaste 事件
    * @param event
    */
-  private onPaste = (event: ClipboardEvent) => {
+  @Bind
+  private onPaste(event: ClipboardEvent) {
     event.preventDefault();
     event.stopPropagation();
     const transfer = event.clipboardData;
@@ -112,5 +115,5 @@ export class Clipboard {
     if (transferPlainText) {
       return this.pasteModule.applyPlainText(transfer);
     }
-  };
+  }
 }
