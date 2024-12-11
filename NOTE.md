@@ -607,6 +607,30 @@ export const getTextNode = (node: Node | null): Text | null => {
 };
 ```
 
+行末的零宽字符还有个比较重要的应用，如果我们的选区操作是从上一行的末尾选到下一行的部分内容时，通过`Selection`得到的选区变换的`Model`是跨越两行的。此时如果做一些操作例如`TAB`缩进的话，是会对多行应用的操作，然而我们的淡蓝色选区看起来只有一行，因此看起来会像是个`BUG`，主要还是视觉上与实际操作上的不一致。
+
+在腾讯文档、谷歌文档等类似的`Canvas`实现的编辑器中，这个问题是通过额外绘制了淡蓝色的选区来解决的。而我们如果通过`DOM`来实现的话，则不能直接绘制内容，这样我们就可以使用零宽字符来实现，即在行末添加一个零宽字符节点，这其中实现的重点是，而当我们选区在零宽字符后时，主动将其修正为零宽字符前。这个实现在`Chrome`上表现良好，但是在`FireFox`上就没有效果了。
+
+```html
+<div contenteditable="true">
+  <div><span>末尾零宽字符 Line 1</span><span>&#8203;</span></div>
+  <div><span>末尾零宽字符 Line 2</span><span>&#8203;</span></div>
+  <div><span>末尾纯文本 Line 1</span></div>
+  <div><span>末尾纯文本 Line 2</span></div>
+</div>
+<script>
+  document.addEventListener("selectionchange", () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount < 1) return;
+    const staticSel = selection.getRangeAt(0);
+    const { startContainer, endContainer, startOffset, endOffset, collapsed } = staticSel;
+    if (startContainer?.textContent === "\u200B" && startOffset > 0) {
+      selection.setBaseAndExtent( startContainer, 0, endContainer, collapsed ? 0 : endOffset);
+    }
+  });
+</script>
+```
+
 ## Embed 节点
 我们的`Embed`节点实际上应该是`InlineVoid`节点，但是因为组件名太长所以就起了别名为`Embed`，而在具体实现的时候遇到了太多了的问题，我只得感慨纸上得来终觉浅，绝知此事要躬行。在之前我一直都是在使用富文本引擎来实现应用层的功能，而虽然我也基本阅读过`slate`的代码并且提过了一些`pr`来解决一些问题，但在真正想对照实现的时候发现问题实在是太多。
 
@@ -830,8 +854,10 @@ quill.updateContents([{ retain: 3 }, { insert: "\n" }]);
 那么如果需要确定当前活跃的块，重要的点就是在变更内容的时候确定块结构的活跃状态变化，而我们是通过`Delta`描述变更，那么我们就不能得知究竟哪些块被删除了，而且本身我们的描述语言中也不存在删除块的变更描述，那么我们最好的方式就是记录好我们实际构建的`state-tree`状态，如果发生内容变更的话，则自动处理块的状态，那么目前我能设想到的几种方式:
 
 * 实际渲染的时候记录树结构的状态，在渲染`Editable`的时候，我们需要将此时渲染的`context`状态传递到组件当中，那么此时我们就可以借助组件的生命周期来记录块的状态，树形结构自然也可以通过`parent`状态来实现，而`children`集合理论上应该不实际需要建立。
-* 在`Mutate`的时候记录块的状态，也就是我们约定`_blockId`关键字来记录块状态的变更，或者实现`Op - Id`映射关系的模式注册，而我们使用`Delta`描述变更时是无法得知是哪些`op`内容实现了插入/删除/更新，这部分实现就涉及到了`Mutate/State`模块的改造，最好是实现`State - Id`的相互映射模块，并且实现行的状态的变更来更新映射关系。
-* 动态获取并解析树结构状态，这里的重点是关注于树的状态，既然我们维护的`Block/Line/Leaf`状态是完备的，那么我们可以直接借助内建状态来获取当前绑定在各个`State`状态上的块，这里的映射关系同样需要上述约定或者注册，甚至于我们粒度做的粗一些可以基于`LineState`来按需收集，无论是`Leaf`还是`Line`产生变更的时候都会重新实例化并且计算状态。
+* 在`Mutate`的时候记录块的状态，也就是我们约定`_blockId`关键字来记录块状态的变更，或者实现`op - id`映射关系的模式注册。而我们使用`Delta`描述变更时是无法得知是哪些`op`内容实现了插入/删除/更新，这部分实现就涉及到了`Mutate/State`模块的改造，最好是实现`State - Id`的相互映射模块，并且实现行的状态的变更来更新映射关系。
+* 动态获取并解析树结构状态，这里的重点是关注于树的状态，既然我们维护的`Block/Line/Leaf`状态是完备的，那么我们可以直接借助内建状态来获取当前绑定在各个`State`状态上的块。这里的映射关系同样需要上述约定或者注册，甚至于我们粒度做的粗一些可以基于`LineState`来按需收集，无论是`Leaf`还是`Line`产生变更的时候都会重新实例化并且计算状态。
+
+其实这里将`3`个方案融合可能是比较好的方法，当产生`Op`的时候，我们必须要知道究竟是哪些`op`是新增的或者删除的。那么在单次`op`应用之后，我们需要解析出此时究竟新增/删除了哪些`block`，就需要将相关的内容传递到后端，新增则初始化空值，删除则清理整个`block`长度的内容，并且在后端检查`block`结构级别的新增或删除。而在`undo`的时候，还是做同样的操作，此时的`changes`还是正向的变更，复用相关逻辑即可。
 
 ## Key 值的维护
 在`LineState`节点的`key`值维护中，如果是初始值则是根据`state`引用自增的值，在变更的时候则是尽可能地复用原始行的`key`，这样可以避免过多的行节点重建并且可以控制整行的强刷。而对于`LeafState`节点的`key`值目前是直接使用`index`值，这样实际上会存在隐性的问题，而如果直接根据`Immutable`来生成`key`值的话，任何文本内容的更改都会导致`key`值改变进而导致`DOM`节点的频繁重建。
