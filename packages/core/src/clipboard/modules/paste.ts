@@ -51,7 +51,7 @@ export class Paste {
    */
   public deserialize(current: Node): Delta {
     const delta = new Delta();
-    // 结束条件 Text、Image 等节点都会在此时处理
+    // 结束条件 Text Image 等节点都会在此时处理
     if (!current.childNodes.length) {
       if (isDOMText(current)) {
         const text = current.textContent || "";
@@ -59,6 +59,7 @@ export class Paste {
       } else {
         const context: DeserializeContext = { delta, html: current };
         this.editor.plugin.call(CALLER_TYPE.DESERIALIZE, context);
+        return context.delta;
       }
       return delta;
     }

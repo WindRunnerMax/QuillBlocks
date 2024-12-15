@@ -90,5 +90,6 @@ export const isMatchHTMLTag = (node: Node, key: string) => {
  * @param node
  */
 export const isMatchBlockTag = (node: Node) => {
+  if (!isDOMElement(node)) return false;
   return BLOCK_TAG_NAME.some(name => isMatchHTMLTag(node, name));
 };

@@ -7,6 +7,7 @@ import type { Editor } from "../../editor";
 import { CALLER_TYPE } from "../../plugin/types";
 import type { CopyContext, SerializeContext } from "../types";
 import { LINE_TAG, TEXT_DOC } from "../types";
+import { isMatchBlockTag } from "../utils/deserialize";
 import { getFragmentText, serializeHTML } from "../utils/serialize";
 
 export class Copy {
@@ -47,9 +48,13 @@ export class Copy {
       if (isEOLOp(op)) {
         const context: SerializeContext = { op, html: lineFragment };
         this.editor.plugin.call(CALLER_TYPE.SERIALIZE, context);
-        const lineNode = document.createElement("div");
-        lineNode.setAttribute(LINE_TAG, "true");
-        lineNode.appendChild(context.html);
+        let lineNode = context.html as HTMLElement;
+        // 最外层非块级元素, 需要包裹一层 div 行标签
+        if (!isMatchBlockTag(lineNode)) {
+          lineNode = document.createElement("div");
+          lineNode.setAttribute(LINE_TAG, "true");
+          lineNode.appendChild(context.html);
+        }
         root.appendChild(lineNode);
         lineFragment = document.createDocumentFragment();
         continue;
@@ -60,12 +65,17 @@ export class Copy {
       this.editor.plugin.call(CALLER_TYPE.SERIALIZE, context);
       lineFragment.appendChild(context.html);
     }
+    // 如果 delta 不以 \n 结尾, 需要兜底处理行结构格式
     if (lineFragment.childNodes.length) {
       const op: Op = { insert: EOL };
       const context: SerializeContext = { op, html: lineFragment };
       this.editor.plugin.call(CALLER_TYPE.SERIALIZE, context);
-      const lineNode = document.createElement("div");
-      lineNode.setAttribute(LINE_TAG, "true");
+      let lineNode = context.html as HTMLElement;
+      if (!isMatchBlockTag(lineNode)) {
+        lineNode = document.createElement("div");
+        lineNode.setAttribute(LINE_TAG, "true");
+        lineNode.appendChild(context.html);
+      }
       lineNode.appendChild(context.html);
       root.appendChild(lineNode);
     }

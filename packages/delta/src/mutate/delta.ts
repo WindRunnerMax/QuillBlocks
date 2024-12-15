@@ -11,6 +11,10 @@ import { isEqualAttributes, isEqualOp } from "../utils/equal";
 import { MutateIterator } from "./iterator";
 
 export class MutateDelta extends Delta {
+  /**
+   * 构造函数
+   * @param ops
+   */
   constructor(ops?: Op[]) {
     super(ops);
   }
@@ -161,5 +165,14 @@ export class MutateDelta extends Delta {
       const delta = new Delta(line);
       predicate(delta, {}, i);
     }
+  }
+
+  /**
+   * 从 Delta 创建 MutateDelta
+   * @param delta
+   */
+  public static from(delta: Delta) {
+    const newOps = normalizeEOL(delta.ops);
+    return new MutateDelta(newOps);
   }
 }

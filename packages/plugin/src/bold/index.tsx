@@ -37,9 +37,7 @@ export class BoldPlugin extends EditorPlugin {
 
   public deserialize(context: DeserializeContext): void {
     const { delta, html } = context;
-    if (!isHTMLElement(html)) {
-      return void 0;
-    }
+    if (!isHTMLElement(html)) return void 0;
     if (
       isMatchHTMLTag(html, "strong") ||
       isMatchHTMLTag(html, "b") ||

@@ -5,10 +5,11 @@ import { LINE_TAG } from "../types";
 /**
  * 序列化 HTML 到 文本
  * @param node
+ * @param clone
  */
-export const serializeHTML = (node: Node): string => {
+export const serializeHTML = (node: Node, clone = false): string => {
   const el = document.createElement("div");
-  el.appendChild(node);
+  el.appendChild(clone ? node.cloneNode(true) : node);
   return el.innerHTML;
 };
 
@@ -39,6 +40,7 @@ export const getFragmentText = (node: Node) => {
   Array.from(node.childNodes).forEach(it => {
     texts.push(getTextContent(it));
   });
-  // COMPAT: 将文本最后的`\n`移除
-  return texts.join("").slice(0, -1);
+  const res = texts.join("");
+  // 将文本最后的 \n 移除
+  return res.endsWith(EOL) ? res.slice(0, -1) : res;
 };
