@@ -347,14 +347,14 @@ export class Delta {
         let opLength = 0;
         switch (component[0]) {
           case diff.INSERT: {
-            // 取 iter2 当前 op 剩下可以处理的长度 / diff 块还未处理的长度 中的较小值
+            // (取 iter2 当前 op 剩下可以处理的长度, diff 块还未处理的长度) 中的较小值
             opLength = Math.min(otherIter.peekLength(), length);
             // 取出 opLength 长度的 op 并置入目标 delta, iter2 移动 offset/index 指针
             retDelta.push(otherIter.next(opLength));
             break;
           }
           case diff.DELETE: {
-            // 取 diff 块还未处理的长度 / iter1 当前 op 剩下可以处理的长度 中的较小值
+            // (取 diff 块还未处理的长度, iter1 当前 op 剩下可以处理的长度) 中的较小值
             opLength = Math.min(length, thisIter.peekLength());
             // iter1 移动 offset/index 指针
             thisIter.next(opLength);
@@ -363,7 +363,7 @@ export class Delta {
             break;
           }
           case diff.EQUAL: {
-            // 取 diff 块还未处理的长度 / iter1 当前 op 剩下可以处理的长度 / iter2 当前 op 剩下可以处理的长度 中的较小值
+            // (取 diff 块还未处理的长度, iter1 当前 op 剩下可以处理的长度, iter2 当前 op 剩下可以处理的长度) 中的较小值
             opLength = Math.min(thisIter.peekLength(), otherIter.peekLength(), length);
             // 取出 opLength 长度的 op1, iter1 移动 offset/index 指针
             const thisOp = thisIter.next(opLength);
@@ -374,7 +374,7 @@ export class Delta {
               // 直接将 opLength 长度的 attributes diff 置入
               retDelta.retain(opLength, diffAttributes(thisOp.attributes, otherOp.attributes));
             } else {
-              // 直接将 op2 置入目标 delta 并删除 op1  兜底策略
+              // 直接将 op2 置入目标 delta 并删除 op1 (兜底策略)
               retDelta.push(otherOp).delete(opLength);
             }
             break;
