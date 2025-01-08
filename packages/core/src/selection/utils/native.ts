@@ -4,7 +4,7 @@ import type { Editor } from "../../editor";
 import { LEAF_STRING, ZERO_EMBED_KEY, ZERO_SPACE_KEY } from "../../model/types";
 import type { Point } from "../modules/point";
 import type { Range } from "../modules/range";
-import type { DOMPoint, DOMStaticRange } from "../types";
+import type { DOMPoint, DOMRange, DOMStaticRange } from "../types";
 import { DIRECTION } from "../types";
 import { getEditableChild, getEditableChildAndIndex, getTextNode } from "./dom";
 
@@ -123,7 +123,7 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
  * @param editor
  * @param range
  */
-export const toDOMRange = (editor: Editor, range: Range): DOMStaticRange | null => {
+export const toDOMRange = (editor: Editor, range: Range): DOMRange | null => {
   const { start, end } = range;
   const startDOMPoint = toDOMPoint(editor, start);
   const endDOMPoint = range.isCollapsed ? startDOMPoint : toDOMPoint(editor, end);

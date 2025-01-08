@@ -27,7 +27,7 @@ export const MenuToolbar: FC<{
     if (!current) return setKeys({});
     const ops: Op[] = [];
     if (current.isCollapsed) {
-      const op = editor.collect.pickOpAtPoint(current.start);
+      const op = editor.collect.getOpAtPoint(current.start);
       op && ops.push(op);
     } else {
       const fragment = props.editor.collect.getFragment();

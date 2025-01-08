@@ -8,7 +8,7 @@ import { Point } from "./modules/point";
 import { Range } from "./modules/range";
 import { RawRange } from "./modules/raw-range";
 import { getRootSelection, getStaticSelection, isEmbedZeroNode, isVoidZeroNode } from "./utils/dom";
-import { isBackward } from "./utils/dom";
+import { isBackwardDOMRange } from "./utils/dom";
 import { toModelRange } from "./utils/model";
 import { isEqualDOMRange, toDOMRange } from "./utils/native";
 
@@ -93,7 +93,7 @@ export class Selection {
     if (!collapsed && !root.contains(endContainer)) {
       return void 0;
     }
-    const backward = isBackward(sel, staticSel);
+    const backward = isBackwardDOMRange(sel, staticSel);
     const range = toModelRange(this.editor, staticSel, backward);
     this.set(range, true);
   }

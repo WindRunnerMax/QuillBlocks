@@ -18,7 +18,7 @@ export class Collect {
    * @param ops
    * @param length
    */
-  public pickOpAtLength(ops: Op[], length: number): Op | null {
+  public getOpAtLength(ops: Op[], length: number): Op | null {
     let index = length;
     for (const op of ops) {
       const opLength = getOpLength(op);
@@ -35,12 +35,12 @@ export class Collect {
    * @param editor
    * @param point
    */
-  public pickOpAtPoint(point: Point): Op | null {
+  public getOpAtPoint(point: Point): Op | null {
     const block = this.editor.state.block;
     const line = block.getLine(point.line);
     if (!line) return null;
     const ops = line.getOps();
-    return this.pickOpAtLength(ops, point.offset);
+    return this.getOpAtLength(ops, point.offset);
   }
 
   /**
@@ -48,7 +48,7 @@ export class Collect {
    * @param editor
    * @param point
    */
-  public pickLeafAtPoint(point: Point): LeafState | null {
+  public getLeafAtPoint(point: Point): LeafState | null {
     const block = this.editor.state.block;
     const line = block.getLine(point.line);
     if (!line) return null;

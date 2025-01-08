@@ -25,8 +25,9 @@ export class Perform {
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const point = sel.start;
-    const leaf = this.editor.collect.pickLeafAtPoint(point);
+    const leaf = this.editor.collect.getLeafAtPoint(point);
     if (leaf && leaf.block && leaf.block) return void 0;
+    // 节点的尾部判断
     const isLeafTail = leaf ? point.offset - leaf.offset - leaf.length >= 0 : false;
     const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);

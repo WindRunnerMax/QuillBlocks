@@ -10,6 +10,7 @@ import { LOG_LEVEL, Logger } from "../log";
 import { Model } from "../model";
 import { Perform } from "../perform";
 import { Plugin } from "../plugin";
+import { Rect } from "../rect";
 import { Ref } from "../ref";
 import { Schema } from "../schema";
 import { Selection } from "../selection";
@@ -49,6 +50,8 @@ export class Editor {
   public ref: Ref;
   /** 集合模块 */
   public collect: Collect;
+  /** 位置模块 */
+  public rect: Rect;
 
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
@@ -67,6 +70,7 @@ export class Editor {
     this.command = new Command();
     this.ref = new Ref(this);
     this.collect = new Collect(this);
+    this.rect = new Rect(this);
   }
 
   /**

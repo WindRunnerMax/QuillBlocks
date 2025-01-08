@@ -141,7 +141,7 @@ export const getTextNode = (node: Node | null): Text | null => {
  * @param sel
  * @param staticSel
  */
-export const isBackward = (sel: DOMSelection | null, staticSel: DOMStaticRange | null) => {
+export const isBackwardDOMRange = (sel: DOMSelection | null, staticSel: DOMStaticRange | null) => {
   if (!sel || !staticSel) return false;
   const { anchorNode, anchorOffset, focusNode, focusOffset } = sel;
   const { startContainer, startOffset, endContainer, endOffset } = staticSel;
