@@ -1,9 +1,8 @@
 import type { EditorSchema } from "block-kit-core";
-
-import { BOLD_KEY } from "../src/bold/types";
-import { IMAGE_KEY } from "../src/image/types";
-import { INLINE_CODE } from "../src/inline-code/types";
-import { MENTION_KEY } from "../src/mention/types";
+import { BOLD_KEY } from "block-kit-plugin";
+import { IMAGE_KEY } from "block-kit-plugin";
+import { INLINE_CODE } from "block-kit-plugin";
+import { MENTION_KEY } from "block-kit-plugin";
 
 export const schema: EditorSchema = {
   [BOLD_KEY]: {

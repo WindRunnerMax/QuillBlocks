@@ -22,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "laser-utils": "0.0.5-alpha.12"
+    "laser-utils": "0.0.5-alpha.22"
   },
   "devDependencies": {
     "@babel/core": "7.20.12",

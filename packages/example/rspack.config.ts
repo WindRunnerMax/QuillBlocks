@@ -9,6 +9,7 @@ const core = path.resolve(__dirname, "../core/src");
 const delta = path.resolve(__dirname, "../delta/src");
 const react = path.resolve(__dirname, "../react/src");
 const utils = path.resolve(__dirname, "../utils/src");
+const plugin = path.resolve(__dirname, "../plugin/src");
 
 /**
  * @type {import("@rspack/cli").Configuration}
@@ -17,7 +18,7 @@ const utils = path.resolve(__dirname, "../utils/src");
 const config: Configuration = {
   context: __dirname,
   entry: {
-    index: "./example/index.tsx",
+    index: "./src/index.tsx",
   },
   plugins: [
     new CopyPlugin([{ from: "./public", to: "./" }]),
@@ -33,6 +34,7 @@ const config: Configuration = {
       "block-kit-delta": delta,
       "block-kit-react": react,
       "block-kit-utils": utils,
+      "block-kit-plugin": plugin,
     },
   },
   builtins: {

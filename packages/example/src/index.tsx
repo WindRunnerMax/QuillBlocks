@@ -3,31 +3,31 @@ import "@arco-design/web-react/es/style/index.less";
 
 import { Editor, LOG_LEVEL } from "block-kit-core";
 import { Delta } from "block-kit-delta";
+import { BoldPlugin } from "block-kit-plugin";
+import { HeadingPlugin } from "block-kit-plugin";
+import { ImagePlugin } from "block-kit-plugin";
+import { InlineCodePlugin } from "block-kit-plugin";
+import { MentionPlugin } from "block-kit-plugin";
+import { MenuToolbar } from "block-kit-plugin";
 import { Editable } from "block-kit-react";
 import type { FC } from "react";
 import { useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 
-import { BoldPlugin } from "../src/bold";
-import { HeadingPlugin } from "../src/heading";
-import { ImagePlugin } from "../src/image";
-import { InlineCodePlugin } from "../src/inline-code";
-import { MentionPlugin } from "../src/mention";
-import { MenuToolbar } from "../src/toolbar";
 import { INIT } from "./block";
 import { schema } from "./schema";
 
 const App: FC = () => {
   const editor = useMemo(() => {
-    const editor = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
-    editor.plugin.register(
-      new BoldPlugin(editor),
-      new ImagePlugin(editor, false),
+    const instance = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
+    instance.plugin.register(
+      new BoldPlugin(instance),
+      new ImagePlugin(instance, false),
       new MentionPlugin(),
-      new InlineCodePlugin(editor),
-      new HeadingPlugin(editor)
+      new InlineCodePlugin(instance),
+      new HeadingPlugin(instance)
     );
-    return editor;
+    return instance;
   }, []);
 
   useEffect(() => {

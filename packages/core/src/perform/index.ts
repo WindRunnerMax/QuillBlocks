@@ -1,6 +1,6 @@
 import type { AttributeMap } from "block-kit-delta";
 import { Delta, EOL } from "block-kit-delta";
-import { NOOP } from "block-kit-utils";
+import { NIL } from "block-kit-utils";
 import type { P } from "block-kit-utils/dist/es/types";
 
 import type { Editor } from "../editor";
@@ -96,7 +96,7 @@ export class Perform {
       // 如果此时光标在行末, 则需要将 NextLine 的属性移除
       if (sel.start.offset === lineOffset && attrs) {
         const nextAttrs = attributes || {};
-        Object.keys(attrs).forEach(key => (nextAttrs[key] = NOOP));
+        Object.keys(attrs).forEach(key => (nextAttrs[key] = NIL));
         attributes = nextAttrs;
       }
     }

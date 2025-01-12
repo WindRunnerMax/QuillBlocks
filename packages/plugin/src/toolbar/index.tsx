@@ -6,7 +6,7 @@ import type { Editor } from "block-kit-core";
 import { EDITOR_EVENT } from "block-kit-core";
 import type { Op } from "block-kit-delta";
 import { stopReactEvent } from "block-kit-react";
-import { cs, NOOP, TRUE, useMemoFn } from "block-kit-utils";
+import { cs, NIL, TRUE, useMemoFn } from "block-kit-utils";
 import type { FC } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -62,7 +62,7 @@ export const MenuToolbar: FC<{
               triggerRef.current?.setPopupVisible(false);
             }}
           >
-            <div onClick={() => editor.command.exec(HEADING_KEY, { value: NOOP })}>Text</div>
+            <div onClick={() => editor.command.exec(HEADING_KEY, { value: NIL })}>Text</div>
             <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h1" })}>H1</div>
             <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h2" })}>H2</div>
             <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h3" })}>H3</div>
@@ -76,7 +76,7 @@ export const MenuToolbar: FC<{
       <div
         className={cs("menu-toolbar-item", keys[BOLD_KEY] && "active")}
         onClick={() => {
-          props.editor.command.exec(BOLD_KEY, { value: keys[BOLD_KEY] ? NOOP : TRUE });
+          props.editor.command.exec(BOLD_KEY, { value: keys[BOLD_KEY] ? NIL : TRUE });
           onComputeMarks();
         }}
       >
@@ -85,7 +85,7 @@ export const MenuToolbar: FC<{
       <div
         className={cs("menu-toolbar-item", keys[INLINE_CODE] && "active")}
         onClick={() => {
-          props.editor.command.exec(INLINE_CODE, { value: keys[INLINE_CODE] ? NOOP : TRUE });
+          props.editor.command.exec(INLINE_CODE, { value: keys[INLINE_CODE] ? NIL : TRUE });
           onComputeMarks();
         }}
       >

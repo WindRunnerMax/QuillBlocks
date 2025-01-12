@@ -1,9 +1,9 @@
 import type { Op } from "block-kit-delta";
 import type { AttributeMap } from "block-kit-delta";
-import { NOOP } from "block-kit-utils";
+import { NIL } from "block-kit-utils";
 
 export const toggleMark = (key: string, value: string, preset: Record<string, string>) => {
-  return { ...preset, [key]: preset[key] === value ? NOOP : value };
+  return { ...preset, [key]: preset[key] === value ? NIL : value };
 };
 
 export const filterMarkMap = (ops: Op[]): Record<string, string> => {

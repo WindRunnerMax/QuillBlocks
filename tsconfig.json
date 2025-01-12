@@ -23,7 +23,8 @@
       "block-kit-delta": ["./packages/delta/src"],
       "block-kit-react": ["./packages/react/src"],
       "block-kit-plugin": ["./packages/plugin/src"],
-      "block-kit-utils": ["./packages/utils/src"]
+      "block-kit-utils": ["./packages/utils/src"],
+      "block-kit-dev": ["./packages/dev/src"]
     }
   },
   "include": ["packages/*/src"],

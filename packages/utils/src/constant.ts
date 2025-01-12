@@ -32,5 +32,5 @@ export const TRUE = "true";
 /** Falsy */
 export const FALSE = "false";
 
-/** NOOP */
-export const NOOP = "";
+/** NIL */
+export const NIL = "";

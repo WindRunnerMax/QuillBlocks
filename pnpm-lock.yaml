@@ -137,6 +137,58 @@ importers:
         specifier: 29.1.2
         version: 29.1.2(@babel/core@7.20.12)(babel-jest@29.4.1)(jest@29.4.1)(typescript@5.3.2)
 
+  packages/example:
+    dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.64.0
+        version: 2.64.0(@types/react@17.0.2)(react-dom@17.0.2)(react@17.0.2)
+      block-kit-core:
+        specifier: 'workspace: *'
+        version: link:../core
+      block-kit-delta:
+        specifier: 'workspace: *'
+        version: link:../delta
+      block-kit-plugin:
+        specifier: 'workspace: *'
+        version: link:../plugin
+      block-kit-react:
+        specifier: 'workspace: *'
+        version: link:../react
+      block-kit-utils:
+        specifier: 'workspace: *'
+        version: link:../utils
+      react:
+        specifier: 17.0.2
+        version: 17.0.2
+      react-dom:
+        specifier: 17.0.2
+        version: 17.0.2(react@17.0.2)
+    devDependencies:
+      '@rspack/cli':
+        specifier: ^0.2.5
+        version: 0.2.12(react-refresh@0.14.0)(webpack@5.95.0)
+      '@rspack/plugin-html':
+        specifier: ^0.2.5
+        version: 0.2.12(@rspack/core@0.2.12)
+      '@types/react':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@types/react-dom':
+        specifier: 17.0.2
+        version: 17.0.2
+      copy-webpack-plugin:
+        specifier: '5'
+        version: 5.1.2(webpack@5.95.0)
+      less:
+        specifier: 4.2.0
+        version: 4.2.0
+      less-loader:
+        specifier: 12.1.0
+        version: 12.1.0(less@4.2.0)(webpack@5.95.0)
+      sass-loader:
+        specifier: 13.3.3
+        version: 13.3.3(sass@1.52.3)(webpack@5.95.0)
+
   packages/plugin:
     dependencies:
       '@arco-design/web-react':
@@ -164,12 +216,6 @@ importers:
       '@rollup/plugin-replace':
         specifier: 5.0.4
         version: 5.0.4(rollup@2.75.7)
-      '@rspack/cli':
-        specifier: ^0.2.5
-        version: 0.2.12(react-refresh@0.14.0)(webpack@5.95.0)
-      '@rspack/plugin-html':
-        specifier: ^0.2.5
-        version: 0.2.12(@rspack/core@0.2.12)
       '@types/react':
         specifier: 17.0.2
         version: 17.0.2
@@ -281,8 +327,8 @@ importers:
   packages/utils:
     dependencies:
       laser-utils:
-        specifier: 0.0.5-alpha.12
-        version: 0.0.5-alpha.12
+        specifier: 0.0.5-alpha.22
+        version: 0.0.5-alpha.22
     devDependencies:
       '@babel/core':
         specifier: 7.20.12
@@ -2433,6 +2479,7 @@ packages:
 
   /@rspack/plugin-html@0.2.12(@rspack/core@0.2.12):
     resolution: {integrity: sha512-zCpsFaTTq0isAghGZpvkaKuNZHKoxzf90X2G71mHQ4T8HUN7+yy4p7lJ8vy/YGEj7zpYGT1k/8kCNivzUljgDQ==}
+    deprecated: deprecated
     peerDependencies:
       '@rspack/core': 0.2.12
     peerDependenciesMeta:
@@ -3186,6 +3233,7 @@ packages:
 
   /acorn-import-assertions@1.9.0(acorn@8.12.1):
     resolution: {integrity: sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==}
+    deprecated: package has been renamed to acorn-import-attributes
     peerDependencies:
       acorn: ^8
     dependencies:
@@ -5356,7 +5404,7 @@ packages:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
     dependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
     dev: true
@@ -5500,6 +5548,7 @@ packages:
 
   /glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
     dependencies:
       fs.realpath: 1.0.0
       inflight: 1.0.6
@@ -6854,8 +6903,8 @@ packages:
     resolution: {integrity: sha512-RTSoaUAfLvpR357vWzAz/50Q/BmHfmE6ETSWfutT0AJiw10e6CmcdYRQJlLRd95B53D0Y2aD1jSxD3V3ySF+PA==}
     dev: true
 
-  /laser-utils@0.0.5-alpha.12:
-    resolution: {integrity: sha512-GTfY35xNhnCZ+AfgU4XpbS+9DdInzb4s5nKfg/xcVilxB320vzSFhT6MK+ql6gOGQmw+/fJ/WSLNZgsP8JrIHw==}
+  /laser-utils@0.0.5-alpha.22:
+    resolution: {integrity: sha512-LtHzkd0IhrqPGcG5bGP0jxtRQXxCBcuXNdBGTyx7i0hjKCjivvztyYCirEb4hdjHXvpZ2NkAI29iPIbFhsKabA==}
     dev: false
 
   /launch-editor@2.9.1:
@@ -7354,7 +7403,7 @@ packages:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.11.0
-      semver: 7.3.8
+      semver: 7.6.0
       validate-npm-package-license: 3.0.4
     dev: true
 
@@ -10267,7 +10316,7 @@ packages:
     engines: {node: '>=0.8.0'}
     dependencies:
       http-parser-js: 0.5.8
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.1
       websocket-extensions: 0.1.4
     dev: true
 
