@@ -6,6 +6,10 @@ export type TextProps = {
   children: string;
 };
 
+/**
+ * 文本节点
+ * @param props
+ */
 export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
   const onRef = (dom: HTMLSpanElement | null) => {
     if (!dom) return null;

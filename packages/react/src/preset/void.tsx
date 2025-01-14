@@ -14,6 +14,10 @@ export type VoidProps = PropsWithChildren<{
   context: ReactLeafContext;
 }>;
 
+/**
+ * 空嵌入节点 HOC
+ * @param props
+ */
 export const Void: FC<VoidProps> = props => {
   const { context } = props;
   const editor = useEditor();

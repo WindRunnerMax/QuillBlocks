@@ -10,12 +10,20 @@ import { forwardRef } from "react";
 import { NO_CURSOR } from "../utils/constant";
 
 export type ZeroSpaceProps = {
+  /** 隐藏光标 */
   hide?: boolean;
+  /** void-block 空节点 */
   void?: boolean;
+  /** embed(inline-block) 嵌入节点 */
   embed?: boolean;
+  /** 行末尾占位 */
   enter?: boolean;
 };
 
+/**
+ * 零宽字符组件
+ * @param props
+ */
 export const ZeroSpace = forwardRef<HTMLSpanElement, ZeroSpaceProps>((props, ref) => {
   return (
     <span

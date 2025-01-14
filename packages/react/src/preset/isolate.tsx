@@ -8,6 +8,11 @@ export type IsolateProps = PropsWithChildren<{
   style?: React.CSSProperties;
 }>;
 
+/**
+ * 独立节点嵌入 HOC
+ * - 独立区域 完全隔离所有事件
+ * @param props
+ */
 export const Isolate: FC<IsolateProps> = props => {
   return (
     <span

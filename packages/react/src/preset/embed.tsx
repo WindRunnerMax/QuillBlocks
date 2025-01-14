@@ -14,6 +14,11 @@ export type EmbedProps = PropsWithChildren<{
   context: ReactLeafContext;
 }>;
 
+/**
+ * Embed 嵌入节点 HOC
+ * - Inline Block HOC
+ * @param props
+ */
 export const Embed: FC<EmbedProps> = props => {
   const { context } = props;
   const editor = useEditor();
@@ -30,7 +35,7 @@ export const Embed: FC<EmbedProps> = props => {
       <ZeroSpace embed />
       <span
         className={props.className}
-        style={{ margin: "0 1px", ...props.style }}
+        style={{ margin: "0 0.1px", ...props.style }}
         contentEditable={false}
         {...{ [VOID_KEY]: true }}
         onMouseDown={onMouseDown}
