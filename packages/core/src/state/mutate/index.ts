@@ -3,6 +3,7 @@ import type { InsertOp } from "block-kit-delta";
 import {
   cloneOp,
   composeAttributes,
+  isDeleteOp,
   isEOLOp,
   isEqualAttributes,
   isInsertOp,
@@ -19,6 +20,12 @@ import { LineState } from "../modules/line-state";
 import { Iterator } from "./iterator";
 
 export class Mutate {
+  /** 插入的 ops */
+  public inserts: InsertOp[];
+  /** 修改的 ops */
+  public revises: InsertOp[];
+  /** 删除的 ops */
+  public deletes: InsertOp[];
   /** 初始 Lines */
   private lines: LineState[];
 
@@ -27,6 +34,9 @@ export class Mutate {
    * @param block
    */
   constructor(private block: BlockState) {
+    this.inserts = [];
+    this.deletes = [];
+    this.revises = [];
     this.lines = block.getLines();
   }
 
@@ -109,6 +119,7 @@ export class Mutate {
       if (otherIter.peekType() === OP_TYPES.INSERT) {
         const leaf = new LeafState(otherIter.next(), 0, lineState);
         lineState = this.insert(lines, lineState, leaf);
+        this.inserts.push(leaf.op as InsertOp);
         continue;
       }
       const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
@@ -125,6 +136,7 @@ export class Mutate {
           const newOp = cloneOp(thisLeaf.op);
           newOp.attributes = attrs;
           newLeaf = LeafState.create(newOp, 0, thisLeaf.parent);
+          this.revises.push({ insert: newOp.insert!, attributes: otherOp.attributes });
         }
         lineState = this.insert(lines, lineState, newLeaf);
         if (!otherIter.hasNext() && newLeaf === thisLeaf) {
@@ -136,6 +148,10 @@ export class Mutate {
           lines.push(...rest.line);
           return lines;
         }
+      }
+      if (isDeleteOp(otherOp)) {
+        thisLeaf && this.deletes.push(thisLeaf.op as InsertOp);
+        continue;
       }
     }
     return lines;

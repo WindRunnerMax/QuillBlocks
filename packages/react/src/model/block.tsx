@@ -2,7 +2,7 @@ import type { BlockState, Editor } from "block-kit-core";
 import { BLOCK_KEY, EDITOR_EVENT, EDITOR_STATE } from "block-kit-core";
 import { useMemoFn } from "block-kit-utils";
 import type { FC } from "react";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { LineModel } from "./line";
 
@@ -11,6 +11,7 @@ const BlockView: FC<{
   state: BlockState;
 }> = props => {
   const { editor, state } = props;
+  const flushing = useRef(false);
   const [lines, setLines] = useState(() => state.getLines());
 
   const setModel = (ref: HTMLDivElement | null) => {
@@ -20,8 +21,14 @@ const BlockView: FC<{
   };
 
   const onContentChange = useMemoFn(() => {
-    // 数据同步变更, 异步绘制变更
+    // 数据同步变更, 异步批量绘制变更
+    // 举个例子: 同步等待刷新的队列 => ||||||||
+    // 进入更新行为后, 异步行为等待, 同步的队列由于 !flushing 全部被守卫
+    // 主线程执行完毕后, 异步队列开始执行, 此时拿到的是最新数据, 以此批量重新渲染
+    if (flushing.current) return void 0;
+    flushing.current = true;
     Promise.resolve().then(() => {
+      flushing.current = false;
       setLines(state.getLines());
       editor.state.set(EDITOR_STATE.PAINTING, true);
     });
