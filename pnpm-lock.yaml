@@ -137,58 +137,6 @@ importers:
         specifier: 29.1.2
         version: 29.1.2(@babel/core@7.20.12)(babel-jest@29.4.1)(jest@29.4.1)(typescript@5.3.2)
 
-  packages/example:
-    dependencies:
-      '@arco-design/web-react':
-        specifier: ^2.64.0
-        version: 2.64.0(@types/react@17.0.2)(react-dom@17.0.2)(react@17.0.2)
-      block-kit-core:
-        specifier: 'workspace: *'
-        version: link:../core
-      block-kit-delta:
-        specifier: 'workspace: *'
-        version: link:../delta
-      block-kit-plugin:
-        specifier: 'workspace: *'
-        version: link:../plugin
-      block-kit-react:
-        specifier: 'workspace: *'
-        version: link:../react
-      block-kit-utils:
-        specifier: 'workspace: *'
-        version: link:../utils
-      react:
-        specifier: 17.0.2
-        version: 17.0.2
-      react-dom:
-        specifier: 17.0.2
-        version: 17.0.2(react@17.0.2)
-    devDependencies:
-      '@rspack/cli':
-        specifier: ^0.2.5
-        version: 0.2.12(react-refresh@0.14.0)(webpack@5.95.0)
-      '@rspack/plugin-html':
-        specifier: ^0.2.5
-        version: 0.2.12(@rspack/core@0.2.12)
-      '@types/react':
-        specifier: 17.0.2
-        version: 17.0.2
-      '@types/react-dom':
-        specifier: 17.0.2
-        version: 17.0.2
-      copy-webpack-plugin:
-        specifier: '5'
-        version: 5.1.2(webpack@5.95.0)
-      less:
-        specifier: 4.2.0
-        version: 4.2.0
-      less-loader:
-        specifier: 12.1.0
-        version: 12.1.0(less@4.2.0)(webpack@5.95.0)
-      sass-loader:
-        specifier: 13.3.3
-        version: 13.3.3(sass@1.52.3)(webpack@5.95.0)
-
   packages/plugin:
     dependencies:
       '@arco-design/web-react':
@@ -277,6 +225,58 @@ importers:
       '@types/react-dom':
         specifier: 17.0.2
         version: 17.0.2
+
+  packages/react-dev:
+    dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.64.0
+        version: 2.64.0(@types/react@17.0.2)(react-dom@17.0.2)(react@17.0.2)
+      block-kit-core:
+        specifier: 'workspace: *'
+        version: link:../core
+      block-kit-delta:
+        specifier: 'workspace: *'
+        version: link:../delta
+      block-kit-plugin:
+        specifier: 'workspace: *'
+        version: link:../plugin
+      block-kit-react:
+        specifier: 'workspace: *'
+        version: link:../react
+      block-kit-utils:
+        specifier: 'workspace: *'
+        version: link:../utils
+      react:
+        specifier: 17.0.2
+        version: 17.0.2
+      react-dom:
+        specifier: 17.0.2
+        version: 17.0.2(react@17.0.2)
+    devDependencies:
+      '@rspack/cli':
+        specifier: ^0.2.5
+        version: 0.2.12(react-refresh@0.14.0)(webpack@5.95.0)
+      '@rspack/plugin-html':
+        specifier: ^0.2.5
+        version: 0.2.12(@rspack/core@0.2.12)
+      '@types/react':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@types/react-dom':
+        specifier: 17.0.2
+        version: 17.0.2
+      copy-webpack-plugin:
+        specifier: '5'
+        version: 5.1.2(webpack@5.95.0)
+      less:
+        specifier: 4.2.0
+        version: 4.2.0
+      less-loader:
+        specifier: 12.1.0
+        version: 12.1.0(less@4.2.0)(webpack@5.95.0)
+      sass-loader:
+        specifier: 13.3.3
+        version: 13.3.3(sass@1.52.3)(webpack@5.95.0)
 
   packages/tools:
     dependencies:

@@ -5,4 +5,4 @@ packages:
   - "packages/core"
   - "packages/react"
   - "packages/plugin"
-  - "packages/example"
+  - "packages/react-dev"

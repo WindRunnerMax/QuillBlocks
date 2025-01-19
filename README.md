@@ -1,5 +1,13 @@
 # QuillBlocks
 
+<p>
+<a href="https://github.com/WindRunnerMax/QuillBlocks">GitHub</a>
+<span>｜</span>
+<a href="https://windrunnermax.github.io/QuillBlocks/">DEMO</a>
+<span>｜</span>
+<a href="./NOTE.md">NOTE</a>
+</p>
+
 QuillJs for React implementation.
 
 ## Blog
