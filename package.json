@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "bootstrap": "pnpm install --frozen-lockfile",
-    "dev": "pnpm run --filter ./packages/example dev",
+    "dev": "pnpm run --filter ./packages/react-dev dev",
     "test": "pnpm run --filter '*' test"
   },
   "repository": {
