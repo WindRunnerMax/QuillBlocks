@@ -25,7 +25,11 @@
 我们的编辑器实际上是要完成类似于`slate`的架构，当前设计的架构的是`core`与视图分离，并且此时我们不容易入侵到`quill`编辑器的选区能力，所以最终相关的选区变换还是需要借助`DOM`与`Editor`实例完成，还需要考量在`core`中维护的`state`状态管理。在`DOM`中需要标记`Block`节点、`Line`节点、`Void`节点等等，然后在浏览器`onSelectionChange`事件中进行`Model`的映射。当然整个说起来容易，做起来就难了，这一套下来还是非常复杂的，需要大量时间不断调试才行。
 
 ## DOM模型与浏览器选区
-浏览器中存在明确的选区策略，在`State 1`的`ContentEditable`状态下，无法做到从`Selection Line 1`选择到`Selection Line 2`，这是浏览器默认行为，而这种选区的默认策略就定染导致我无法基于这种模型实现`Blocks`。而如果是`Stage 2`的模型状态，是完全可以做到选区的正常操作的，在模型方面没有什么问题，但是我们此时的`Quill`选区又出现了问题，由于其在初始化时是会由`<br/>`产生到`div/p`状态的突变，导致其选区的`Range`发生异动，此时在浏览器中的光标是不正确的，而我们此时没有办法入侵到`Quill`中帮助其修正选区，且`DOM`上没有任何辅助我们修正选区的标记，所以这个方式也难以继续下去。因此在这种状态下，我们可能只能选取`Stage 3`策略的形式，并不实现完整的`Blocks`，而是将`Quill`作为嵌套结构的编辑器实例，在这种模型状态下编辑器不会出现选区的偏移问题，我们的嵌套结构也可以借助`Quill`的`Embed Blot`来实现插件扩展嵌套`Block`结构。
+浏览器中存在明确的选区策略，在`State 1`的`ContentEditable`状态下，无法做到从`Selection Line 1`选择到`Selection Line 2`，这是浏览器默认行为，而这种选区的默认策略就定染导致我无法基于这种模型实现`Blocks`。
+
+而如果是`Stage 2`的模型状态，是完全可以做到选区的正常操作的，在模型方面没有什么问题，但是我们此时的`Quill`选区又出现了问题，由于其在初始化时是会由`<br/>`产生到`div/p`状态的突变，导致其选区的`Range`发生异动，此时在浏览器中的光标是不正确的，而我们此时没有办法入侵到`Quill`中帮助其修正选区，且`DOM`上没有任何辅助我们修正选区的标记，所以这个方式也难以继续下去。
+
+因此在这种状态下，我们可能只能选取`Stage 3`策略的形式，并不实现完整的`Blocks`，而是将`Quill`作为嵌套结构的编辑器实例，在这种模型状态下编辑器不会出现选区的偏移问题，我们的嵌套结构也可以借助`Quill`的`Embed Blot`来实现插件扩展嵌套`Block`结构。
 
 ```html
 <p>State 1</p>
@@ -106,7 +110,7 @@
 ## 状态模型管理
 在先前的`State`模块更新文档内容时，我们是直接重建了所有的`LineState`以及`LeafState`对象，然后在`React`视图层的`BlockModel`中监听了`OnContentChange`事件，以此来将`BlockState`的更新应用到视图层。这种方式简单直接，全量更新状态能够保证在`React`的状态更新，然而这种方式的问题在于性能，当文档内容非常大的时候，全量计算将会导致大量的状态重建，并且其本身的改变也会导致`React`的`diff`差异进而全量更新文档视图，这样的性能开销通常是不可接受的。
 
-那么通常来说我们就需要基于`Changes`来确定状态的更新，首先我们需要确定更新的粒度，例如以行为基准则`retain`跨行的时候就直接复用原有的`LineState`，这当然是个合理的方法，相当于尽可能复用`Origin List`然后生成`Target List`，这样的方式自然可以避免部分状态的重建，尽可能复用原本的对象。整体思路大概是分别记录旧列表和新列表的`row`和`col`两个`index`值，然后更新时记录起始`row`，删除和新增自然是正常处理，对于更新则认为是先删后增，对于内容的处理则需要分别讨论单行和跨行的问题，最后可以将这部分增删`LineSatet`数据放置于`changes`中，就可以得到实际增删的`Ops`了，这部分数据在`apply`的`delta`中是不存在的，同样可以认为是数据的补充。
+那么通常来说我们就需要基于`Changes`来确定状态的更新，首先我们需要确定更新的粒度，例如以行为基准则`retain`跨行的时候就直接复用原有的`LineState`，这当然是个合理的方法，相当于尽可能复用`Origin List`然后生成`Target List`，这样的方式自然可以避免部分状态的重建，尽可能复用原本的对象。整体思路大概是分别记录旧列表和新列表的`row`和`col`两个`index`值，然后更新时记录起始`row`，删除和新增自然是正常处理，对于更新则认为是先删后增，对于内容的处理则需要分别讨论单行和跨行的问题，最后可以将这部分增删`LineState`数据放置于`changes`中，就可以得到实际增删的`Ops`了，这部分数据在`apply`的`delta`中是不存在的，同样可以认为是数据的补充。
 
 那么这里实际上是存在非常需要关注的点是我们现在维护的是状态模型，那么也就是说所有的更新就不再是直接的`Delta.compose`，而是使用我们实现的`Mutate`，假如我们对于数据的处理存在偏差的话，那么就会导致状态出现问题，本质上我们是需要实现`Line`级别的`compose`方法。实际上我们可以重新考虑这个问题，如果我们整个行的`LeafState`都没有变化的话，是不是就可以意味着`LineState`就可以直接复用了，在`React`中`Immutable`是很常用的概念，那么我们完全可以重写`compose`等方法做到`Imuutable`，然后在更新的时候重新构建新的`Delta`，当行中`Ops`都没有发生变化的时候，我们就可以直接复用`LinState`，当然`LeafState`是完全可以直接复用的，这里我们将粒度精细到了`Op`级别。
 
@@ -1031,3 +1035,138 @@ a a ab ab b bc b c c c
 12 34 5 6 7 890
 ```
 
+不过话又说回来，这种`wrapper`结构是比较特殊的场景下才会需要的，在某些操作例如缩进这个行为中，是无法判断究竟是要缩进引用块还是缩进其中的文字，这个问题在很多开源编辑器中都存在。其实也就是在没有块结构的情况下，对于类似的行为不好控制，而整体缩进这件事配合`list`在大型文档中也是很合理的行为，因此这部分实现还是要等我们的块结构编辑器实现才可以。
+
+## Blocks 选区状态管理
+最近考虑了个问题，以`blocks`为基础构建的文档例如飞书文档中，每个文本行都是块。在这种情况下，选区的跨行选择就成了比较复杂的问题，先说纯文本块，那其实就是比较常规的类似于`LineState`的选区模式。
+
+- <https://open.feishu.cn/document/server-docs/docs/docs/docx-v1/document/list>
+- <https://open.feishu.cn/document/ukTMukTMukTM/uUDN04SN0QjL1QDN/document-docx/docx-v1/data-structure/block>
+
+然而如果存在块嵌套时，从文本块选择到代码块内，或者相反的操作，交互会变得非常复杂。以我们现在的选区模式为例，我们希望能以`anchorNode`和`focusNode`两个节点就能计算出选区的范围。
+
+最开始我是考虑到使用`Range.cloneContents`来完整映射所有的选区内容，也就是说通过浏览器选区计算后，最后的`Model`选区大概是下面的内容。
+
+```js
+[
+  { type: "text", start: 1, end: 10, id: "xxx" },
+  { type: "block", id: "yyy" },
+  { type: "text", start: 0, end: 3, id: "zzz" },
+]
+```
+
+简单看了下飞书文档的处理，发现其选区竟然本身是多段式，这里我确实是没太理解其中的原因，可能是直接计算并不会有太大的计算成本。
+
+```js
+// PageMain.editor.selectionAPI.getSelection()
+[
+  { "id": 2, "type": "text", "selection": { "start": 3, "end":6 } },
+  { "id": 3, "type": "text", "selection": { "start": 0, "end":4 } },
+  { "id": 4, "type": "text", "selection": { "start": 0, "end":3 } }
+]
+```
+
+在无法考虑清楚的情况下，还是看下熟悉的`slate`，以`getFragment`方法为起点研究了`slate`的选区到数据的选区实现。这里的逻辑大概是从`editor.chidren`取得所有的节点，然后从内容中剔除所有不在`range`的节点，以及文本节点的切割。
+
+- <https://github.com/ianstormtaylor/slate/blob/25be3b/packages/slate/src/interfaces/node.ts#L287>
+- <https://github.com/ianstormtaylor/slate/blob/25be3b/packages/slate/src/interfaces/node.ts#L477>
+
+因此也能解答出之前我没想好的问题，在`slate`调用`getFragment`时如果本身的层级很深，会有保留原始的层级嵌套结构。也就是在调用`Node.nodes`时，以`editor`为基点就能构建出完整的`path`，然后对比`path`和`match`函数裁剪即可。
+
+```js
+[{
+  children: [{
+    children: [{
+      children: [{
+        // ...
+        text: "content"
+      }]
+    }]
+  }]
+}]
+```
+
+但是如果以这种方式来处理选区的话，似乎性能并不会太好，当然`slate`本身的选区是对应了浏览器的`anchor`和`focus`节点来确定，只不过是具体使用的时候才会选取节点。
+
+而后又研究了下飞书具体的交互实现，发现其并没有我想象的那么复杂的选区状态管理，总结起来就是:
+
+- 纯文本情况下仅能选同级节点的内容。
+- 块级结构下选区状态也是以同级节点为单位。
+
+仅处理同级节点的选区内容，就类似我们的此时实现的`LineState`状态，处理两个节点的共同父级，这样就可以直接从`children`的`start`取到`end`即可。这样其实还解决了我之前考虑的虚拟滚动时，任意两个节点都的高度都可比较的问题，我们的对比基准应该是同父级的节点，而且比较的结构应该是`LineState`而不仅仅是`BlockState`状态树。
+
+说回飞书的这个交互实现，纯文本的节点选区是以`text`为单位，如果出现跨行的情况则是直接用的浏览器的状态展示。而块级结构的选区是以`block`为单位，此时的浏览器焦点在`body`上，也就是说选区的选中实际上是飞书自行管理的状态。如果是从文本选到块还是比较有趣的，文本是浏览器状态，块内的文本则会被`selected::selection`隐藏掉，而块本身则会被选中，且块内文本的在松手时会全部选中。
+
+## History Merge
+如果只是正常的`History`模块实现，我们之前已经基本设计完成了。但是存在一些特殊的情况，需要合并`undo`栈的数据。例如图片上传时是个`insert`，此时处于`loading`状态，最后当异步图片上传成功后，此时需要应用的是`retain attrs`修改属性。
+
+那么这种情况下，如果触发`ctrl+z`的话，会导致上传回到`loading`状态而不是撤销`insert`。因此明显这里应该将`retain attrs`这个`op`在`History`模块中合并到`insert`上，这样就可以保证`undo`的时候是撤销`insert`而不是`retain attrs`。
+
+我们先来实现合并，因为我们这些模块都是分离的，所以没有办法直接跟`History`模块通信，这里需要改造一下`apply`，并且将标识写入`undo`栈。但是仅仅是移除`retain`的`op`并且将其合并到`insert`上是不够的，这里还需要`transform`的数据处理。
+
+```js
+const { id: id1 } = state.apply(new Delta().insert());
+const { id: id2 } = state.apply(new Delta().retain());
+const index1 = editor.history.stack.findIndex(it => it.id === id1);
+const index2 = editor.history.stack.findIndex(it => it.id === id2);
+const delta1 = editor.history.stack[index1].delta;
+const delta2 = editor.history.stack[index2].delta;
+const delta = delta1.compose(delta2);
+editor.history.stack[index1] = { id: id1, delta };
+editor.history.stack.splice(index2, 1);
+```
+
+在这里需要先看看`transform`的具体含义，如果是在协同中的话，`b'=a.t(b)`的意思是`a`和`b`都是从相同的`draft`分支出来的，而那么`b'`就是假设`a`已经应用了，此时`b`需要在`a`的基础上变换出`b'`才能直接应用，我们可以简单理解为`tf`解决了`a`操作对`b`操作造成的影响。
+
+那么先前的`undoable`实现，需要将历史所有的`undo`栈处理一遍，这里的假设是`undoable op`是早已存在`draft`中。也就是说此时即使`undo`栈内的所有`op`都以执行，那么此时的`draft`中还是存在`undoable op`。那么由于这个假设存在，就会将所有历史数据影响到，由此需要做变换。
+
+那么假设此时我们此时存在`abc`三个记录，`c`为栈顶，目标是合并`ac`记录。那么我们先来看`c`这个`op`，因为`b`可能会插入新的内容，导致`a/c`的`retain`并不一致，做了`inverted`之后`c`的`retain`会比`a`大，因此我们需要消除`b`带来的影响。
+
+举个具体的例子，假设此时我们的内容为`132`，文本的插入顺序是`123`，那么我们可以构造出相关的`inverted op`。此时我们来将`4`合并到`2`上，但是明显如果直接取出来并且`compose`结果是不对的，`retain`的值并不能对到`2`上。因此就需要对其之间所有的操作进行变换，这里`2`和`4`之间只有`3`, 就只需要处理`3`带来的影响。
+
+```js
+const op1 = new Delta().insert("1");
+const op2 = new Delta().retain(1).insert("2");
+const op3 = new Delta().retain(1).insert("3");
+const op4 = new Delta().retain(2).retain(1, { src: "2" });
+
+const invert1 = new Delta().delete(1);
+const invert2 = new Delta().retain(1).delete(1);
+const invert3 = new Delta().retain(1).delete(1);
+const invert4 = new Delta().retain(2).retain(1, { src: "1" });
+
+invert3.transform(invert4); // [{"retain":1},{"retain":1,"attributes":{"src":"1"}}]
+```
+
+这里其实还有个问题，设想一下为什么先前处理`undoable`的时候，做的变换是针对历史记录的，而这里的变化就是针对新来的记录了。实际上我们还是需要处理历史记录的，而`undoable`的`op`因为根本不会实际参与到我们的`undo`进程中，其处理完后直接就消失了，所以可以不需要处理。
+
+再举个例子，假如此时我们的内容是`312`，写入的顺序是`123`，由此`inverted op`则可以推断出来。此时如果我们只是将`invert3`移除，并且合并到先前的某个`op`上，之后执行`invert2`的时候，就会发现删除的是`1`而不是`2`，这就导致了索引指向的问题。
+
+```js
+const op1 = new Delta().insert("1");
+const op2 = new Delta().retain(1).insert("2");
+const op3 = new Delta().insert("3");
+
+const invert1 = new Delta().delete(1);
+const invert2 = new Delta().retain(1).delete(1);
+const invert3 = new Delta().delete(1);
+```
+
+由此可知，最开始那个例子仅仅适用于处理`attrs`的场景，因为被`merge`的这个`op`本身不会影响到其他的`op`，但是实际的场景基本也只有这个。又会影响到历史记录索引，又会被先前操作过的`op`影响本身的索引，就像是`xxx|yyy`。这种情况并不常见，倒是在`Local CS`中倒是会用的上。
+
+因此我们还需要与`undoable`一样，将其变换应用到历史记录上。但是因为这里是互相影响的，究竟应该是以被合并`op`变换后的值为基准，还是原始的值为准。考虑了一下我觉得还是应该以原始值为准，毕竟互相影响的时候是初始值。
+
+依然是上面的例子，假如此时我们的内容是`312`，写入的顺序是`123`。这里需要注意的是，我们是假设新`op`不存在来做的变换，因此应该是先将其再次`invert`后再变换，相当于需要在当前的基准上将`invert3`做了`undo`，也就是下面例子中的`op3`。
+
+```js
+const op1 = new Delta().insert("1");
+const op2 = new Delta().retain(1).insert("2");
+const op3 = new Delta().insert("3");
+
+const invert1 = new Delta().delete(1);
+const invert2 = new Delta().retain(1).delete(1);
+const invert3 = new Delta().delete(1);
+
+const invert21 = op3.transform(invert2); // [{"retain":2},{"delete":1}]
+const invert11 = op3.transform(invert1); // [{"retain":1},{"delete":1}]
+```
