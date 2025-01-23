@@ -21,7 +21,7 @@ import { BLOCK_LIKE } from "./utils/constant";
 
 export class Editor {
   /** 编辑容器 */
-  private container: HTMLDivElement | null;
+  protected container: HTMLDivElement | null;
   /** 配置模块 */
   public schema: Schema;
   /** 事件模块 */

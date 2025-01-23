@@ -12,7 +12,7 @@ export class Plugin {
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.current = [];
   }
 

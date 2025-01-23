@@ -18,7 +18,7 @@ export class Clipboard {
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.copyModule = new Copy(editor);
     this.pasteModule = new Paste(editor);
     this.editor.event.on(EDITOR_EVENT.CUT, this.onCut);
@@ -40,7 +40,7 @@ export class Clipboard {
    * @param event
    */
   @Bind
-  private onCopy(event: ClipboardEvent) {
+  protected onCopy(event: ClipboardEvent) {
     event.preventDefault();
     event.stopPropagation();
     const sel = this.editor.selection.get();
@@ -66,7 +66,7 @@ export class Clipboard {
    * @param event
    */
   @Bind
-  private onCut(event: ClipboardEvent) {
+  protected onCut(event: ClipboardEvent) {
     event.preventDefault();
     event.stopPropagation();
     const sel = this.editor.selection.get();
@@ -80,7 +80,7 @@ export class Clipboard {
    * @param event
    */
   @Bind
-  private onPaste(event: ClipboardEvent) {
+  protected onPaste(event: ClipboardEvent) {
     event.preventDefault();
     event.stopPropagation();
     const transfer = event.clipboardData;

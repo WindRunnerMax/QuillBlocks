@@ -4,7 +4,7 @@ import { BlockDelta } from "./block-delta";
 import type { BlockSetOption } from "./interface";
 
 export class BlockSet {
-  private _blocks: Record<string, BlockDelta>;
+  protected _blocks: Record<string, BlockDelta>;
 
   constructor(blocks: BlockSetOption = {}) {
     this._blocks = Object.keys(blocks).reduce(

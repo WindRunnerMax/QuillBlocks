@@ -9,7 +9,7 @@ export class Input {
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.editor.event.on(EDITOR_EVENT.BEFORE_INPUT, this.onBeforeInput);
     this.editor.event.on(EDITOR_EVENT.COMPOSITION_END, this.onCompositionEnd);
   }
@@ -27,7 +27,7 @@ export class Input {
    * @param event
    */
   @Bind
-  private onBeforeInput(event: InputEvent) {
+  protected onBeforeInput(event: InputEvent) {
     if (this.editor.state.get(EDITOR_STATE.COMPOSING)) {
       return null;
     }
@@ -78,7 +78,7 @@ export class Input {
    * @param event
    */
   @Bind
-  private onCompositionEnd(event: CompositionEvent) {
+  protected onCompositionEnd(event: CompositionEvent) {
     const data = event.data;
     const sel = this.editor.selection.get();
     data && sel && this.editor.perform.insertText(sel, data);

@@ -11,7 +11,7 @@ import { isMatchBlockTag } from "../utils/deserialize";
 import { getFragmentText, serializeHTML } from "../utils/serialize";
 
 export class Copy {
-  constructor(private editor: Editor) {}
+  constructor(protected editor: Editor) {}
 
   /**
    * 复制 Delta 到剪贴板

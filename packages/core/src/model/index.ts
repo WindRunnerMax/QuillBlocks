@@ -4,9 +4,9 @@ import type { LineState } from "../state/modules/line-state";
 
 export class Model {
   /** DOM TO STATE */
-  private DOM_MODEL: WeakMap<HTMLElement, BlockState | LineState | LeafState>;
+  protected DOM_MODEL: WeakMap<HTMLElement, BlockState | LineState | LeafState>;
   /** STATE TO DOM */
-  private MODEL_DOM: WeakMap<BlockState | LineState | LeafState, HTMLElement>;
+  protected MODEL_DOM: WeakMap<BlockState | LineState | LeafState, HTMLElement>;
 
   /**
    * 构造函数

@@ -22,9 +22,9 @@ export class LineState {
   /** 标记更新子节点 */
   public isDirty = false;
   /** Leaf 节点 */
-  private leaves: LeafState[] = [];
+  protected leaves: LeafState[] = [];
   /** Ops 缓存 */
-  private _ops: Op[] | null = null;
+  protected _ops: Op[] | null = null;
   /** Leaf 到 Index 映射 */
   public _leafToIndex: WeakMap<LeafState, number>;
 
@@ -42,7 +42,7 @@ export class LineState {
     this.length = 0;
     this.key = Key.getId(this);
     this._leafToIndex = new WeakMap();
-    this._deltaToLeaves(delta);
+    this._initFromDelta(delta);
   }
 
   /**
@@ -54,7 +54,7 @@ export class LineState {
   }
 
   /**
-   *  设置 Leaf 节点
+   * 设置 Leaf 节点
    * @param leaf
    * @param index
    */
@@ -221,7 +221,7 @@ export class LineState {
    * 通过 delta 创建 Leaves
    * @internal 仅编辑器内部使用
    */
-  public _deltaToLeaves(delta: Delta) {
+  public _initFromDelta(delta: Delta) {
     this._ops = [];
     this.leaves = [];
     this.isDirty = false;

@@ -14,7 +14,7 @@ export class Perform {
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {}
+  constructor(protected editor: Editor) {}
 
   /**
    * 插入文本

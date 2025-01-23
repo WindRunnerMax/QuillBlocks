@@ -20,7 +20,7 @@ describe("event bus", () => {
       changes: delta,
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore: private property
+    // @ts-ignore: protected property
     const len = event.listeners.CONTENT_CHANGE?.length;
     expect(len).toEqual(2);
     expect(spy).toHaveBeenCalledTimes(1);

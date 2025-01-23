@@ -6,13 +6,13 @@ import type { LineState } from "../modules/line-state";
 
 export class Iterator {
   /** 行索引 */
-  private row: number;
+  protected row: number;
   /** 列索引 */
-  private col: number;
+  protected col: number;
   /** Op 偏移 */
-  private offset: number;
+  protected offset: number;
   /** LineState 组 */
-  private lines: LineState[];
+  protected lines: LineState[];
 
   /**
    * 构造函数

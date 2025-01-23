@@ -11,7 +11,7 @@ export class Rect {
   /**
    * 构造函数
    */
-  constructor(private editor: Editor) {}
+  constructor(protected editor: Editor) {}
 
   /**
    * 获取光标的 Rect

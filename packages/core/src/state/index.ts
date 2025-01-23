@@ -12,13 +12,13 @@ import { EDITOR_STATE } from "./types";
 
 export class EditorState {
   /** Delta 缓存 */
-  private _delta: Delta | null;
+  protected _delta: Delta | null;
   /** BlockState 引用 */
   public block: BlockState;
   /** 内建状态集合 */
-  private status: Record<string, boolean> = {};
+  protected status: Record<string, boolean> = {};
 
-  constructor(private editor: Editor, delta: Delta) {
+  constructor(protected editor: Editor, delta: Delta) {
     this._delta = delta;
     this.block = new BlockState(editor, delta);
   }

@@ -13,23 +13,23 @@ import type { StackItem } from "./types";
 
 export class History {
   /** 延时 */
-  private readonly DELAY = 1000;
+  protected readonly DELAY = 1000;
   /** 堆栈最大值 */
-  private readonly STACK_SIZE = 100;
+  protected readonly STACK_SIZE = 100;
   /** 前次执行记录时间 */
-  private lastRecord: number;
+  protected lastRecord: number;
   /** UNDO 栈 */
-  private undoStack: StackItem[];
+  protected undoStack: StackItem[];
   /** REDO 栈 */
-  private redoStack: StackItem[];
+  protected redoStack: StackItem[];
   /** 当前选区 */
-  private currentRange: RawRange | null;
+  protected currentRange: RawRange | null;
 
   /**
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.redoStack = [];
     this.undoStack = [];
     this.lastRecord = 0;
@@ -90,7 +90,7 @@ export class History {
    * 获取最新选区
    */
   @Bind
-  private onContentWillChange() {
+  protected onContentWillChange() {
     const range = this.editor.selection.toRaw();
     this.currentRange = range;
   }
@@ -100,7 +100,7 @@ export class History {
    * @param event
    */
   @Bind
-  private onContentChange(event: ContentChangeEvent) {
+  protected onContentChange(event: ContentChangeEvent) {
     const { changes, previous, source } = event;
     if (!changes.ops.length || source === APPLY_SOURCE.HISTORY) {
       return void 0;
@@ -137,7 +137,7 @@ export class History {
    * @param stack
    * @param delta
    */
-  private transformStack(stack: StackItem[], delta: Delta) {
+  protected transformStack(stack: StackItem[], delta: Delta) {
     let remoteDelta = delta;
     for (let i = stack.length - 1; i >= 0; i -= 1) {
       const prevItem = stack[i];
@@ -157,7 +157,7 @@ export class History {
    * @param range
    * @param delta
    */
-  private transformRange(range: RawRange | null, delta: Delta) {
+  protected transformRange(range: RawRange | null, delta: Delta) {
     if (!range) return range;
     const start = delta.transformPosition(range.start);
     const end = delta.transformPosition(range.start + range.len);
@@ -168,7 +168,7 @@ export class History {
    * 恢复选区位置
    * @param stackItem
    */
-  private restoreSelection(stackItem: StackItem) {
+  protected restoreSelection(stackItem: StackItem) {
     if (stackItem.range) {
       const range = Range.fromRaw(this.editor, stackItem.range);
       this.editor.selection.set(range);
@@ -188,7 +188,7 @@ export class History {
    * @param event
    */
   @Bind
-  private onKeyDown(event: KeyboardEvent) {
+  protected onKeyDown(event: KeyboardEvent) {
     if (isUndo(event)) {
       this.undo();
       event.preventDefault();

@@ -4,82 +4,82 @@ import type { EventBus } from "../bus";
 import { NATIVE_EVENTS } from "./types";
 
 export class NativeEvent {
-  constructor(private event: EventBus, private editor: Editor) {}
+  constructor(protected event: EventBus, protected editor: Editor) {}
 
-  private onCompositionStart = (e: CompositionEvent) => {
+  protected onCompositionStart = (e: CompositionEvent) => {
     this.editor.state.set(EDITOR_STATE.COMPOSING, true);
     this.event.emit(NATIVE_EVENTS.COMPOSITION_START, e);
   };
 
-  private onCompositionUpdate = (e: CompositionEvent) => {
+  protected onCompositionUpdate = (e: CompositionEvent) => {
     this.event.emit(NATIVE_EVENTS.COMPOSITION_UPDATE, e);
   };
 
-  private onCompositionEnd = (e: CompositionEvent) => {
-    this.event.emit(NATIVE_EVENTS.COMPOSITION_END, e);
+  protected onCompositionEnd = (e: CompositionEvent) => {
     this.editor.state.set(EDITOR_STATE.COMPOSING, false);
+    this.event.emit(NATIVE_EVENTS.COMPOSITION_END, e);
   };
 
-  private onBeforeInput = (e: Event) => {
+  protected onBeforeInput = (e: Event) => {
     this.event.emit(NATIVE_EVENTS.BEFORE_INPUT, e as InputEvent);
   };
 
-  private onInput = (e: Event) => {
+  protected onInput = (e: Event) => {
     this.event.emit(NATIVE_EVENTS.INPUT, e as InputEvent);
   };
 
-  private onCopy = (e: ClipboardEvent) => {
+  protected onCopy = (e: ClipboardEvent) => {
     this.event.emit(NATIVE_EVENTS.COPY, e);
   };
 
-  private onCut = (e: ClipboardEvent) => {
+  protected onCut = (e: ClipboardEvent) => {
     this.event.emit(NATIVE_EVENTS.CUT, e);
   };
 
-  private onPaste = (e: ClipboardEvent) => {
+  protected onPaste = (e: ClipboardEvent) => {
     this.event.emit(NATIVE_EVENTS.PASTE, e);
   };
 
-  private onKeydown = (e: KeyboardEvent) => {
+  protected onKeydown = (e: KeyboardEvent) => {
     this.event.emit(NATIVE_EVENTS.KEY_DOWN, e);
   };
 
-  private onKeypress = (e: KeyboardEvent) => {
+  protected onKeypress = (e: KeyboardEvent) => {
     this.event.emit(NATIVE_EVENTS.KEY_PRESS, e);
   };
 
-  private onKeyup = (e: KeyboardEvent) => {
+  protected onKeyup = (e: KeyboardEvent) => {
     this.event.emit(NATIVE_EVENTS.KEY_UP, e);
   };
 
-  private onFocus = (e: FocusEvent) => {
+  protected onFocus = (e: FocusEvent) => {
     this.editor.state.set(EDITOR_STATE.FOCUS, true);
     this.event.emit(NATIVE_EVENTS.FOCUS, e);
   };
 
-  private onBlur = (e: FocusEvent) => {
+  protected onBlur = (e: FocusEvent) => {
     this.editor.state.set(EDITOR_STATE.FOCUS, false);
     this.event.emit(NATIVE_EVENTS.BLUR, e);
   };
 
-  private onSelectionChange = (e: Event) => {
+  protected onSelectionChange = (e: Event) => {
     this.event.emit(NATIVE_EVENTS.SELECTION_CHANGE_NATIVE, e);
   };
 
-  private onMouseDown = (e: MouseEvent) => {
+  protected onMouseDown = (e: MouseEvent) => {
     this.event.emit(NATIVE_EVENTS.MOUSE_DOWN, e);
   };
 
-  private onMouseUp = (e: MouseEvent) => {
+  protected onMouseUp = (e: MouseEvent) => {
     this.event.emit(NATIVE_EVENTS.MOUSE_UP, e);
   };
 
-  private onMouseDownGlobal = (e: MouseEvent) => {
+  protected onMouseDownGlobal = (e: MouseEvent) => {
     this.editor.state.set(EDITOR_STATE.MOUSE_DOWN, true);
     this.event.emit(NATIVE_EVENTS.MOUSE_DOWN, e);
   };
 
-  private onMouseUpGlobal = (e: MouseEvent) => {
+  protected onMouseUpGlobal = (e: MouseEvent) => {
     this.editor.state.set(EDITOR_STATE.MOUSE_DOWN, false);
     this.event.emit(NATIVE_EVENTS.MOUSE_UP, e);
   };

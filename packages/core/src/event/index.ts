@@ -4,15 +4,15 @@ import { NativeEvent } from "./native";
 
 export class Event {
   /** 原生事件绑定 */
-  private nativeEvent: NativeEvent;
+  protected nativeEvent: NativeEvent;
   /** 事件总线 */
-  private bus: EventBus;
+  protected bus: EventBus;
 
   /**
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.bus = new EventBus();
     this.nativeEvent = new NativeEvent(this.bus, this.editor);
   }

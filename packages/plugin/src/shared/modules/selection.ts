@@ -3,8 +3,8 @@ import { EDITOR_EVENT } from "block-kit-core";
 import { Bind } from "block-kit-utils";
 
 import type { SelectionHOC } from "../components/selection";
-
 export class SelectionPlugin {
+  /** id <-> React.ReactNode */
   protected idToView: Map<string, SelectionHOC>;
 
   constructor(public editor: Editor, public readonly: boolean) {
@@ -26,7 +26,7 @@ export class SelectionPlugin {
   }
 
   @Bind
-  public onSelectionChange(e: SelectionChangeEvent) {
+  protected onSelectionChange(e: SelectionChangeEvent) {
     const current = e.current;
     this.idToView.forEach(view => {
       view.onSelectionChange(current);

@@ -21,7 +21,7 @@ type State = {
 };
 
 export class SelectionHOC extends React.PureComponent<Props, State> {
-  private editor: Editor;
+  protected editor: Editor;
 
   constructor(props: Props) {
     super(props);

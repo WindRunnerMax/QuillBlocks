@@ -14,7 +14,7 @@ describe("ref range", () => {
     const newRange = ref.unref();
     expect(newRange).toEqual({ start: 3, len: 4 });
     expect(ref.unref()).toBeNull();
-    // @ts-expect-error private property
+    // @ts-expect-error protected property
     expect(editor.ref.rangeRefs.size).toBe(0);
   });
 

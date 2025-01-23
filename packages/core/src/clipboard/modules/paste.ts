@@ -6,7 +6,7 @@ import { CALLER_TYPE } from "../../plugin/types";
 import type { DeserializeContext, PasteContext } from "../types";
 
 export class Paste {
-  constructor(private editor: Editor) {}
+  constructor(protected editor: Editor) {}
 
   /**
    * 处理剪贴板 Delta

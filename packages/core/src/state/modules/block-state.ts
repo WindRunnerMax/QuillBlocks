@@ -14,14 +14,14 @@ export class BlockState {
   /** Block Key */
   public readonly key: string;
   /** LineState 集合 */
-  private lines: LineState[] = [];
+  protected lines: LineState[] = [];
 
-  constructor(public editor: Editor, delta: Delta) {
+  constructor(public editor: Editor, base: Delta) {
     this.key = Key.getId(this);
     let offset = 0;
     this.lines = [];
     // 初始化创建 LineState
-    delta.eachLine((delta, attributes, index) => {
+    base.eachLine((delta, attributes, index) => {
       const lineState = new LineState(delta, attributes, this);
       lineState.index = index;
       lineState.start = offset;

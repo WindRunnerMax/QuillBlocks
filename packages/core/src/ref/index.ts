@@ -8,12 +8,12 @@ import type { RawRangeRef } from "./types";
 
 export class Ref {
   /** 选区 */
-  private rangeRefs: Set<RawRangeRef>;
+  protected rangeRefs: Set<RawRangeRef>;
 
   /**
    * 构造函数
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.rangeRefs = new Set();
     this.editor.event.on(EDITOR_EVENT.CONTENT_CHANGE, this.transform);
   }
@@ -48,7 +48,7 @@ export class Ref {
    * 拆离引用
    * @param ref
    */
-  private unref(ref: RawRangeRef) {
+  protected unref(ref: RawRangeRef) {
     const current = ref.current;
     this.rangeRefs.delete(ref);
     ref.current = null;
@@ -60,7 +60,7 @@ export class Ref {
    * @param event
    */
   @Bind
-  private transform(event: ContentChangeEvent) {
+  protected transform(event: ContentChangeEvent) {
     const { changes } = event;
     for (const ref of this.rangeRefs) {
       const raw = ref.current;

@@ -2,7 +2,7 @@ import type { CMDFunc, CMDPayload, EditorCMD } from "./types";
 
 export class Command {
   /** 命令 Map */
-  private commands: EditorCMD;
+  protected commands: EditorCMD;
 
   /**
    * 构造函数

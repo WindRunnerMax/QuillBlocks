@@ -11,7 +11,7 @@ export class Collect {
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {}
+  constructor(protected editor: Editor) {}
 
   /**
    * 基于 Ops 获取 Length 位置的 Op

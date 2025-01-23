@@ -4,11 +4,11 @@ import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "../delta/op";
 
 export class MutateIterator {
   /** Ops 组 */
-  private ops: Op[];
+  protected ops: Op[];
   /** Op 索引 */
-  private index: number;
+  protected index: number;
   /** Op 偏移 */
-  private offset: number;
+  protected offset: number;
 
   constructor(ops: Op[]) {
     this.ops = ops;

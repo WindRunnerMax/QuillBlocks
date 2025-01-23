@@ -14,19 +14,19 @@ import { isEqualDOMRange, toDOMRange } from "./utils/native";
 
 export class Selection {
   /** 上次时间片快照 */
-  private lastRecord: number = 0;
+  protected lastRecord: number = 0;
   /** 时间片内执行次数 */
-  private execution: number = 0;
+  protected execution: number = 0;
   /** 先前选区 */
-  private previous: Range | null = null;
+  protected previous: Range | null = null;
   /** 当前选区 */
-  private current: Range | null = null;
+  protected current: Range | null = null;
 
   /**
    * 构造函数
    * @param editor
    */
-  constructor(private editor: Editor) {
+  constructor(protected editor: Editor) {
     this.editor.event.on(EDITOR_EVENT.KEY_DOWN, this.onArrowKeyDown);
     this.editor.event.on(EDITOR_EVENT.SELECTION_CHANGE_NATIVE, this.onNativeSelectionChange);
   }
@@ -56,7 +56,7 @@ export class Selection {
   /**
    * 检查时间片执行次数限制
    */
-  private limit() {
+  protected limit() {
     const now = Date.now();
     // 如果距离上次记录时间超过 500ms, 重置执行次数
     if (now - this.lastRecord >= 500) {
@@ -75,7 +75,7 @@ export class Selection {
    * 处理选区变换事件
    */
   @Bind
-  private onNativeSelectionChange() {
+  protected onNativeSelectionChange() {
     if (this.editor.state.isComposing()) {
       return void 0;
     }
@@ -172,7 +172,7 @@ export class Selection {
    * @param event
    */
   @Bind
-  private onArrowKeyDown(event: KeyboardEvent) {
+  protected onArrowKeyDown(event: KeyboardEvent) {
     const leftArrow = isArrowLeft(event);
     const rightArrow = isArrowRight(event);
     if (!(leftArrow || rightArrow) || event.metaKey || event.altKey) {
