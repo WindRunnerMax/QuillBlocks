@@ -25,7 +25,7 @@ export class BoldPlugin extends EditorPlugin {
     return !!attrs[BOLD_KEY];
   }
 
-  public serialize(context: SerializeContext): void {
+  public serialize(context: SerializeContext): SerializeContext {
     const { op, html } = context;
     if (op.attributes && op.attributes[BOLD_KEY]) {
       const strong = document.createElement("strong");
@@ -33,11 +33,12 @@ export class BoldPlugin extends EditorPlugin {
       strong.appendChild(html);
       context.html = strong;
     }
+    return context;
   }
 
-  public deserialize(context: DeserializeContext): void {
+  public deserialize(context: DeserializeContext): DeserializeContext {
     const { delta, html } = context;
-    if (!isHTMLElement(html)) return void 0;
+    if (!isHTMLElement(html)) return context;
     if (
       isMatchHTMLTag(html, "strong") ||
       isMatchHTMLTag(html, "b") ||
@@ -45,6 +46,7 @@ export class BoldPlugin extends EditorPlugin {
     ) {
       applyMarker(delta, { [BOLD_KEY]: TRUE });
     }
+    return context;
   }
 
   public render(context: ReactLeafContext): ReactNode {

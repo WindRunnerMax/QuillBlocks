@@ -1,5 +1,5 @@
 import type { Editor, LeafState } from "block-kit-core";
-import { LEAF_KEY } from "block-kit-core";
+import { LEAF_KEY, PLUGIN_TYPE } from "block-kit-core";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
@@ -19,7 +19,7 @@ const LeafView: FC<{
     }
   };
 
-  const context = useMemo(() => {
+  const runtime = useMemo(() => {
     const context: ReactLeafContext = {
       op: leafState.op,
       classList: [],
@@ -29,8 +29,9 @@ const LeafView: FC<{
       style: {},
       children: <Text>{leafState.getText()}</Text>,
     };
-    for (const plugin of editor.plugin.current) {
-      if (plugin.render && plugin.match(context.attributes || {}, context.op)) {
+    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER);
+    for (const plugin of plugins) {
+      if (plugin.match(context.attributes || {}, context.op)) {
         context.children = plugin.render(context);
       }
     }
@@ -41,10 +42,10 @@ const LeafView: FC<{
     <span
       {...{ [LEAF_KEY]: true }}
       ref={setModel}
-      className={context.classList.join(" ")}
-      style={context.style}
+      className={runtime.classList.join(" ")}
+      style={runtime.style}
     >
-      {context.children}
+      {runtime.children}
     </span>
   );
 };

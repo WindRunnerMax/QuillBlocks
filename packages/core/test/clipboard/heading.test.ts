@@ -26,6 +26,7 @@ describe("clipboard heading", () => {
           element.appendChild(html);
           context.html = element;
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);
@@ -41,10 +42,11 @@ describe("clipboard heading", () => {
     const plugin = getMockedPlugin({
       deserialize(context) {
         const { delta, html } = context;
-        if (!isHTMLElement(html)) return void 0;
+        if (!isHTMLElement(html)) return context;
         if (["h1", "h2"].indexOf(html.tagName.toLowerCase()) > -1) {
           applyLineMarker(delta, { heading: html.tagName.toLowerCase() });
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);

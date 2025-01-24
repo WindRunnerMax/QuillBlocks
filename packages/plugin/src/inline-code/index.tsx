@@ -1,7 +1,7 @@
 import "./styles/index.scss";
 
-import type { SerializeContext } from "block-kit-core";
-import type { Editor } from "block-kit-core";
+import type { Editor, SerializeContext } from "block-kit-core";
+import { Priority } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
@@ -25,15 +25,17 @@ export class InlineCodePlugin extends EditorPlugin {
     return !!attrs[INLINE_CODE];
   }
 
-  public serialize(context: SerializeContext): void {
+  public serialize(context: SerializeContext): SerializeContext {
     const { op, html } = context;
     if (op.attributes && op.attributes[INLINE_CODE]) {
       const strong = document.createElement("code");
       strong.appendChild(html);
       context.html = strong;
     }
+    return context;
   }
 
+  @Priority(100)
   public render(context: ReactLeafContext): ReactNode {
     return <code className="inline-code">{context.children}</code>;
   }

@@ -26,6 +26,7 @@ describe("clipboard image", () => {
           element.src = op.attributes.src;
           context.html = element;
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);
@@ -44,13 +45,14 @@ describe("clipboard image", () => {
     const plugin = getMockedPlugin({
       deserialize(context) {
         const { html } = context;
-        if (!isHTMLElement(html)) return void 0;
+        if (!isHTMLElement(html)) return context;
         if (isMatchHTMLTag(html, "img")) {
           const src = html.getAttribute("src") || "";
           const delta = new Delta();
           delta.insert(" ", { image: "true", src: src });
           context.delta = delta;
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);

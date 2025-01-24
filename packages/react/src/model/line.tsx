@@ -1,5 +1,5 @@
 import type { Editor, LineState } from "block-kit-core";
-import { NODE_KEY } from "block-kit-core";
+import { NODE_KEY, PLUGIN_TYPE } from "block-kit-core";
 import { EOL } from "block-kit-delta";
 import type { FC } from "react";
 import React, { useMemo } from "react";
@@ -42,7 +42,7 @@ const LineView: FC<{
     return nodes;
   }, [editor, leaves]);
 
-  const context = useMemo(() => {
+  const runtime = useMemo(() => {
     const context: ReactLineContext = {
       classList: [],
       lineState: lineState,
@@ -50,17 +50,16 @@ const LineView: FC<{
       style: {},
       children: children,
     };
-    for (const plugin of editor.plugin.current) {
-      if (plugin.renderLine) {
-        context.children = plugin.renderLine(context);
-      }
+    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER_LINE);
+    for (const plugin of plugins) {
+      context.children = plugin.renderLine(context);
     }
     return context;
   }, [children, editor.plugin, lineState]);
 
   return (
     <div {...{ [NODE_KEY]: true }} ref={setModel} dir="auto">
-      {context.children}
+      {runtime.children}
     </div>
   );
 };

@@ -29,6 +29,7 @@ describe("clipboard block", () => {
           element.appendChild(inside);
           context.html = element;
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);
@@ -47,12 +48,13 @@ describe("clipboard block", () => {
     const plugin = getMockedPlugin({
       deserialize(context) {
         const { html } = context;
-        if (!isHTMLElement(html)) return void 0;
+        if (!isHTMLElement(html)) return context;
         if (isMatchHTMLTag(html, "div") && html.hasAttribute("data-block")) {
           const id = html.getAttribute("data-block")!;
           deltas[id] = context.delta;
           context.delta = new Delta().insert(" ", { _ref: id });
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);

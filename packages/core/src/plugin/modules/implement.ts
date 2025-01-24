@@ -10,24 +10,43 @@ import type {
 import type { LeafContext, LineContext } from "../types/context";
 
 export abstract class CorePlugin {
-  /** 插件唯一标识 */
+  /**
+   * 插件唯一标识
+   */
   public abstract readonly key: string;
-  /** 调度优先级越高 DOM 结构在越外层 */
-  public readonly priority?: number;
-  /** 插件销毁时调度 */
+  /**
+   * 插件销毁时调度
+   */
   public abstract destroy(): void;
-  /** 叶子节点匹配插件 */
+  /**
+   * 叶子节点匹配插件
+   * - 与 render 方法匹配使用
+   * */
   public abstract match(attrs: AttributeMap, op: Op): boolean;
-  /** 渲染行节点 */
+  /**
+   * 渲染行节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
   public renderLine?(context: LineContext): P.Any;
-  /** 渲染块级子节点 */
+  /**
+   * 渲染块级子节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
   public render?(context: LeafContext): P.Any;
-  /** 将 Fragment 序列化为 HTML  */
-  public serialize?(context: SerializeContext): void;
-  /** 将 HTML 反序列化为 Fragment  */
-  public deserialize?(context: DeserializeContext): void;
-  /** 内容即将写入剪贴板 */
-  public willSetToClipboard?(context: CopyContext): void;
-  /** 粘贴的内容即将应用到编辑器 */
-  public willApplyPasteNodes?(context: PasteContext): void;
+  /**
+   * 将 Fragment(delta) 序列化为 HTML
+   */
+  public serialize?(context: SerializeContext): SerializeContext;
+  /**
+   * 将 HTML 反序列化为 Fragment(delta)
+   */
+  public deserialize?(context: DeserializeContext): DeserializeContext;
+  /**
+   * 内容即将写入剪贴板
+   */
+  public willSetToClipboard?(context: CopyContext): CopyContext;
+  /**
+   * 粘贴的内容即将应用到编辑器
+   */
+  public willApplyPasteNodes?(context: PasteContext): PasteContext;
 }

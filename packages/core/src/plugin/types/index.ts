@@ -2,6 +2,10 @@ import type { F, O } from "block-kit-utils/dist/es/types";
 
 import type { CorePlugin } from "../modules/implement";
 
+export type PluginType = keyof CorePlugin;
+export type RequiredPlugin = Required<CorePlugin>;
+export type CallerType = O.Values<typeof CALLER_TYPE>;
+
 export const CALLER_TYPE = {
   SERIALIZE: "serialize",
   DESERIALIZE: "deserialize",
@@ -9,16 +13,28 @@ export const CALLER_TYPE = {
   WILL_PASTE_NODES: "willApplyPasteNodes",
 } as const;
 
+export const PLUGIN_TYPE = {
+  ...CALLER_TYPE,
+  RENDER: "render",
+  RENDER_LINE: "renderLine",
+} as const;
+
 export type CallerMap = {
-  [CALLER_TYPE.SERIALIZE]: PickPluginType<typeof CALLER_TYPE.SERIALIZE>;
-  [CALLER_TYPE.DESERIALIZE]: PickPluginType<typeof CALLER_TYPE.DESERIALIZE>;
-  [CALLER_TYPE.WILL_SET_CLIPBOARD]: PickPluginType<typeof CALLER_TYPE.WILL_SET_CLIPBOARD>;
-  [CALLER_TYPE.WILL_PASTE_NODES]: PickPluginType<typeof CALLER_TYPE.WILL_PASTE_NODES>;
+  [P in CallerType]: PickPluginFunc<P>;
 };
 
-export type PluginType = keyof CorePlugin;
-export type RequiredPlugin = Required<CorePlugin>;
-export type CallerType = O.Values<typeof CALLER_TYPE>;
-export type PickPluginType<key extends PluginType> = RequiredPlugin[key] extends F.Any
+export type PluginFuncKeys = Exclude<
+  O.Values<{
+    [key in PluginType]: RequiredPlugin[key] extends F.Any ? key : never;
+  }>,
+  "destroy" | "match"
+>;
+
+export type PickPluginFunc<key extends PluginType> = RequiredPlugin[key] extends F.Any
   ? Parameters<RequiredPlugin[key]>[0]
   : null;
+
+export type PluginRequiredKeyFunc<T extends PluginFuncKeys> = CorePlugin &
+  Required<{
+    [K in T]: RequiredPlugin[K];
+  }>;

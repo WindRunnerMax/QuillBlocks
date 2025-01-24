@@ -24,7 +24,7 @@
       "block-kit-react": ["./packages/react/src"],
       "block-kit-plugin": ["./packages/plugin/src"],
       "block-kit-utils": ["./packages/utils/src"],
-      "block-kit-dev": ["./packages/dev/src"]
+      "block-kit-utils/dist/es/*": ["./packages/utils/src/*"]
     }
   },
   "include": ["packages/*/src"],

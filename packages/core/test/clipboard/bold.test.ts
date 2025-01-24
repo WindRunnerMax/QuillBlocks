@@ -25,6 +25,7 @@ describe("clipboard bold", () => {
           strong.appendChild(context.html);
           context.html = strong;
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);
@@ -40,7 +41,7 @@ describe("clipboard bold", () => {
     const plugin = getMockedPlugin({
       deserialize(context) {
         const { delta, html } = context;
-        if (!isHTMLElement(html)) return void 0;
+        if (!isHTMLElement(html)) return context;
         if (
           isMatchHTMLTag(html, "strong") ||
           isMatchHTMLTag(html, "b") ||
@@ -48,6 +49,7 @@ describe("clipboard bold", () => {
         ) {
           applyMarker(delta, { bold: "true" });
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);

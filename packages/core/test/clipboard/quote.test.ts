@@ -26,6 +26,7 @@ describe("clipboard quote", () => {
           element.appendChild(html);
           context.html = element;
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);
@@ -41,13 +42,14 @@ describe("clipboard quote", () => {
     const plugin = getMockedPlugin({
       deserialize(context) {
         const { delta, html } = context;
-        if (!isHTMLElement(html)) return void 0;
+        if (!isHTMLElement(html)) return context;
         if (isMatchHTMLTag(html, "p")) {
           applyLineMarker(delta, {});
         }
         if (isMatchHTMLTag(html, "blockquote")) {
           applyLineMarker(delta, { quote: "true" });
         }
+        return context;
       },
     });
     editor.plugin.register(plugin);
