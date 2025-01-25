@@ -1,8 +1,8 @@
-export const stopNativeEvent = (e: Event) => {
+export const preventNativeEvent = (e: Event) => {
   e.preventDefault();
   e.stopPropagation();
 };
 
 export const stopReactEvent = (e: React.SyntheticEvent) => {
-  stopNativeEvent(e.nativeEvent);
+  preventNativeEvent(e.nativeEvent);
 };

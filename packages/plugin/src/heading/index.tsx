@@ -29,11 +29,11 @@ export class HeadingPlugin extends EditorPlugin {
     const level = attrs[HEADING_KEY];
     switch (level) {
       case "h1":
-        return <div className="heading h1">{context.children}</div>;
+        return <div className="block-kit-heading h1">{context.children}</div>;
       case "h2":
-        return <div className="heading h2">{context.children}</div>;
+        return <div className="block-kit-heading h2">{context.children}</div>;
       case "h3":
-        return <div className="heading h3">{context.children}</div>;
+        return <div className="block-kit-heading h3">{context.children}</div>;
       default:
         break;
     }

@@ -1,6 +1,6 @@
 @import '../../shared/styles/variable';
 
-.menu-toolbar {
+.block-kit-menu-toolbar {
   align-items: center;
   border-bottom: 1px solid var(--color-border-3);
   display: flex;
@@ -20,7 +20,7 @@
   }
 }
 
-.toolbar-dropdown {
+.block-kit-toolbar-dropdown {
   @include frame-region;
 
   >div {

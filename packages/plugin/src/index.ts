@@ -20,3 +20,5 @@ export { MENTION_KEY, MENTION_NAME } from "./mention/types";
 export { SelectionHOC } from "./shared/components/selection";
 export { SelectionPlugin } from "./shared/modules/selection";
 export { MenuToolbar } from "./toolbar";
+export type { ToolbarContextType } from "./toolbar/context/provider";
+export { ToolbarContext, useToolbarContext } from "./toolbar/context/provider";

@@ -30,7 +30,7 @@ export class ImagePlugin extends EditorPlugin {
 
   public render(context: ReactLeafContext): ReactNode {
     return (
-      <Void className="image-void" context={context}>
+      <Void className="block-kit-image-void" context={context}>
         <SelectionHOC selection={this.selection} leaf={context.leafState}>
           <img src="./favicon.ico" width={200} height={200}></img>
         </SelectionHOC>

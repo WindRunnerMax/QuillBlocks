@@ -1,28 +1,23 @@
 import "./styles/index.scss";
 
-import { Trigger } from "@arco-design/web-react";
-import { IconBold, IconCode } from "@arco-design/web-react/icon";
-import type { Editor } from "block-kit-core";
 import { EDITOR_EVENT } from "block-kit-core";
 import type { Op } from "block-kit-delta";
 import { stopReactEvent } from "block-kit-react";
-import { cs, NIL, TRUE, useMemoFn } from "block-kit-utils";
-import type { FC } from "react";
-import { useEffect, useRef, useState } from "react";
+import { cs, useMemoFn } from "block-kit-utils";
+import { useEffect, useState } from "react";
 
-import { BOLD_KEY } from "../bold/types";
-import { HEADING_KEY } from "../heading/types";
-import { INLINE_CODE } from "../inline-code/types";
+import { ToolbarContext } from "./context/provider";
+import { Bold } from "./modules/bold";
+import { Heading } from "./modules/heading";
+import { InlineCode } from "./modules/inline-code";
+import type { ToolbarProps } from "./types";
 import { filterLineMarkMap, filterMarkMap } from "./utils/marks";
 
-export const MenuToolbar: FC<{
-  editor: Editor;
-}> = props => {
+export const MenuToolbar = (props: ToolbarProps) => {
   const { editor } = props;
-  const triggerRef = useRef<Trigger>(null);
   const [keys, setKeys] = useState<Record<string, string>>({});
 
-  const onComputeMarks = useMemoFn(() => {
+  const refreshMarks = useMemoFn(() => {
     const current = props.editor.selection.get();
     if (!current) return setKeys({});
     const ops: Op[] = [];
@@ -43,54 +38,28 @@ export const MenuToolbar: FC<{
   });
 
   useEffect(() => {
-    props.editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, onComputeMarks);
+    props.editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, refreshMarks);
     return () => {
-      props.editor.event.off(EDITOR_EVENT.SELECTION_CHANGE, onComputeMarks);
+      props.editor.event.off(EDITOR_EVENT.SELECTION_CHANGE, refreshMarks);
     };
-  }, [props.editor.event, onComputeMarks]);
+  }, [props.editor.event, refreshMarks]);
 
   return (
-    <div className="menu-toolbar" onMouseDown={stopReactEvent}>
-      <Trigger
-        ref={triggerRef}
-        trigger="click"
-        popup={() => (
-          <div
-            className="toolbar-dropdown"
-            onClick={() => {
-              onComputeMarks();
-              triggerRef.current?.setPopupVisible(false);
-            }}
-          >
-            <div onClick={() => editor.command.exec(HEADING_KEY, { value: NIL })}>Text</div>
-            <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h1" })}>H1</div>
-            <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h2" })}>H2</div>
-            <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h3" })}>H3</div>
-          </div>
-        )}
-      >
-        <div className="menu-toolbar-item" style={{ width: 20, textAlign: "center" }}>
-          {keys[HEADING_KEY]?.toUpperCase() || "Text"}
-        </div>
-      </Trigger>
-      <div
-        className={cs("menu-toolbar-item", keys[BOLD_KEY] && "active")}
-        onClick={() => {
-          props.editor.command.exec(BOLD_KEY, { value: keys[BOLD_KEY] ? NIL : TRUE });
-          onComputeMarks();
+    <div className={cs("block-kit-menu-toolbar", props.className)} onMouseDown={stopReactEvent}>
+      <ToolbarContext.Provider
+        value={{
+          keys,
+          editor,
+          setKeys,
+          refreshMarks,
         }}
       >
-        <IconBold />
-      </div>
-      <div
-        className={cs("menu-toolbar-item", keys[INLINE_CODE] && "active")}
-        onClick={() => {
-          props.editor.command.exec(INLINE_CODE, { value: keys[INLINE_CODE] ? NIL : TRUE });
-          onComputeMarks();
-        }}
-      >
-        <IconCode />
-      </div>
+        {props.children}
+      </ToolbarContext.Provider>
     </div>
   );
 };
+
+MenuToolbar.Bold = Bold;
+MenuToolbar.Heading = Heading;
+MenuToolbar.InlineCode = InlineCode;

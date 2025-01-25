@@ -1,0 +1,21 @@
+import { IconBold } from "@arco-design/web-react/icon";
+import { cs, NIL, TRUE } from "block-kit-utils";
+
+import { BOLD_KEY } from "../../bold/types";
+import { useToolbarContext } from "../context/provider";
+
+export const Bold = () => {
+  const { keys, refreshMarks, editor } = useToolbarContext();
+
+  return (
+    <div
+      className={cs("menu-toolbar-item", keys[BOLD_KEY] && "active")}
+      onClick={() => {
+        editor.command.exec(BOLD_KEY, { value: keys[BOLD_KEY] ? NIL : TRUE });
+        refreshMarks();
+      }}
+    >
+      <IconBold />
+    </div>
+  );
+};

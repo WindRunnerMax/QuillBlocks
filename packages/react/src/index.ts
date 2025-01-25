@@ -11,4 +11,4 @@ export { Isolate } from "./preset/isolate";
 export { Text } from "./preset/text";
 export { Void } from "./preset/void";
 export { ZeroSpace } from "./preset/zero";
-export { stopNativeEvent, stopReactEvent } from "./utils/event";
+export { preventNativeEvent as stopNativeEvent, stopReactEvent } from "./utils/event";

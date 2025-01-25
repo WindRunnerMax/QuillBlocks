@@ -60,7 +60,7 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
     }
     return (
       <div
-        className={cs(this.props.className, selected && border && "doc-block-selected")}
+        className={cs(this.props.className, selected && border && "block-kit-embed-selected")}
         data-selection
       >
         {React.Children.map(this.props.children, child => {

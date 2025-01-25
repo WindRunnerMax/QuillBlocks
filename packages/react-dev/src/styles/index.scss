@@ -1,0 +1,30 @@
+/* stylelint-disable selector-no-qualifying-type */
+
+body {
+  background-color: var(--color-fill-2);
+}
+
+.block-kit-editor-container {
+  box-sizing: border-box;
+  position: relative;
+
+  .block-kit-toolbar {
+    background-color: var(--color-bg-1);
+    border-bottom: unset;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .block-kit-editable {
+    background-color: var(--color-bg-1);
+    margin: 15px auto;
+    padding: 10px 20px;
+    width: 800px;
+  }
+
+  div[data-node] {
+    padding: 1px 0;
+  }
+}

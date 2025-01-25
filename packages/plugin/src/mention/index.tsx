@@ -25,7 +25,7 @@ export class MentionPlugin extends EditorPlugin {
     const attrs = context.attributes || {};
     const name = attrs[MENTION_NAME] || "";
     return (
-      <Embed className="editor-mention-embed" context={context}>
+      <Embed className="block-kit-mention-embed" context={context}>
         <span className="mention-name">@{name}</span>
       </Embed>
     );

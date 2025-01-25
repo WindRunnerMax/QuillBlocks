@@ -1,4 +1,4 @@
-import "./index.scss";
+import "./styles/index.scss";
 import "@arco-design/web-react/es/style/index.less";
 
 import { Editor, LOG_LEVEL } from "block-kit-core";
@@ -14,8 +14,9 @@ import type { FC } from "react";
 import { useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 
-import { INIT } from "./block";
-import { schema } from "./schema";
+import { GitHubIcon } from "./components/github";
+import { INIT } from "./config/block";
+import { schema } from "./config/schema";
 
 const App: FC = () => {
   const editor = useMemo(() => {
@@ -38,9 +39,14 @@ const App: FC = () => {
   }, [editor]);
 
   return (
-    <div className="editor-container">
-      <MenuToolbar editor={editor}></MenuToolbar>
-      <Editable editor={editor} className="editable-node"></Editable>
+    <div className="block-kit-editor-container">
+      <MenuToolbar className="block-kit-toolbar" editor={editor}>
+        <MenuToolbar.Heading></MenuToolbar.Heading>
+        <MenuToolbar.Bold></MenuToolbar.Bold>
+        <MenuToolbar.InlineCode></MenuToolbar.InlineCode>
+        <GitHubIcon></GitHubIcon>
+      </MenuToolbar>
+      <Editable className="block-kit-editable" editor={editor}></Editable>
     </div>
   );
 };
