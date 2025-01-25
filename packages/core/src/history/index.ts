@@ -24,12 +24,15 @@ export class History {
   protected redoStack: StackItem[];
   /** 当前选区 */
   protected currentRange: RawRange | null;
+  /** 批量执行 */
+  protected batching: number[];
 
   /**
    * 构造函数
    * @param editor
    */
   constructor(protected editor: Editor) {
+    this.batching = [];
     this.redoStack = [];
     this.undoStack = [];
     this.lastRecord = 0;
@@ -51,7 +54,7 @@ export class History {
   }
 
   /**
-   * UNDO
+   * undo
    */
   public undo() {
     if (!this.undoStack.length) return void 0;
@@ -70,7 +73,7 @@ export class History {
   }
 
   /**
-   * REDO
+   * redo
    */
   public redo() {
     if (!this.redoStack.length) return void 0;
@@ -89,12 +92,114 @@ export class History {
   }
 
   /**
+   * 开始批量操作
+   * - 以堆栈的形式记录状态
+   * ```
+   * begin
+   *  apply
+   *    begin
+   *      apply
+   *    close
+   * close
+   * ```
+   */
+  public beginBatch() {
+    this.batching.push(1);
+  }
+
+  /**
+   * 结束批量操作
+   * - 务必保证 begin 和 close 成对出现
+   */
+  public closeBatch() {
+    this.batching.pop();
+  }
+
+  /**
+   * 批量执行回调
+   * @param callback
+   */
+  public batch(callback: () => void) {
+    this.beginBatch();
+    callback();
+    this.closeBatch();
+  }
+
+  /**
+   * 正在执行批量操作
+   */
+  public isBatching() {
+    return this.batching.length > 0;
+  }
+
+  /**
+   * 将 mergeId 记录合并到 baseId 记录
+   * - 暂时仅支持合并 retain 操作, 需保证 baseId < mergeId
+   * - 其他操作暂时没有场景, 可查阅 NOTE 的 History Merge 一节
+   * @param baseId
+   * @param mergeId
+   */
+  public mergeRecord(baseId: string, mergeId: string): boolean {
+    const baseIndex = this.undoStack.findIndex(item => item.id.has(baseId));
+    const mergeIndex = this.undoStack.findIndex(item => item.id.has(mergeId));
+    if (baseIndex === -1 || mergeIndex === -1 || baseIndex >= mergeIndex) {
+      return false;
+    }
+    const baseItem = this.undoStack[baseIndex];
+    const mergeItem = this.undoStack[mergeIndex];
+    let mergeDelta = mergeItem.delta;
+    for (let i = mergeIndex - 1; i > baseIndex; i--) {
+      const item = this.undoStack[i];
+      mergeDelta = item.delta.transform(mergeDelta);
+    }
+    this.undoStack[baseIndex] = {
+      id: new Set([...baseItem.id, ...mergeItem.id]),
+      // 这里是 merge.compose(base) 而不是相反
+      // 因为 undo 后的执行顺序是 merge -> base
+      delta: mergeDelta.compose(baseItem.delta),
+      range: baseItem.range,
+    };
+    this.undoStack.splice(mergeIndex, 1);
+    return true;
+  }
+
+  /**
+   * undoable
+   */
+  public undoable() {
+    return this.undoStack.length > 0;
+  }
+
+  /**
+   * redoable
+   */
+  public redoable() {
+    return this.redoStack.length > 0;
+  }
+
+  /**
    * 获取最新选区
    */
   @Bind
   protected onContentWillChange() {
     const range = this.editor.selection.toRaw();
     this.currentRange = range;
+  }
+
+  /**
+   * 键盘事件
+   * @param event
+   */
+  @Bind
+  protected onKeyDown(event: KeyboardEvent) {
+    if (isUndo(event)) {
+      this.undo();
+      event.preventDefault();
+    }
+    if (isRedo(event)) {
+      this.redo();
+      event.preventDefault();
+    }
   }
 
   /**
@@ -117,8 +222,11 @@ export class History {
     let undoRange = this.currentRange;
     let idSet = new Set<string>([id]);
     const timestamp = Date.now();
-    if (this.lastRecord + this.DELAY > timestamp && this.undoStack.length > 0) {
-      // 如果触发时间在 delay 时间片内, 则合并上一个记录
+    if (
+      // 如果触发时间在 delay 时间片内或者批量执行时, 需要合并上一个记录
+      (this.lastRecord + this.DELAY > timestamp || this.isBatching()) &&
+      this.undoStack.length > 0
+    ) {
       const item = this.undoStack.pop();
       if (item) {
         inverted = inverted.compose(item.delta);
@@ -144,7 +252,7 @@ export class History {
    */
   protected transformStack(stack: StackItem[], delta: Delta) {
     let remoteDelta = delta;
-    for (let i = stack.length - 1; i >= 0; i -= 1) {
+    for (let i = stack.length - 1; i >= 0; i--) {
       const prevItem = stack[i];
       stack[i] = {
         id: prevItem.id,
@@ -186,22 +294,6 @@ export class History {
       const rawRange = RawRange.fromEdge(index, index);
       const range = Range.fromRaw(this.editor, rawRange);
       this.editor.selection.set(range);
-    }
-  }
-
-  /**
-   * 键盘事件
-   * @param event
-   */
-  @Bind
-  protected onKeyDown(event: KeyboardEvent) {
-    if (isUndo(event)) {
-      this.undo();
-      event.preventDefault();
-    }
-    if (isRedo(event)) {
-      this.redo();
-      event.preventDefault();
     }
   }
 }

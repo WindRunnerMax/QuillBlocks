@@ -28,6 +28,7 @@ export {
   isTruly,
   Object,
   ROOT_BLOCK,
+  sleep,
   TSON,
   useMemoFn,
 } from "laser-utils";

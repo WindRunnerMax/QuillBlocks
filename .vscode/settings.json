@@ -5,6 +5,7 @@
         "CRDT",
         "pako",
         "pnpm",
+        "redoable",
         "rspack",
         "TSON",
         "undoable",

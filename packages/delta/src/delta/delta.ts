@@ -17,8 +17,13 @@ import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "./op";
 const NULL_CHARACTER = String.fromCharCode(0);
 
 export class Delta {
+  /** 内建 ops */
   public ops: Op[];
 
+  /**
+   * 构造函数
+   * @param ops
+   */
   constructor(ops?: Op[] | { ops: Op[] }) {
     if (Array.isArray(ops)) {
       this.ops = ops;
@@ -45,6 +50,15 @@ export class Delta {
       newOp.attributes = attributes;
     }
     return this.push(newOp);
+  }
+
+  /**
+   * 插入操作
+   * @param attributes
+   * @link https://www.npmjs.com/package/quill-delta/v/4.2.2#insert
+   */
+  public insertEOL(attributes?: AttributeMap): this {
+    return this.insert(EOL, attributes);
   }
 
   /**
