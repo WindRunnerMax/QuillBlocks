@@ -60,6 +60,7 @@ export class History {
     const base = this.editor.state.toBlockSet();
     const inverted = item.delta.invert(base);
     this.redoStack.push({
+      id: item.id,
       delta: inverted,
       range: this.transformRange(item.range, inverted),
     });
@@ -78,6 +79,7 @@ export class History {
     const base = this.editor.state.toBlockSet();
     const inverted = item.delta.invert(base);
     this.undoStack.push({
+      id: item.id,
       delta: inverted,
       range: this.transformRange(item.range, inverted),
     });
@@ -101,7 +103,7 @@ export class History {
    */
   @Bind
   protected onContentChange(event: ContentChangeEvent) {
-    const { changes, previous, source } = event;
+    const { changes, previous, source, id } = event;
     if (!changes.ops.length || source === APPLY_SOURCE.HISTORY) {
       return void 0;
     }
@@ -113,12 +115,15 @@ export class History {
     this.redoStack = [];
     let inverted = changes.invert(previous);
     let undoRange = this.currentRange;
+    let idSet = new Set<string>([id]);
     const timestamp = Date.now();
     if (this.lastRecord + this.DELAY > timestamp && this.undoStack.length > 0) {
+      // 如果触发时间在 delay 时间片内, 则合并上一个记录
       const item = this.undoStack.pop();
       if (item) {
         inverted = inverted.compose(item.delta);
         undoRange = item.range;
+        idSet = new Set([id, ...item.id]);
       }
     } else {
       this.lastRecord = timestamp;
@@ -126,7 +131,7 @@ export class History {
     if (!inverted.ops.length) {
       return void 0;
     }
-    this.undoStack.push({ delta: inverted, range: undoRange });
+    this.undoStack.push({ delta: inverted, range: undoRange, id: idSet });
     if (this.undoStack.length > this.STACK_SIZE) {
       this.undoStack.shift();
     }
@@ -142,6 +147,7 @@ export class History {
     for (let i = stack.length - 1; i >= 0; i -= 1) {
       const prevItem = stack[i];
       stack[i] = {
+        id: prevItem.id,
         delta: remoteDelta.transform(prevItem.delta, true),
         range: prevItem.range && this.transformRange(prevItem.range, remoteDelta),
       };

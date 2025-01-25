@@ -1,4 +1,5 @@
 import { Delta } from "block-kit-delta";
+import { getId } from "block-kit-utils";
 
 import { EventBus } from "../../src/event/bus";
 import { EDITOR_EVENT } from "../../src/index";
@@ -18,6 +19,10 @@ describe("event bus", () => {
       previous: delta,
       source: "test",
       changes: delta,
+      id: getId(6),
+      inserts: [],
+      revises: [],
+      deletes: [],
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore: protected property
@@ -35,12 +40,20 @@ describe("event bus", () => {
       previous: delta,
       source: "test",
       changes: delta,
+      id: getId(6),
+      inserts: [],
+      revises: [],
+      deletes: [],
     });
     event.emit(EDITOR_EVENT.CONTENT_CHANGE, {
       current: delta,
       previous: delta,
       source: "test",
       changes: delta,
+      id: getId(6),
+      inserts: [],
+      revises: [],
+      deletes: [],
     });
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -54,12 +67,20 @@ describe("event bus", () => {
       previous: delta,
       source: "test",
       changes: delta,
+      id: getId(6),
+      inserts: [],
+      revises: [],
+      deletes: [],
     });
     event.emit(EDITOR_EVENT.CONTENT_CHANGE, {
       current: delta,
       previous: delta,
       source: "test",
       changes: delta,
+      id: getId(6),
+      inserts: [],
+      revises: [],
+      deletes: [],
     });
     expect(spy).toHaveBeenCalledTimes(0);
   });

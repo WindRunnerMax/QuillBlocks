@@ -4,6 +4,7 @@ import type { RawRange } from "../../selection/modules/raw-range";
 
 export type StackItem = {
   delta: Delta;
+  id: Set<string>;
   range: RawRange | null;
 };
 

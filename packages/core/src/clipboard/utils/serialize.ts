@@ -1,6 +1,6 @@
 import { EOL } from "block-kit-delta";
 
-import { LINE_TAG } from "../types";
+import { NODE_KEY } from "../../model/types";
 
 /**
  * 序列化 HTML 到 文本
@@ -25,7 +25,7 @@ export const getTextContent = (node: Node): string => {
   node.childNodes.forEach(child => {
     texts.push(getTextContent(child));
   });
-  if (node instanceof Element && node.getAttribute(LINE_TAG)) {
+  if (node instanceof Element && node.getAttribute(NODE_KEY)) {
     texts.push(EOL);
   }
   return texts.join("");

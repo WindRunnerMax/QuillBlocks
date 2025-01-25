@@ -53,6 +53,10 @@ export class Editor {
   /** 位置模块 */
   public rect: Rect;
 
+  /**
+   * 构造函数
+   * @param options
+   */
   constructor(options: EditorOptions = {}) {
     const { delta = new Delta(BLOCK_LIKE), logLevel = LOG_LEVEL.ERROR, schema = {} } = options;
     this.container = null;

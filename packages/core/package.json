@@ -1,5 +1,5 @@
 {
-  "name": "block-kit-core",
+  "name": "block-kit",
   "version": "0.0.0",
   "description": "",
   "main": "dist/index.js",

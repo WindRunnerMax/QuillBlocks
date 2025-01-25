@@ -1,4 +1,5 @@
 import type { Delta } from "block-kit-delta";
+import { getId } from "block-kit-utils";
 
 import type { Editor } from "../editor";
 import type { ContentChangeEvent } from "../event/bus/types";
@@ -7,7 +8,7 @@ import { Range } from "../selection/modules/range";
 import { RawRange } from "../selection/modules/raw-range";
 import { BlockState } from "./modules/block-state";
 import { Mutate } from "./mutate";
-import type { ApplyOptions } from "./types";
+import type { ApplyOptions, ApplyResult } from "./types";
 import { EDITOR_STATE } from "./types";
 
 export class EditorState {
@@ -16,9 +17,15 @@ export class EditorState {
   /** BlockState 引用 */
   public block: BlockState;
   /** 内建状态集合 */
-  protected status: Record<string, boolean> = {};
+  protected status: Record<string, boolean>;
 
+  /**
+   * 构造函数
+   * @param editor
+   * @param delta
+   */
   constructor(protected editor: Editor, delta: Delta) {
+    this.status = {};
     this._delta = delta;
     this.block = new BlockState(editor, delta);
   }
@@ -81,7 +88,7 @@ export class EditorState {
    * @param delta
    * @param options
    */
-  public apply(delta: Delta, options: ApplyOptions = {}) {
+  public apply(delta: Delta, options: ApplyOptions = {}): ApplyResult {
     const { source = "user" } = options;
     const previous = this.toBlockSet();
     this._delta = null;
@@ -89,9 +96,8 @@ export class EditorState {
     // 获取当前选区位置
     const raw: RawRange | null = options.range || this.editor.selection.toRaw();
     this.editor.event.trigger(EDITOR_EVENT.CONTENT_WILL_CHANGE, {
-      previous,
       current: previous,
-      source,
+      source: source,
       changes: delta,
     });
 
@@ -108,9 +114,20 @@ export class EditorState {
       this.editor.selection.set(range);
     }
 
+    const id = getId(6);
     const current = this.toBlockSet();
-    const payload: ContentChangeEvent = { previous, current, source, changes: delta };
+    const payload: ContentChangeEvent = {
+      id: id,
+      previous: previous,
+      current: current,
+      source: source,
+      changes: delta,
+      inserts: mutate.inserts,
+      revises: mutate.revises,
+      deletes: mutate.deletes,
+    };
     this.editor.logger.debug("Editor Content Change", payload);
     this.editor.event.trigger(EDITOR_EVENT.CONTENT_CHANGE, payload);
+    return { id };
   }
 }

@@ -8,6 +8,9 @@ export class Key {
   /** 自动递增标识符 */
   public static n = 0;
 
+  /**
+   * 构造函数
+   */
   constructor() {
     this.id = `${Key.n++}`;
   }

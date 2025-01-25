@@ -27,3 +27,7 @@ export type ApplyOptions = {
   source?: O.Values<typeof APPLY_SOURCE>;
   range?: RawRange;
 };
+
+export type ApplyResult = {
+  id: string;
+};

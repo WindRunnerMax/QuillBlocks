@@ -1,12 +1,10 @@
 import type { Delta } from "block-kit-delta";
 
 import type { Op } from "../../../../delta/dist";
-import { NODE_KEY } from "../../model/types";
 
-export const LINE_TAG = NODE_KEY;
-export const TEXT_DOC = "application/x-rich-text";
+export const TEXT_DOC = "application/x-block-kit";
 
-/** Fragment => HTML */
+/** Fragment(Delta) => HTML */
 export type SerializeContext = {
   /** Op 基准 */
   op: Op;
@@ -22,7 +20,7 @@ export type CopyContext = {
   html: Node;
 };
 
-/** HTML => Fragment  */
+/** HTML => Fragment(Delta)  */
 export type DeserializeContext = {
   /** Delta 目标 */
   delta: Delta;

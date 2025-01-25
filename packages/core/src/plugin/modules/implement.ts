@@ -34,11 +34,11 @@ export abstract class CorePlugin {
    */
   public render?(context: LeafContext): P.Any;
   /**
-   * 将 Fragment(delta) 序列化为 HTML
+   * 将 Fragment(Delta) 序列化为 HTML
    */
   public serialize?(context: SerializeContext): SerializeContext;
   /**
-   * 将 HTML 反序列化为 Fragment(delta)
+   * 将 HTML 反序列化为 Fragment(Delta)
    */
   public deserialize?(context: DeserializeContext): DeserializeContext;
   /**

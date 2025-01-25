@@ -4,9 +4,10 @@ import { EOL, isEOLOp, normalizeEOL } from "block-kit-delta";
 import { Clipboard, TEXT_HTML, TEXT_PLAIN } from "block-kit-utils";
 
 import type { Editor } from "../../editor";
+import { NODE_KEY } from "../../model/types";
 import { CALLER_TYPE } from "../../plugin/types";
 import type { CopyContext, SerializeContext } from "../types";
-import { LINE_TAG, TEXT_DOC } from "../types";
+import { TEXT_DOC } from "../types";
 import { isMatchBlockTag } from "../utils/deserialize";
 import { getFragmentText, serializeHTML } from "../utils/serialize";
 
@@ -52,7 +53,7 @@ export class Copy {
         // 最外层非块级元素, 需要包裹一层 div 行标签
         if (!isMatchBlockTag(lineNode)) {
           lineNode = document.createElement("div");
-          lineNode.setAttribute(LINE_TAG, "true");
+          lineNode.setAttribute(NODE_KEY, "true");
           lineNode.appendChild(context.html);
         }
         root.appendChild(lineNode);
@@ -73,7 +74,7 @@ export class Copy {
       let lineNode = context.html as HTMLElement;
       if (!isMatchBlockTag(lineNode)) {
         lineNode = document.createElement("div");
-        lineNode.setAttribute(LINE_TAG, "true");
+        lineNode.setAttribute(NODE_KEY, "true");
         lineNode.appendChild(context.html);
       }
       lineNode.appendChild(context.html);
