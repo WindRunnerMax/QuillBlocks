@@ -1,5 +1,26 @@
 .block-kit-inline-code {
-  background-color: #eee;
-  border-radius: 3px;
-  padding: 1px 3px;
+  background-color: var(--color-fill-2);
+  border-bottom-style: solid;
+  border-color: var(--color-border-2);
+  border-top-style: solid;
+  border-width: 1px;
+  box-sizing: border-box;
+  padding-bottom: 1px;
+  padding-top: 1px;
+}
+
+.block-kit-inline-code-start {
+  border-bottom-left-radius: 3px;
+  border-left-style: solid;
+  border-top-left-radius: 3px;
+  margin-left: 2px;
+  padding-left: 2px;
+}
+
+.block-kit-inline-code-end {
+  border-bottom-right-radius: 3px;
+  border-right-style: solid;
+  border-top-right-radius: 3px;
+  margin-right: 2px;
+  padding-right: 2px;
 }

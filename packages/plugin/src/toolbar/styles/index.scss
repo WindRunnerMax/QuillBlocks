@@ -1,29 +1,37 @@
 @import '../../shared/styles/variable';
 
 .block-kit-menu-toolbar {
-  align-items: center;
   border-bottom: 1px solid var(--color-border-3);
   display: flex;
   padding: 6px 5px;
   user-select: none;
 
   .menu-toolbar-item {
+    border-radius: 3px;
     color: var(--color-text-1);
     cursor: pointer;
     margin: 0 3px;
     padding: 3px 7px;
 
-    &.active {
+    &.active,
+    &:hover {
       background-color: var(--color-fill-2);
       color: var(--color-text-1);
     }
+  }
+
+  .menu-toolbar-cut {
+    background-color: var(--color-fill-3);
+    box-sizing: border-box;
+    margin: 4px 6px;
+    width: 1px;
   }
 }
 
 .block-kit-toolbar-dropdown {
   @include frame-region;
 
-  >div {
+  > div {
     align-items: center;
     cursor: pointer;
     display: flex;

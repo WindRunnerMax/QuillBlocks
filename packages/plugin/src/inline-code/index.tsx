@@ -37,6 +37,16 @@ export class InlineCodePlugin extends EditorPlugin {
 
   @Priority(100)
   public render(context: ReactLeafContext): ReactNode {
-    return <code className="block-kit-inline-code">{context.children}</code>;
+    const leaf = context.leafState;
+    const prev = leaf.prev(false);
+    const next = leaf.next(false);
+    if (!prev || !prev.op.attributes || !prev.op.attributes[INLINE_CODE]) {
+      context.classList.push("block-kit-inline-code-start");
+    }
+    context.classList.push("block-kit-inline-code");
+    if (!next || !next.op.attributes || !next.op.attributes[INLINE_CODE]) {
+      context.classList.push("block-kit-inline-code-end");
+    }
+    return context.children;
   }
 }

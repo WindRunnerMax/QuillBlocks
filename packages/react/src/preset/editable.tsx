@@ -9,6 +9,7 @@ export const Editable: React.FC<{
   editor: Editor;
   readonly?: boolean;
   className?: string;
+  autoFocus?: boolean;
 }> = props => {
   const { editor, readonly } = props;
   const ref = useRef<HTMLDivElement>(null);

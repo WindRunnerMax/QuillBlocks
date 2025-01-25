@@ -8,12 +8,16 @@ import { useEffect, useState } from "react";
 
 import { ToolbarContext } from "./context/provider";
 import { Bold } from "./modules/bold";
+import { Cut } from "./modules/cut";
 import { Heading } from "./modules/heading";
 import { InlineCode } from "./modules/inline-code";
+import { Italic } from "./modules/italic";
+import { Strike } from "./modules/strike";
+import { Underline } from "./modules/underline";
 import type { ToolbarProps } from "./types";
 import { filterLineMarkMap, filterMarkMap } from "./utils/marks";
 
-export const MenuToolbar = (props: ToolbarProps) => {
+export const Toolbar = (props: ToolbarProps) => {
   const { editor } = props;
   const [keys, setKeys] = useState<Record<string, string>>({});
 
@@ -60,6 +64,10 @@ export const MenuToolbar = (props: ToolbarProps) => {
   );
 };
 
-MenuToolbar.Bold = Bold;
-MenuToolbar.Heading = Heading;
-MenuToolbar.InlineCode = InlineCode;
+Toolbar.Cut = Cut;
+Toolbar.Bold = Bold;
+Toolbar.Italic = Italic;
+Toolbar.Strike = Strike;
+Toolbar.Heading = Heading;
+Toolbar.Underline = Underline;
+Toolbar.InlineCode = InlineCode;

@@ -21,15 +21,15 @@ export const Heading = () => {
             triggerRef.current?.setPopupVisible(false);
           }}
         >
-          <div onClick={() => editor.command.exec(HEADING_KEY, { value: NIL })}>Text</div>
+          <div onClick={() => editor.command.exec(HEADING_KEY, { value: NIL })}>正文</div>
           <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h1" })}>H1</div>
           <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h2" })}>H2</div>
           <div onClick={() => editor.command.exec(HEADING_KEY, { value: "h3" })}>H3</div>
         </div>
       )}
     >
-      <div className="menu-toolbar-item" style={{ width: 20, textAlign: "center" }}>
-        {keys[HEADING_KEY]?.toUpperCase() || "Text"}
+      <div className="menu-toolbar-item" style={{ width: 30, textAlign: "center" }}>
+        {keys[HEADING_KEY]?.toUpperCase() || "正文"}
       </div>
     </Trigger>
   );

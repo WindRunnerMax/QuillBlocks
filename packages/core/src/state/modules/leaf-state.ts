@@ -44,7 +44,7 @@ export class LeafState {
 
   /**
    * 获取前一个 LeafState
-   * @param span 跨行
+   * @param span [span=true] 跨行
    */
   public prev(span = true) {
     const index = this.parent._leafToIndex.get(this);
@@ -60,7 +60,7 @@ export class LeafState {
 
   /**
    * 获取下一个 LeafState
-   * @param span 跨行
+   * @param span [span=true] 跨行
    */
   public next(span = true) {
     const index = this.parent._leafToIndex.get(this);
