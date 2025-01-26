@@ -1,6 +1,7 @@
 import type { Editor, LineState } from "block-kit-core";
 import { NODE_KEY, PLUGIN_TYPE } from "block-kit-core";
 import { EOL } from "block-kit-delta";
+import { cs } from "block-kit-utils";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
@@ -58,7 +59,13 @@ const LineView: FC<{
   }, [children, editor.plugin, lineState]);
 
   return (
-    <div {...{ [NODE_KEY]: true }} ref={setModel} dir="auto">
+    <div
+      {...{ [NODE_KEY]: true }}
+      ref={setModel}
+      dir="auto"
+      className={cs(runtime.classList)}
+      style={runtime.style}
+    >
       {runtime.children}
     </div>
   );

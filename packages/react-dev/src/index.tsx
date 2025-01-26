@@ -4,11 +4,13 @@ import "@arco-design/web-react/es/style/index.less";
 import { Editor, LOG_LEVEL, Point, Range } from "block-kit-core";
 import { Delta } from "block-kit-delta";
 import {
+  AlignPlugin,
   BoldPlugin,
   HeadingPlugin,
   ImagePlugin,
   InlineCodePlugin,
   ItalicPlugin,
+  LineHeightPlugin,
   MentionPlugin,
   StrikePlugin,
   Toolbar,
@@ -34,7 +36,9 @@ const App: FC = () => {
       new ImagePlugin(instance, false),
       new MentionPlugin(),
       new InlineCodePlugin(instance),
-      new HeadingPlugin(instance)
+      new HeadingPlugin(instance),
+      new AlignPlugin(instance),
+      new LineHeightPlugin(instance)
     );
     return instance;
   }, []);
@@ -61,8 +65,10 @@ const App: FC = () => {
         <Toolbar.Italic></Toolbar.Italic>
         <Toolbar.Underline></Toolbar.Underline>
         <Toolbar.Strike></Toolbar.Strike>
-        <Toolbar.Cut></Toolbar.Cut>
         <Toolbar.InlineCode></Toolbar.InlineCode>
+        <Toolbar.Cut></Toolbar.Cut>
+        <Toolbar.Align></Toolbar.Align>
+        <Toolbar.LineHeight></Toolbar.LineHeight>
         <Toolbar.Cut></Toolbar.Cut>
         <GitHubIcon></GitHubIcon>
       </Toolbar>

@@ -3,6 +3,6 @@ export const preventNativeEvent = (e: Event) => {
   e.stopPropagation();
 };
 
-export const stopReactEvent = (e: React.SyntheticEvent) => {
+export const preventReactEvent = (e: React.SyntheticEvent) => {
   preventNativeEvent(e.nativeEvent);
 };

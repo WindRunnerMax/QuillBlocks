@@ -2,16 +2,17 @@ import "./styles/index.scss";
 
 import { EDITOR_EVENT } from "block-kit-core";
 import type { Op } from "block-kit-delta";
-import { stopReactEvent } from "block-kit-react";
 import { cs, useMemoFn } from "block-kit-utils";
 import { useEffect, useState } from "react";
 
 import { ToolbarContext } from "./context/provider";
+import { Align } from "./modules/align";
 import { Bold } from "./modules/bold";
 import { Cut } from "./modules/cut";
 import { Heading } from "./modules/heading";
 import { InlineCode } from "./modules/inline-code";
 import { Italic } from "./modules/italic";
+import { LineHeight } from "./modules/line-height";
 import { Strike } from "./modules/strike";
 import { Underline } from "./modules/underline";
 import type { ToolbarProps } from "./types";
@@ -49,7 +50,10 @@ export const Toolbar = (props: ToolbarProps) => {
   }, [props.editor.event, refreshMarks]);
 
   return (
-    <div className={cs("block-kit-menu-toolbar", props.className)} onMouseDown={stopReactEvent}>
+    <div
+      className={cs("block-kit-menu-toolbar", props.className)}
+      onMouseDown={e => e.preventDefault()}
+    >
       <ToolbarContext.Provider
         value={{
           keys,
@@ -66,8 +70,10 @@ export const Toolbar = (props: ToolbarProps) => {
 
 Toolbar.Cut = Cut;
 Toolbar.Bold = Bold;
+Toolbar.Align = Align;
 Toolbar.Italic = Italic;
 Toolbar.Strike = Strike;
 Toolbar.Heading = Heading;
 Toolbar.Underline = Underline;
 Toolbar.InlineCode = InlineCode;
+Toolbar.LineHeight = LineHeight;

@@ -1,0 +1,60 @@
+import { Trigger } from "@arco-design/web-react";
+import {
+  IconAlignCenter,
+  IconAlignLeft,
+  IconAlignRight,
+  IconDown,
+} from "@arco-design/web-react/icon";
+import { NIL } from "block-kit-utils";
+import type { O } from "block-kit-utils/dist/es/types";
+import { useRef } from "react";
+
+import { ALIGN_KEY } from "../../align/types";
+import { JustifyIcon } from "../../shared/icons/justify";
+import { useToolbarContext } from "../context/provider";
+
+const MAP: O.Map<JSX.Element> = {
+  left: <IconAlignLeft />,
+  center: <IconAlignCenter />,
+  right: <IconAlignRight />,
+  justify: <JustifyIcon />,
+};
+
+export const Align = () => {
+  const triggerRef = useRef<Trigger>(null);
+  const { keys, refreshMarks, editor } = useToolbarContext();
+
+  return (
+    <Trigger
+      ref={triggerRef}
+      trigger="click"
+      popup={() => (
+        <div
+          className="block-kit-toolbar-dropdown"
+          onClick={() => {
+            refreshMarks();
+            triggerRef.current?.setPopupVisible(false);
+          }}
+        >
+          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: NIL })}>
+            <IconAlignLeft />
+          </div>
+          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: "center" })}>
+            <IconAlignCenter />
+          </div>
+          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: "right" })}>
+            <IconAlignRight />
+          </div>
+          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: "justify" })}>
+            <JustifyIcon />
+          </div>
+        </div>
+      )}
+    >
+      <div className="menu-toolbar-item">
+        {MAP[keys[ALIGN_KEY]] || <IconAlignLeft />}
+        <IconDown className="menu-toolbar-icon-down" />
+      </div>
+    </Trigger>
+  );
+};

@@ -20,11 +20,9 @@
     }
   }
 
-  .menu-toolbar-cut {
-    background-color: var(--color-fill-3);
-    box-sizing: border-box;
-    margin: 4px 6px;
-    width: 1px;
+  .menu-toolbar-icon-down {
+    font-size: 12px;
+    margin-left: 3px;
   }
 }
 
@@ -35,10 +33,15 @@
     align-items: center;
     cursor: pointer;
     display: flex;
+    font-size: 12px;
     height: 30px;
     justify-content: center;
     margin: 5px;
-    min-width: 50px;
+    width: 70px;
+
+    > .arco-icon {
+      font-size: 13px;
+    }
 
     &:hover {
       background-color: var(--color-fill-2);

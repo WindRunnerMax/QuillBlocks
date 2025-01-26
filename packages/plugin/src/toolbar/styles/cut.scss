@@ -1,0 +1,10 @@
+@import '../../shared/styles/variable';
+
+.block-kit-menu-toolbar {
+  .menu-toolbar-cut {
+    background-color: var(--color-fill-3);
+    box-sizing: border-box;
+    margin: 4px 6px;
+    width: 1px;
+  }
+}
