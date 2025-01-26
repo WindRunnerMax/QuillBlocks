@@ -11,6 +11,7 @@ export {
   isMatchBlockTag,
   isMatchHTMLTag,
 } from "./clipboard/utils/deserialize";
+export { getFirstUnicodeLen, getLastUnicodeLen } from "./collect/utils/string";
 export { Editor } from "./editor";
 export type { EventMapKeys } from "./event/bus/types";
 export type { ContentChangeEvent, SelectionChangeEvent } from "./event/bus/types";

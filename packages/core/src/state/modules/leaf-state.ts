@@ -1,4 +1,5 @@
 import type { Op } from "block-kit-delta";
+import type { InsertOp } from "block-kit-delta";
 import { EOL } from "block-kit-delta";
 import { isNil } from "block-kit-utils";
 
@@ -81,6 +82,22 @@ export class LeafState {
     const start = new Point(this.parent.index, this.offset);
     const end = new Point(this.parent.index, this.offset + this.length);
     return new Range(start, end);
+  }
+
+  /**
+   * 裁剪当前 op
+   * @param index
+   * @param forward [?=false]
+   */
+  public sliceOp(index: number, forward = false): InsertOp {
+    const text = this.getText();
+    const op: InsertOp = {
+      insert: forward ? text.slice(index, text.length) : text.slice(0, index),
+    };
+    if (this.op.attributes) {
+      op.attributes = this.op.attributes;
+    }
+    return op;
   }
 
   /**

@@ -1,6 +1,7 @@
 import type { AttributeMap } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
 
+import { getFirstUnicodeLen, getLastUnicodeLen } from "../collect/utils/string";
 import type { Editor } from "../editor";
 import { Point } from "../selection/modules/point";
 import { Range } from "../selection/modules/range";
@@ -55,9 +56,11 @@ export class Perform {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
-    const start = raw.start - 1;
+    const op = this.editor.collect.getBackwardOpAtPoint(sel.start);
+    const len = getLastUnicodeLen(op && op.insert);
+    const start = raw.start - len;
     if (start < 0) return void 0;
-    const delta = new Delta().retain(start).delete(1);
+    const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
   }
 
@@ -70,8 +73,10 @@ export class Perform {
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const start = raw.start;
+    const op = this.editor.collect.getForwardOpAtPoint(sel.start);
+    const len = getFirstUnicodeLen(op && op.insert);
     if (start < 0) return void 0;
-    const delta = new Delta().retain(start).delete(1);
+    const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
   }
 
