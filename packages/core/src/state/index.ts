@@ -89,7 +89,7 @@ export class EditorState {
    * @param options
    */
   public apply(delta: Delta, options: ApplyOptions = {}): ApplyResult {
-    const { source = "user" } = options;
+    const { source = "user", autoCaret = true } = options;
     const previous = this.toBlockSet();
     this._delta = null;
 
@@ -107,7 +107,7 @@ export class EditorState {
     this.block.updateLines(newLines);
 
     // 更新选区位置
-    if (raw) {
+    if (autoCaret && raw) {
       const start = delta.transformPosition(raw.start);
       const end = raw.len ? delta.transformPosition(raw.start + raw.len) : start;
       const range = Range.fromRaw(this.editor, new RawRange(start, end - start));

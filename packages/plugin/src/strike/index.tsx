@@ -49,6 +49,9 @@ export class StrikePlugin extends EditorPlugin {
   }
 
   public render(context: ReactLeafContext): ReactNode {
-    return <del>{context.children}</del>;
+    context.style.textDecoration = context.style.textDecoration
+      ? context.style.textDecoration + " line-through"
+      : "line-through";
+    return context.children;
   }
 }

@@ -4,7 +4,7 @@ import { Editor } from "../../src/editor";
 import { Point } from "../../src/selection/modules/point";
 import { Range } from "../../src/selection/modules/range";
 
-describe("perform marks", () => {
+describe("perform line-marks", () => {
   it("signal line", () => {
     const delta = new Delta()
       .insert("text")

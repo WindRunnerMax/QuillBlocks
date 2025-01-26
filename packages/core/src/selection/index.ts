@@ -101,7 +101,7 @@ export class Selection {
   /**
    * 更新选区模型
    * @param range
-   * @param force
+   * @param force [?false]
    */
   public set(range: Range | null, force = false): void {
     if (Range.isEqual(this.current, range)) {

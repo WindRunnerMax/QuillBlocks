@@ -45,7 +45,9 @@ export class UnderlinePlugin extends EditorPlugin {
   }
 
   public render(context: ReactLeafContext): ReactNode {
-    context.style.textDecoration = "underline";
+    context.style.textDecoration = context.style.textDecoration
+      ? context.style.textDecoration + " underline"
+      : "underline";
     return context.children;
   }
 }

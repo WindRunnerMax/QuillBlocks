@@ -26,6 +26,7 @@ export const APPLY_SOURCE = {
 export type ApplyOptions = {
   source?: O.Values<typeof APPLY_SOURCE>;
   range?: RawRange;
+  autoCaret?: boolean;
 };
 
 export type ApplyResult = {

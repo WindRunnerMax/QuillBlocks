@@ -1,11 +1,9 @@
 import type { AttributeMap } from "block-kit-delta";
-import { Delta, EOL } from "block-kit-delta";
-import { NIL } from "block-kit-utils";
-import type { P } from "block-kit-utils/dist/es/types";
+import { Delta } from "block-kit-delta";
 
 import type { Editor } from "../editor";
 import { Point } from "../selection/modules/point";
-import type { Range } from "../selection/modules/range";
+import { Range } from "../selection/modules/range";
 import { RawPoint } from "../selection/modules/raw-point";
 import { RawRange } from "../selection/modules/raw-range";
 
@@ -28,7 +26,7 @@ export class Perform {
     const leaf = this.editor.collect.getLeafAtPoint(point);
     if (leaf && leaf.block && leaf.block) return void 0;
     // 节点的尾部判断
-    const isLeafTail = leaf ? point.offset - leaf.offset - leaf.length >= 0 : false;
+    const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
     const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });
@@ -84,36 +82,38 @@ export class Perform {
    */
   public insertBreak(sel: Range, attributes?: AttributeMap) {
     const raw = RawRange.fromRange(this.editor, sel);
-    if (!raw) return void 0;
-    let attrs: AttributeMap | P.Undef = void 0;
     const block = this.editor.state.block;
-    const state = block.getLine(sel.start.line);
-    // COMPAT: 折叠选区状态且非行首情况下, 复制行属性到当前插入的行
-    // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1})
-    if (sel.isCollapsed && state && sel.start.offset) {
-      attrs = state.attributes;
-      const lineOffset = state.length - 1;
-      // 如果此时光标在行末, 则需要将 NextLine 的属性移除
-      if (sel.start.offset === lineOffset && attrs) {
-        const nextAttrs = attributes || {};
-        Object.keys(attrs).forEach(key => (nextAttrs[key] = NIL));
-        attributes = nextAttrs;
-      }
-    }
+    const startLine = block.getLine(sel.start.line);
+    const endLine = block.getLine(sel.end.line);
+    if (!raw || !startLine || !endLine) return void 0;
     const start = raw.start;
     const len = raw.len;
-    if (start < 0) return void 0;
     const delta = new Delta().retain(start);
     len && delta.delete(len);
-    delta.insert(EOL, attrs);
-    // COMPAT: 如果存在预设的属性 则需要合并到拆分的行属性中
-    // x|x(\n {y:1}) => x(\n {y:1})x(\n {y:1 & attributes})
-    if (sel.isCollapsed && attributes && state) {
-      const nextAttrs = attributes;
-      const lineOffset = state.length - 1;
-      delta.retain(lineOffset - sel.start.offset).retain(1, nextAttrs);
+    let point: Point | null = null;
+    if (start === startLine.start) {
+      // 当光标在行首时, 直接移动行属性
+      // |xx(\n {y:1}) => (\n)|xx(\n {y:1})
+      delta.insertEOL();
+      const lineOffset = endLine.length - 1;
+      delta.retain(lineOffset - sel.end.offset).retain(1, attributes);
+      point = new Point(sel.start.line + 1, 0);
+    } else if (start === startLine.start + startLine.length - 1) {
+      // 当光标在行尾时, 将行属性保留在当前行
+      // xx|(\n {y:1}) => xx(\n {y:1})(\n attributes)
+      delta.retain(1).insertEOL(attributes);
+      point = new Point(sel.start.line + 1, 0);
+    } else {
+      // 当光标在行中时, 将行属性保留在当前行, 下一行合并新属性
+      // x|x(\n {y:1}) => xx(\n {y:1})(\n {y:1} & attributes)
+      delta.insertEOL(startLine.attributes);
+      const lineOffset = endLine.length - 1;
+      const attrs = { ...startLine.attributes, ...attributes };
+      delta.retain(lineOffset - sel.end.offset).retain(1, attrs);
     }
-    this.editor.state.apply(delta, { range: raw });
+    // FIX: 跨行 \n 的 delta 会越过当前的 sel, 因此需要手动校准
+    this.editor.state.apply(delta, { range: raw, autoCaret: !point });
+    point && this.editor.selection.set(new Range(point, point.clone()));
   }
 
   /**

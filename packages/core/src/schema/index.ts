@@ -58,9 +58,10 @@ export class Schema {
 
   /**
    * 过滤需要追踪的属性
-   * @param op
+   * @param op 操作
+   * @param isLeafTail 是否在节点尾部
    */
-  public filterTailMark(op: Op | null, isLeafTail: boolean): AttributeMap | undefined {
+  public filterTailMark(op: Op | null, isLeafTail: boolean | null): AttributeMap | undefined {
     if (!op || !op.attributes || isEOLOp(op)) return void 0;
     const keys = Object.keys(op.attributes);
     const result: AttributeMap = {};
