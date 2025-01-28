@@ -6,11 +6,17 @@ import type { BlockDeltaOption } from "./interface";
 import { BLOCK_TYPE } from "./interface";
 
 export class BlockDelta extends Delta {
+  /** Block 标识 */
   public readonly blockId: string;
+  /** Block 类型 */
   public readonly blockType: string;
 
+  /**
+   * 构造函数
+   * @param options
+   */
   constructor(options?: BlockDeltaOption) {
-    const { ops = [], blockId = getId(), blockType = BLOCK_TYPE.Z } = options || {};
+    const { ops = [], blockId = getId(), blockType = BLOCK_TYPE.C } = options || {};
     super(ops);
     this.blockId = blockId;
     this.blockType = blockType;

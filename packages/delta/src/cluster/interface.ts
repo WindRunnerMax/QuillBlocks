@@ -1,9 +1,8 @@
 import type { Ops } from "../delta/interface";
 
 export const BLOCK_TYPE = {
-  C: "C", // Col
-  R: "R", // Row
-  Z: "Z", // Block
+  L: "L", // List
+  C: "C", // Content
 } as const;
 
 export type BlockDeltaOption = {

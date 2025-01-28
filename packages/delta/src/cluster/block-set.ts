@@ -4,8 +4,13 @@ import { BlockDelta } from "./block-delta";
 import type { BlockSetOption } from "./interface";
 
 export class BlockSet {
+  /** 内建值 */
   protected _blocks: Record<string, BlockDelta>;
 
+  /**
+   * 构造函数
+   * @param blocks
+   */
   constructor(blocks: BlockSetOption = {}) {
     this._blocks = Object.keys(blocks).reduce(
       (acc, blockId) => ({ ...acc, [blockId]: new BlockDelta(blocks[blockId]) }),
@@ -82,7 +87,7 @@ export class BlockSet {
 
   /**
    * 克隆对象
-   * @param deep 是否深拷贝
+   * @param deep [?=undefined] 是否深拷贝
    */
   public clone(deep?: boolean): BlockSet {
     const newBlockSet = new BlockSet();

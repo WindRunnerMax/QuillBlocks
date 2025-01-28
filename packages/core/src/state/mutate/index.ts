@@ -3,6 +3,7 @@ import type { InsertOp } from "block-kit-delta";
 import {
   cloneOp,
   composeAttributes,
+  EOL_OP,
   isDeleteOp,
   isEOLOp,
   isEqualAttributes,
@@ -161,6 +162,10 @@ export class Mutate {
         thisLeaf && this.deletes.push(thisLeaf.op as InsertOp);
         continue;
       }
+    }
+    // 当行状态存在值或者当前没有行时, 补齐行数据内容
+    if (lineState.getLeaves().length || !this.newLines.length) {
+      this.insert(lineState, new LeafState(cloneOp(EOL_OP), 0, lineState));
     }
     return this.newLines;
   }

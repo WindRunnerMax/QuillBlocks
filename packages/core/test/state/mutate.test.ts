@@ -110,4 +110,30 @@ describe("state mutate", () => {
     expect(newLeaf1).toBeTruthy();
     expect(newLeaf1).not.toEqual(leafStateText2);
   });
+
+  it("delete tail eol", () => {
+    const changes = new Delta().retain(14).delete(1);
+    const mutate = new Mutate(state);
+    const newLines = mutate.compose(changes);
+    const ops: Ops = [];
+    newLines.forEach(line => ops.push(...line.getOps()));
+    expect(newLines.length).toBe(2);
+    const newLineState1 = newLines[0];
+    const newLineState2 = newLines[1];
+    expect(lineState1).toBe(newLineState1);
+    expect(newLineState1.getLeaf(0)).toBe(leafStateText1);
+    expect(newLineState1.getLeaf(1)).toBe(leafStateText2);
+    expect(newLineState1.getLeaf(2)).toBe(leafStateEOL1);
+    expect(lineState2).not.toBe(newLineState2);
+    expect(newLineState2.getLeaf(0)).toBe(leafStateText3);
+    expect(newLineState2.getLeaf(1)).not.toBe(leafStateEOL2);
+  });
+
+  it("delete whole content", () => {
+    const changes = new Delta().delete(15);
+    const mutate = new Mutate(state);
+    const newLines = mutate.compose(changes);
+    expect(newLines.length).toBe(1);
+    expect(newLines[0].getLeaf(0)?.op).toEqual({ insert: "\n" });
+  });
 });
