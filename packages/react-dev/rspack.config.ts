@@ -20,6 +20,10 @@ const config: Configuration = {
   entry: {
     index: "./src/index.tsx",
   },
+  externals: {
+    "react": "React",
+    "react-dom": "ReactDOM",
+  },
   plugins: [
     new CopyPlugin([{ from: "./public", to: "./" }]),
     new HtmlPlugin({

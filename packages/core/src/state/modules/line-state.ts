@@ -43,6 +43,10 @@ export class LineState {
     this.key = Key.getId(this);
     this._leafToIndex = new WeakMap();
     this._initFromDelta(delta);
+    if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+      // 在开发模式和测试环境下冻结, 避免 immutable 的对象被修改
+      Object.freeze(this.attributes);
+    }
   }
 
   /**

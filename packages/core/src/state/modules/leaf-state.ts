@@ -34,6 +34,11 @@ export class LeafState {
     this.block = editor.schema.isBlock(op);
     this.inline = editor.schema.isInline(op);
     this.length = op.insert ? op.insert.length : 0;
+    if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+      // 在开发模式和测试环境下冻结, 避免 immutable 的对象被修改
+      Object.freeze(this.op);
+      Object.freeze(this.op.attributes);
+    }
   }
 
   /**
@@ -45,7 +50,7 @@ export class LeafState {
 
   /**
    * 获取前一个 LeafState
-   * @param span [span=true] 跨行
+   * @param span [?=true] 跨行
    */
   public prev(span = true) {
     const index = this.parent._leafToIndex.get(this);
@@ -61,7 +66,7 @@ export class LeafState {
 
   /**
    * 获取下一个 LeafState
-   * @param span [span=true] 跨行
+   * @param span [?=true] 跨行
    */
   public next(span = true) {
     const index = this.parent._leafToIndex.get(this);
