@@ -1,7 +1,13 @@
 export { AlignPlugin } from "./align";
 export { ALIGN_KEY } from "./align/types";
+export { BackgroundPlugin } from "./background";
+export { BACKGROUND_KEY } from "./background/types";
 export { BoldPlugin } from "./bold";
 export { BOLD_KEY } from "./bold/types";
+export { FontColorPlugin } from "./font-color";
+export { FONT_COLOR_KEY } from "./font-color/types";
+export { FontSizePlugin } from "./font-size";
+export { FONT_SIZE_KEY } from "./font-size/types";
 export { HeadingPlugin } from "./heading/index";
 export { HEADING_KEY } from "./heading/types";
 export { ImagePlugin } from "./image/index";

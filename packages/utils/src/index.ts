@@ -29,6 +29,7 @@ export {
   Object,
   ROOT_BLOCK,
   sleep,
+  Styles,
   TSON,
   useMemoFn,
 } from "laser-utils";

@@ -6,6 +6,7 @@ import { Delta } from "block-kit-delta";
 import {
   AlignPlugin,
   BoldPlugin,
+  FontSizePlugin,
   HeadingPlugin,
   ImagePlugin,
   InlineCodePlugin,
@@ -38,7 +39,8 @@ const App: FC = () => {
       new InlineCodePlugin(instance),
       new HeadingPlugin(instance),
       new AlignPlugin(instance),
-      new LineHeightPlugin(instance)
+      new LineHeightPlugin(instance),
+      new FontSizePlugin(instance)
     );
     return instance;
   }, []);
@@ -54,19 +56,20 @@ const App: FC = () => {
     <BlockKit editor={editor}>
       <div className="block-kit-editor-container">
         <Toolbar className="block-kit-toolbar">
-          <Toolbar.Heading></Toolbar.Heading>
           <Toolbar.Bold></Toolbar.Bold>
           <Toolbar.Italic></Toolbar.Italic>
           <Toolbar.Underline></Toolbar.Underline>
           <Toolbar.Strike></Toolbar.Strike>
           <Toolbar.InlineCode></Toolbar.InlineCode>
+          <Toolbar.FontSize></Toolbar.FontSize>
           <Toolbar.Cut></Toolbar.Cut>
+          <Toolbar.Heading></Toolbar.Heading>
           <Toolbar.Align></Toolbar.Align>
           <Toolbar.LineHeight></Toolbar.LineHeight>
           <Toolbar.Cut></Toolbar.Cut>
           <GitHubIcon></GitHubIcon>
         </Toolbar>
-        <Editable className="block-kit-editable"></Editable>
+        <Editable autoFocus className="block-kit-editable"></Editable>
       </div>
     </BlockKit>
   );
