@@ -1,7 +1,7 @@
 import type { FC, PropsWithChildren } from "react";
 import React from "react";
 
-import { stopReactEvent } from "../utils/event";
+import { preventReactEvent } from "../utils/event";
 
 export type IsolateProps = PropsWithChildren<{
   className?: string;
@@ -19,8 +19,8 @@ export const Isolate: FC<IsolateProps> = props => {
       className={props.className}
       style={{ userSelect: "none", ...props.style }}
       contentEditable={false}
-      onMouseDown={stopReactEvent}
-      onCopy={stopReactEvent}
+      onMouseDown={preventReactEvent}
+      onCopy={preventReactEvent}
     >
       {props.children}
     </span>

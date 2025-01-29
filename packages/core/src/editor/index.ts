@@ -81,7 +81,7 @@ export class Editor {
    * 挂载编辑器
    * @param container
    */
-  public onMount(container: HTMLDivElement) {
+  public onMount(this: Editor, container: HTMLDivElement) {
     if (this.state.get(EDITOR_STATE.MOUNTED)) {
       console.warn("Editor has been mounted, please destroy it before mount again.");
     }
@@ -94,7 +94,7 @@ export class Editor {
    * 获取编辑器容器
    * @returns
    */
-  public getContainer() {
+  public getContainer(this: Editor) {
     if (!this.container) {
       const div = document.createElement("div");
       div.setAttribute("data-type", "mock");
@@ -106,7 +106,7 @@ export class Editor {
   /**
    * 销毁编辑器
    */
-  public destroy() {
+  public destroy(this: Editor) {
     this.event.unbind();
     this.input.destroy();
     this.model.destroy();

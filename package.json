@@ -5,6 +5,7 @@
   "scripts": {
     "bootstrap": "pnpm install --frozen-lockfile",
     "dev": "pnpm run --filter ./packages/react-dev dev",
+    "build": "pnpm run --filter '*' build",
     "test": "pnpm run --filter '*' test"
   },
   "repository": {

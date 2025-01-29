@@ -2,6 +2,7 @@ import "./styles/index.scss";
 
 import { EDITOR_EVENT } from "block-kit-core";
 import type { Op } from "block-kit-delta";
+import { useEditorStatic } from "block-kit-react";
 import { cs, useMemoFn } from "block-kit-utils";
 import { useEffect, useState } from "react";
 
@@ -19,22 +20,22 @@ import type { ToolbarProps } from "./types";
 import { filterLineMarkMap, filterMarkMap } from "./utils/marks";
 
 export const Toolbar = (props: ToolbarProps) => {
-  const { editor } = props;
+  const { editor } = useEditorStatic();
   const [keys, setKeys] = useState<Record<string, string>>({});
 
   const refreshMarks = useMemoFn(() => {
-    const current = props.editor.selection.get();
+    const current = editor.selection.get();
     if (!current) return setKeys({});
     const ops: Op[] = [];
     if (current.isCollapsed) {
       const op = editor.collect.getOpAtPoint(current.start);
       op && ops.push(op);
     } else {
-      const fragment = props.editor.collect.getFragment();
+      const fragment = editor.collect.getFragment();
       fragment && ops.push(...fragment);
     }
     const markMap = filterMarkMap(ops);
-    const lines = props.editor.state.block.getLines();
+    const lines = editor.state.block.getLines();
     const { start, end } = current;
     const lineMarkMap = filterLineMarkMap(
       lines.slice(start.line, end.line + 1).map(line => line.attributes)
@@ -43,11 +44,11 @@ export const Toolbar = (props: ToolbarProps) => {
   });
 
   useEffect(() => {
-    props.editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, refreshMarks);
+    editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, refreshMarks);
     return () => {
-      props.editor.event.off(EDITOR_EVENT.SELECTION_CHANGE, refreshMarks);
+      editor.event.off(EDITOR_EVENT.SELECTION_CHANGE, refreshMarks);
     };
-  }, [props.editor.event, refreshMarks]);
+  }, [editor.event, refreshMarks]);
 
   return (
     <div

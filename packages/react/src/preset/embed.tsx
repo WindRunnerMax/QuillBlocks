@@ -4,7 +4,7 @@ import { Point } from "block-kit-core";
 import type { FC, PropsWithChildren } from "react";
 import React from "react";
 
-import { useEditor } from "../hooks/use-editor";
+import { useEditorStatic } from "../hooks/use-editor";
 import type { ReactLeafContext } from "../plugin";
 import { ZeroSpace } from "./zero";
 
@@ -21,7 +21,7 @@ export type EmbedProps = PropsWithChildren<{
  */
 export const Embed: FC<EmbedProps> = props => {
   const { context } = props;
-  const editor = useEditor();
+  const { editor } = useEditorStatic();
   const leaf = context.leafState;
 
   const onMouseDown = () => {

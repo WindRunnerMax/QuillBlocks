@@ -1,4 +1,4 @@
-export { useEditor } from "./hooks/use-editor";
+export { BlockKit, BlockKitContext, useEditorStatic } from "./hooks/use-editor";
 export { BlockModel } from "./model/block";
 export { EOLModel } from "./model/eol";
 export { LeafModel } from "./model/leaf";
