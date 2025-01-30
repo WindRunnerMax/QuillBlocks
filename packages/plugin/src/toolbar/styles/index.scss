@@ -18,6 +18,11 @@
       background-color: var(--color-fill-2);
       color: var(--color-text-1);
     }
+
+    &.disable {
+      background-color: unset;
+      color: var(--color-text-3);
+    }
   }
 
   .menu-toolbar-icon-down {

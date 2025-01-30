@@ -1,5 +1,7 @@
 import "../styles/cut.scss";
 
-export const Cut = () => {
+import type { FC } from "react";
+
+export const Cut: FC = () => {
   return <div className="menu-toolbar-cut"></div>;
 };

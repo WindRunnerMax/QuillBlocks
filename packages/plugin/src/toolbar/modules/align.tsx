@@ -7,6 +7,7 @@ import {
 } from "@arco-design/web-react/icon";
 import { NIL } from "block-kit-utils";
 import type { O } from "block-kit-utils/dist/es/types";
+import type { FC } from "react";
 import { useRef } from "react";
 
 import { ALIGN_KEY } from "../../align/types";
@@ -20,7 +21,7 @@ const MAP: O.Map<JSX.Element> = {
   justify: <JustifyIcon />,
 };
 
-export const Align = () => {
+export const Align: FC = () => {
   const triggerRef = useRef<Trigger>(null);
   const { keys, refreshMarks, editor } = useToolbarContext();
 

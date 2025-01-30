@@ -1,10 +1,11 @@
 import { IconBold } from "@arco-design/web-react/icon";
 import { cs, NIL, TRUE } from "block-kit-utils";
+import type { FC } from "react";
 
 import { BOLD_KEY } from "../../bold/types";
 import { useToolbarContext } from "../context/provider";
 
-export const Bold = () => {
+export const Bold: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();
 
   return (

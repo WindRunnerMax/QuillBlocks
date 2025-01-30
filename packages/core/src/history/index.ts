@@ -166,14 +166,14 @@ export class History {
   /**
    * undoable
    */
-  public undoable() {
+  public isUndoAble() {
     return this.undoStack.length > 0;
   }
 
   /**
    * redoable
    */
-  public redoable() {
+  public isRedoAble() {
     return this.redoStack.length > 0;
   }
 

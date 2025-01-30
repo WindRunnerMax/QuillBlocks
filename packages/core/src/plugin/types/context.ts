@@ -6,14 +6,28 @@ import type { Properties } from "csstype";
 import type { LeafState } from "../../state/modules/leaf-state";
 import type { LineState } from "../../state/modules/line-state";
 
+/**
+ * 包装行状态
+ */
+export type WrapperContext = {
+  attributes: AttributeMap;
+  children?: P.Any;
+};
+
+/**
+ * 行状态
+ */
 export type LineContext = {
   classList: string[];
   lineState: LineState;
-  attributes?: AttributeMap;
+  attributes: AttributeMap;
   style: Properties<string | number>;
   children?: P.Any;
 };
 
+/**
+ * 叶子状态
+ */
 export type LeafContext = {
   op: Op;
   classList: string[];

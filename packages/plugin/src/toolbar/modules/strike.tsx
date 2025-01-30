@@ -1,10 +1,11 @@
 import { IconStrikethrough } from "@arco-design/web-react/icon";
 import { cs, NIL, TRUE } from "block-kit-utils";
+import type { FC } from "react";
 
 import { STRIKE_KEY } from "../../strike/types";
 import { useToolbarContext } from "../context/provider";
 
-export const Strike = () => {
+export const Strike: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();
 
   return (

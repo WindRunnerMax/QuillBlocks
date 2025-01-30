@@ -3,6 +3,7 @@ import "../styles/line-height.scss";
 import { Trigger } from "@arco-design/web-react";
 import { IconCheck, IconDown } from "@arco-design/web-react/icon";
 import { NIL } from "block-kit-utils";
+import type { FC } from "react";
 import { useRef } from "react";
 
 import { FONT_SIZE_KEY } from "../../font-size/types";
@@ -13,7 +14,7 @@ const STEP = Array(10)
   .fill(null)
   .map((_, i) => String(i + 12));
 
-export const FontSize = () => {
+export const FontSize: FC = () => {
   const triggerRef = useRef<Trigger>(null);
   const { keys, refreshMarks, editor } = useToolbarContext();
 

@@ -7,7 +7,7 @@ import type {
   PasteContext,
   SerializeContext,
 } from "../../clipboard/types";
-import type { LeafContext, LineContext } from "../types/context";
+import type { LeafContext, LineContext, WrapperContext } from "../types/context";
 
 export abstract class CorePlugin {
   /**
@@ -20,7 +20,7 @@ export abstract class CorePlugin {
   public abstract destroy(): void;
   /**
    * 叶子节点匹配插件
-   * - 与 render 方法匹配使用
+   * - 与 render/renderLine/renderWrapper 方法匹配使用
    * */
   public abstract match(attrs: AttributeMap, op: Op): boolean;
   /**
@@ -33,6 +33,11 @@ export abstract class CorePlugin {
    * - 调度优先级值越大 DOM 结构在越外层
    */
   public render?(context: LeafContext): P.Any;
+  /**
+   * 渲染包装行节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public renderWrapper?(context: WrapperContext): P.Any;
   /**
    * 将 Fragment(Delta) 序列化为 HTML
    */

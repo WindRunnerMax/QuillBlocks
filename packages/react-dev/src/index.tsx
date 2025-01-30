@@ -67,6 +67,8 @@ const App: FC = () => {
           <Toolbar.Align></Toolbar.Align>
           <Toolbar.LineHeight></Toolbar.LineHeight>
           <Toolbar.Cut></Toolbar.Cut>
+          <Toolbar.History></Toolbar.History>
+          <Toolbar.Cut></Toolbar.Cut>
           <GitHubIcon></GitHubIcon>
         </Toolbar>
         <Editable autoFocus className="block-kit-editable"></Editable>

@@ -1,10 +1,11 @@
 import { IconUnderline } from "@arco-design/web-react/icon";
 import { cs, NIL, TRUE } from "block-kit-utils";
+import type { FC } from "react";
 
 import { UNDERLINE_KEY } from "../../underline/types";
 import { useToolbarContext } from "../context/provider";
 
-export const Underline = () => {
+export const Underline: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();
 
   return (

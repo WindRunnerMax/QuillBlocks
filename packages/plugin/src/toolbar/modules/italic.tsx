@@ -1,10 +1,11 @@
 import { IconItalic } from "@arco-design/web-react/icon";
 import { cs, NIL, TRUE } from "block-kit-utils";
+import type { FC } from "react";
 
 import { ITALIC_KEY } from "../../italic/types";
 import { useToolbarContext } from "../context/provider";
 
-export const Italic = () => {
+export const Italic: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();
 
   return (

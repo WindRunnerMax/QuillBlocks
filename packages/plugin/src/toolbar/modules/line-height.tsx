@@ -3,6 +3,7 @@ import "../styles/line-height.scss";
 import { Trigger } from "@arco-design/web-react";
 import { IconCheck, IconDown } from "@arco-design/web-react/icon";
 import { NIL } from "block-kit-utils";
+import type { FC } from "react";
 import { useRef } from "react";
 
 import { LINE_HEIGHT_KEY } from "../../line-height/types";
@@ -13,7 +14,7 @@ const STEP = [...Array.from({ length: 10 }, (_, i) => (i + 1) * 0.1 + 1), 2.5, 3
   v.toFixed(1).toString()
 );
 
-export const LineHeight = () => {
+export const LineHeight: FC = () => {
   const triggerRef = useRef<Trigger>(null);
   const { keys, refreshMarks, editor } = useToolbarContext();
 
