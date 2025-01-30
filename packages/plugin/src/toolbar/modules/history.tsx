@@ -7,7 +7,7 @@ import { Fragment, useEffect, useState } from "react";
 import { useToolbarContext } from "../context/provider";
 
 export const History: FC = () => {
-  const { editor } = useToolbarContext();
+  const { editor, refreshMarks } = useToolbarContext();
   const [undoable, setUndoable] = useState(false);
   const [redoable, setRedoable] = useState(false);
 
@@ -25,10 +25,12 @@ export const History: FC = () => {
 
   const undo = () => {
     editor.history.undo();
+    refreshMarks();
   };
 
   const redo = () => {
     editor.history.redo();
+    refreshMarks();
   };
 
   return (

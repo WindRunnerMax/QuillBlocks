@@ -5,6 +5,7 @@ import { Editor, LOG_LEVEL } from "block-kit-core";
 import { Delta } from "block-kit-delta";
 import {
   AlignPlugin,
+  BackgroundPlugin,
   BoldPlugin,
   FontSizePlugin,
   HeadingPlugin,
@@ -17,6 +18,7 @@ import {
   Toolbar,
   UnderlinePlugin,
 } from "block-kit-plugin";
+import { FontColorPlugin } from "block-kit-plugin";
 import { BlockKit, Editable } from "block-kit-react";
 import type { FC } from "react";
 import { useEffect, useMemo } from "react";
@@ -40,7 +42,9 @@ const App: FC = () => {
       new HeadingPlugin(instance),
       new AlignPlugin(instance),
       new LineHeightPlugin(instance),
-      new FontSizePlugin(instance)
+      new FontSizePlugin(instance),
+      new FontColorPlugin(instance),
+      new BackgroundPlugin(instance)
     );
     return instance;
   }, []);
@@ -62,6 +66,7 @@ const App: FC = () => {
           <Toolbar.Strike></Toolbar.Strike>
           <Toolbar.InlineCode></Toolbar.InlineCode>
           <Toolbar.FontSize></Toolbar.FontSize>
+          <Toolbar.FontColor></Toolbar.FontColor>
           <Toolbar.Cut></Toolbar.Cut>
           <Toolbar.Heading></Toolbar.Heading>
           <Toolbar.Align></Toolbar.Align>

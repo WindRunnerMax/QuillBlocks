@@ -8,7 +8,6 @@ import {
 import { NIL } from "block-kit-utils";
 import type { O } from "block-kit-utils/dist/es/types";
 import type { FC } from "react";
-import { useRef } from "react";
 
 import { ALIGN_KEY } from "../../align/types";
 import { JustifyIcon } from "../../shared/icons/justify";
@@ -22,31 +21,35 @@ const MAP: O.Map<JSX.Element> = {
 };
 
 export const Align: FC = () => {
-  const triggerRef = useRef<Trigger>(null);
   const { keys, refreshMarks, editor } = useToolbarContext();
 
   return (
     <Trigger
-      ref={triggerRef}
       trigger="click"
       popup={() => (
-        <div
-          className="block-kit-toolbar-dropdown"
-          onClick={() => {
-            refreshMarks();
-            triggerRef.current?.setPopupVisible(false);
-          }}
-        >
-          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: NIL })}>
+        <div className="block-kit-toolbar-dropdown" onClick={refreshMarks}>
+          <div
+            className="kit-toolbar-node"
+            onClick={() => editor.command.exec(ALIGN_KEY, { value: NIL })}
+          >
             <IconAlignLeft />
           </div>
-          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: "center" })}>
+          <div
+            className="kit-toolbar-node"
+            onClick={() => editor.command.exec(ALIGN_KEY, { value: "center" })}
+          >
             <IconAlignCenter />
           </div>
-          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: "right" })}>
+          <div
+            className="kit-toolbar-node"
+            onClick={() => editor.command.exec(ALIGN_KEY, { value: "right" })}
+          >
             <IconAlignRight />
           </div>
-          <div onClick={() => editor.command.exec(ALIGN_KEY, { value: "justify" })}>
+          <div
+            className="kit-toolbar-node"
+            onClick={() => editor.command.exec(ALIGN_KEY, { value: "justify" })}
+          >
             <JustifyIcon />
           </div>
         </div>

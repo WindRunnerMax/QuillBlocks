@@ -1,5 +1,3 @@
-import "../styles/line-height.scss";
-
 import { Trigger } from "@arco-design/web-react";
 import { IconCheck, IconDown } from "@arco-design/web-react/icon";
 import { NIL } from "block-kit-utils";
@@ -23,15 +21,9 @@ export const FontSize: FC = () => {
       ref={triggerRef}
       trigger="click"
       popup={() => (
-        <div
-          className="block-kit-toolbar-dropdown"
-          onClick={() => {
-            refreshMarks();
-            triggerRef.current?.setPopupVisible(false);
-          }}
-        >
+        <div className="block-kit-toolbar-dropdown" onClick={refreshMarks}>
           <div
-            className="block-kit-toolbar-height-item"
+            className="block-kit-toolbar-height-item kit-toolbar-node"
             onClick={() => editor.command.exec(FONT_SIZE_KEY, { value: NIL })}
           >
             {!keys[FONT_SIZE_KEY] && <IconCheck />}
@@ -40,7 +32,7 @@ export const FontSize: FC = () => {
           {STEP.map(item => (
             <div
               key={item}
-              className="block-kit-toolbar-height-item"
+              className="block-kit-toolbar-height-item kit-toolbar-node"
               onClick={() => editor.command.exec(FONT_SIZE_KEY, { value: item })}
             >
               {keys[FONT_SIZE_KEY] === item && <IconCheck />}

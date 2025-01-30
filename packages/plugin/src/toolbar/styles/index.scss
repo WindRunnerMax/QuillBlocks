@@ -34,7 +34,7 @@
 .block-kit-toolbar-dropdown {
   @include frame-region;
 
-  > div {
+  > .kit-toolbar-node {
     align-items: center;
     cursor: pointer;
     display: flex;

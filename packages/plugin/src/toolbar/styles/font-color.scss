@@ -1,0 +1,80 @@
+.block-kit-color-picker {
+  padding: 10px;
+  width: 230px;
+
+  .kit-color-picker-label {
+    font-size: 12px;
+  }
+
+  .kit-picker-group {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 13px;
+    justify-content: space-between;
+    margin: 5px 0;
+  }
+
+  .kit-picker-item-wrapper {
+    border-color: transparent;
+    border-radius: 3px;
+    border-style: solid;
+    border-width: 1px;
+    flex-shrink: 0;
+
+    &.active {
+      border-color: rgb(var(--arcoblue-6));
+    }
+  }
+
+  .kit-picker-item {
+    align-items: center;
+    border: 1px solid var(--color-border-1);
+    border-radius: 3px;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    height: 22px;
+    justify-content: center;
+    width: 22px;
+  }
+
+  .kit-picker-background-case {
+    .kit-picker-item-wrapper {
+      margin-right: 3px;
+      margin-top: 4px;
+    }
+
+    .kit-picker-item {
+      border-color: transparent;
+    }
+
+    .kit-picker-item-empty-background {
+      border-color: var(--color-border-2);
+      overflow: hidden;
+      position: relative;
+
+      &::before {
+        background-color: var(--color-border-3);
+        content: '';
+        height: 33px;
+        left: 7px;
+        position: absolute;
+        top: -9px;
+        transform: rotate(-45deg);
+        width: 1px;
+        z-index: 2;
+      }
+    }
+  }
+}
+
+.menu-toolbar-item.kit-color-case {
+  align-items: center;
+  display: flex;
+  padding: 3px 2px;
+
+  .kit-color-block {
+    border-radius: 3px;
+    padding: 0 5px;
+  }
+}
