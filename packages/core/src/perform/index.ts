@@ -26,9 +26,12 @@ export class Perform {
     const point = sel.start;
     const leaf = this.editor.collect.getLeafAtPoint(point);
     if (leaf && leaf.block && leaf.block) return void 0;
-    // 节点的尾部判断
-    const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
-    const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
+    let attributes: AttributeMap | undefined = this.editor.collect.marks;
+    if (!sel.isCollapsed) {
+      // 非折叠选区时, 需要以 start 起始判断该节点的尾部 marks
+      const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
+      attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
+    }
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });
   }
@@ -139,7 +142,13 @@ export class Perform {
    * @param attributes
    */
   public applyMarks(sel: Range, attributes: AttributeMap) {
-    if (sel.isCollapsed) return void 0;
+    if (sel.isCollapsed) {
+      this.editor.collect.marks = {
+        ...this.editor.collect.marks,
+        ...attributes,
+      };
+      return void 0;
+    }
     const { start, end } = sel;
     const block = this.editor.state.block;
     const startLine = block.getLine(start.line);

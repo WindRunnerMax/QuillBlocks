@@ -28,7 +28,14 @@ export const Toolbar = (props: ToolbarProps) => {
 
   const refreshMarks = useMemoFn(() => {
     const current = editor.selection.get();
-    if (!current) return setKeys({});
+    if (!current) {
+      setKeys({});
+      return void 0;
+    }
+    if (current.isCollapsed) {
+      setKeys({ ...editor.collect.marks });
+      return void 0;
+    }
     const ops: Op[] = [];
     if (current.isCollapsed) {
       const op = editor.collect.getOpAtPoint(current.start);

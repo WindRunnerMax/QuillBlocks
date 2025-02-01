@@ -111,6 +111,7 @@ export class Editor {
     this.input.destroy();
     this.model.destroy();
     this.plugin.destroy();
+    this.collect.destroy();
     this.selection.destroy();
     this.history.destroy();
     this.clipboard.destroy();

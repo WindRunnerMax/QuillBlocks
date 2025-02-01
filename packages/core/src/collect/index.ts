@@ -1,18 +1,33 @@
-import type { Op } from "block-kit-delta";
+import type { AttributeMap, Op } from "block-kit-delta";
 import type { InsertOp } from "block-kit-delta";
 import { getOpLength } from "block-kit-delta";
+import { Bind } from "block-kit-utils";
 
 import type { Editor } from "../editor";
+import type { SelectionChangeEvent } from "../event/bus/types";
+import { EDITOR_EVENT } from "../event/bus/types";
 import type { Point } from "../selection/modules/point";
 import type { Range } from "../selection/modules/range";
 import type { LeafState } from "../state/modules/leaf-state";
 
 export class Collect {
+  /** 选区折叠时的 marks */
+  public marks: AttributeMap = {};
+
   /**
    * 构造函数
    * @param editor
    */
-  constructor(protected editor: Editor) {}
+  constructor(protected editor: Editor) {
+    this.editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, this.onSelectionChange);
+  }
+
+  /**
+   * 销毁模块
+   */
+  public destroy() {
+    this.editor.event.off(EDITOR_EVENT.SELECTION_CHANGE, this.onSelectionChange);
+  }
 
   /**
    * 基于 Point 获取索引位置的 Leaf
@@ -120,5 +135,25 @@ export class Collect {
       index = index - opLength;
     }
     return null;
+  }
+
+  /**
+   * 选区变化
+   * @param event
+   */
+  @Bind
+  protected onSelectionChange(event: SelectionChangeEvent) {
+    const current = event.current;
+    if (!current || !current.isCollapsed) {
+      this.marks = {};
+      return void 0;
+    }
+    const point = current.start;
+    const leaf = this.editor.collect.getLeafAtPoint(point);
+    if (leaf && leaf.block && leaf.block) return void 0;
+    const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
+    const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
+    this.marks = attributes || {};
+    return void 0;
   }
 }

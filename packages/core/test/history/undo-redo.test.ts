@@ -19,8 +19,8 @@ describe("history undo-redo", () => {
     expect(editor.state.toBlockSet()).toEqual(
       new MutateDelta().insert("13").insert("2", { src: "http" }).insertEOL()
     );
-    expect(editor.history.undoable()).toBe(true);
-    expect(editor.history.redoable()).toBe(false);
+    expect(editor.history.isUndoAble()).toBe(true);
+    expect(editor.history.isRedoAble()).toBe(false);
     editor.history.undo();
     expect(editor.state.toBlockSet()).toEqual(
       new MutateDelta().insert("13").insert("2", { src: "blob" }).insertEOL()
@@ -33,7 +33,7 @@ describe("history undo-redo", () => {
     expect(editor.state.toBlockSet()).toEqual(new MutateDelta().insert("1").insertEOL());
     editor.history.undo();
     expect(editor.state.toBlockSet()).toEqual(new MutateDelta().insertEOL());
-    expect(editor.history.undoable()).toBe(false);
+    expect(editor.history.isUndoAble()).toBe(false);
     editor.history.redo();
     expect(editor.state.toBlockSet()).toEqual(new MutateDelta().insert("1").insertEOL());
     editor.history.redo();
@@ -48,7 +48,7 @@ describe("history undo-redo", () => {
     expect(editor.state.toBlockSet()).toEqual(
       new MutateDelta().insert("13").insert("2", { src: "http" }).insertEOL()
     );
-    expect(editor.history.undoable()).toBe(true);
-    expect(editor.history.redoable()).toBe(false);
+    expect(editor.history.isUndoAble()).toBe(true);
+    expect(editor.history.isRedoAble()).toBe(false);
   });
 });
