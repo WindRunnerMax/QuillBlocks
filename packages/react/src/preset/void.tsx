@@ -12,6 +12,7 @@ export type VoidProps = PropsWithChildren<{
   className?: string;
   style?: React.CSSProperties;
   context: ReactLeafContext;
+  Tag?: "span" | "div";
 }>;
 
 /**
@@ -19,7 +20,7 @@ export type VoidProps = PropsWithChildren<{
  * @param props
  */
 export const Void: FC<VoidProps> = props => {
-  const { context } = props;
+  const { context, Tag = "span" } = props;
   const { editor } = useEditorStatic();
   const leaf = context.leafState;
 
@@ -32,7 +33,7 @@ export const Void: FC<VoidProps> = props => {
   return (
     <React.Fragment>
       <ZeroSpace void hide />
-      <span
+      <Tag
         className={props.className}
         style={{ userSelect: "none", ...props.style }}
         contentEditable={false}
@@ -40,7 +41,7 @@ export const Void: FC<VoidProps> = props => {
         onMouseDown={onMouseDown}
       >
         {props.children}
-      </span>
+      </Tag>
     </React.Fragment>
   );
 };

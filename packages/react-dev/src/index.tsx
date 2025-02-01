@@ -7,6 +7,7 @@ import {
   AlignPlugin,
   BackgroundPlugin,
   BoldPlugin,
+  DividerPlugin,
   FontSizePlugin,
   HeadingPlugin,
   ImagePlugin,
@@ -29,6 +30,7 @@ import { INIT } from "./config/block";
 import { schema } from "./config/schema";
 
 const App: FC = () => {
+  const readonly = false;
   const editor = useMemo(() => {
     const instance = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
     instance.plugin.register(
@@ -36,7 +38,7 @@ const App: FC = () => {
       new ItalicPlugin(instance),
       new UnderlinePlugin(instance),
       new StrikePlugin(instance),
-      new ImagePlugin(instance, false),
+      new ImagePlugin(instance, readonly),
       new MentionPlugin(),
       new InlineCodePlugin(instance),
       new HeadingPlugin(instance),
@@ -44,10 +46,11 @@ const App: FC = () => {
       new LineHeightPlugin(instance),
       new FontSizePlugin(instance),
       new FontColorPlugin(instance),
-      new BackgroundPlugin(instance)
+      new BackgroundPlugin(instance),
+      new DividerPlugin(instance, readonly)
     );
     return instance;
-  }, []);
+  }, [readonly]);
 
   useEffect(() => {
     // @ts-expect-error editor
@@ -65,12 +68,15 @@ const App: FC = () => {
           <Toolbar.Underline></Toolbar.Underline>
           <Toolbar.Strike></Toolbar.Strike>
           <Toolbar.InlineCode></Toolbar.InlineCode>
+          <Toolbar.Cut></Toolbar.Cut>
           <Toolbar.FontSize></Toolbar.FontSize>
           <Toolbar.FontColor></Toolbar.FontColor>
           <Toolbar.Cut></Toolbar.Cut>
           <Toolbar.Heading></Toolbar.Heading>
           <Toolbar.Align></Toolbar.Align>
           <Toolbar.LineHeight></Toolbar.LineHeight>
+          <Toolbar.Cut></Toolbar.Cut>
+          <Toolbar.Divider></Toolbar.Divider>
           <Toolbar.Cut></Toolbar.Cut>
           <Toolbar.History></Toolbar.History>
           <Toolbar.Cut></Toolbar.Cut>

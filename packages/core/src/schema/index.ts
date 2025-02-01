@@ -1,6 +1,7 @@
 import type { AttributeMap, Op } from "block-kit-delta";
 import { isEOLOp } from "block-kit-delta";
 
+import type { LineState } from "../state/modules/line-state";
 import type { EditorSchema } from "./types";
 
 export class Schema {
@@ -74,5 +75,15 @@ export class Schema {
       }
     }
     return Object.keys(result).length ? result : void 0;
+  }
+
+  /**
+   * 判断 Block 行状态
+   * @param op
+   */
+  public isBlockLine(line: LineState | null): boolean {
+    if (!line) return false;
+    const firstLeaf = line.getFirstLeaf();
+    return !!firstLeaf && this.isBlock(firstLeaf.op);
   }
 }

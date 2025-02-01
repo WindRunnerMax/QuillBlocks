@@ -2,6 +2,7 @@ import type { EditorSchema } from "block-kit-core";
 import {
   BACKGROUND_KEY,
   BOLD_KEY,
+  DIVIDER_KEY,
   FONT_COLOR_KEY,
   FONT_SIZE_KEY,
   ITALIC_KEY,
@@ -23,4 +24,5 @@ export const schema: EditorSchema = {
   [BACKGROUND_KEY]: { mark: true },
   [IMAGE_KEY]: { block: true, void: true },
   [MENTION_KEY]: { void: true, inline: true },
+  [DIVIDER_KEY]: { block: true, void: true },
 };

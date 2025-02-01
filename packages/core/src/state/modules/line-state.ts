@@ -4,6 +4,8 @@ import { Delta, getOpLength } from "block-kit-delta";
 import { isInsertOp } from "block-kit-delta";
 import { OpIterator } from "block-kit-delta";
 
+import { Point } from "../../selection/modules/point";
+import { Range } from "../../selection/modules/range";
 import { Key } from "../utils/key";
 import type { BlockState } from "./block-state";
 import { LeafState } from "./leaf-state";
@@ -206,6 +208,17 @@ export class LineState {
       index = index + getOpLength(nextOp);
     }
     return nextOps;
+  }
+
+  /**
+   * 转换 Range 对象
+   * @param start
+   * @param end
+   */
+  public toRange() {
+    const start = new Point(this.index, 0);
+    const end = new Point(this.index, this.length);
+    return new Range(start, end);
   }
 
   /**

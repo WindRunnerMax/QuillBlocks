@@ -10,6 +10,7 @@ import { ToolbarContext } from "./context/provider";
 import { Align } from "./modules/align";
 import { Bold } from "./modules/bold";
 import { Cut } from "./modules/cut";
+import { Divider } from "./modules/divider";
 import { FontColor } from "./modules/font-color";
 import { FontSize } from "./modules/font-size";
 import { Heading } from "./modules/heading";
@@ -32,8 +33,13 @@ export const Toolbar = (props: ToolbarProps) => {
       setKeys({});
       return void 0;
     }
+    const lines = editor.state.block.getLines();
+    const { start, end } = current;
+    const lineMarkMap = filterLineMarkMap(
+      lines.slice(start.line, end.line + 1).map(line => line.attributes)
+    );
     if (current.isCollapsed) {
-      setKeys({ ...editor.collect.marks });
+      setKeys({ ...editor.collect.marks, ...lineMarkMap });
       return void 0;
     }
     const ops: Op[] = [];
@@ -45,11 +51,6 @@ export const Toolbar = (props: ToolbarProps) => {
       fragment && ops.push(...fragment);
     }
     const markMap = filterMarkMap(ops);
-    const lines = editor.state.block.getLines();
-    const { start, end } = current;
-    const lineMarkMap = filterLineMarkMap(
-      lines.slice(start.line, end.line + 1).map(line => line.attributes)
-    );
     setKeys({ ...markMap, ...lineMarkMap });
   });
 
@@ -86,6 +87,7 @@ Toolbar.Italic = Italic;
 Toolbar.Strike = Strike;
 Toolbar.History = History;
 Toolbar.Heading = Heading;
+Toolbar.Divider = Divider;
 Toolbar.FontSize = FontSize;
 Toolbar.FontColor = FontColor;
 Toolbar.Underline = Underline;

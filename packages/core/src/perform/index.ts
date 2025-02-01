@@ -34,6 +34,7 @@ export class Perform {
     }
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });
+    return void 0;
   }
 
   /**
@@ -49,6 +50,7 @@ export class Perform {
     if (start < 0 || len <= 0) return void 0;
     const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
+    return void 0;
   }
 
   /**
@@ -57,14 +59,28 @@ export class Perform {
    */
   public deleteBackward(sel: Range) {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
+    const line = this.editor.state.block.getLine(sel.start.line);
+    const prevLine = line && line.prev();
+    // 上一行为块节点时, 删除则移动光标到该节点上
+    if (prevLine && this.editor.schema.isBlockLine(prevLine)) {
+      const firstLeaf = prevLine.getFirstLeaf();
+      const range = firstLeaf && firstLeaf.toRange();
+      range && this.editor.selection.set(range, true);
+      return void 0;
+    }
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const op = this.editor.collect.getBackwardOpAtPoint(sel.start);
-    const len = getLastUnicodeLen(op && op.insert);
+    let len = 1;
+    if (op && op.insert) {
+      // 处理 Unicode 字符
+      len = getLastUnicodeLen(op.insert);
+    }
     const start = raw.start - len;
     if (start < 0) return void 0;
     const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
+    return void 0;
   }
 
   /**
@@ -73,14 +89,24 @@ export class Perform {
    */
   public deleteForward(sel: Range) {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
+    const line = this.editor.state.block.getLine(sel.start.line);
+    // 当前行为块结构时, 舍弃 forward 删除操作
+    if (line && sel.start.offset === 1 && this.editor.schema.isBlockLine(line)) {
+      return void 0;
+    }
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const start = raw.start;
     const op = this.editor.collect.getForwardOpAtPoint(sel.start);
-    const len = getFirstUnicodeLen(op && op.insert);
+    let len = 1;
+    if (op && op.insert) {
+      // 处理 Unicode 字符
+      len = getFirstUnicodeLen(op.insert);
+    }
     if (start < 0) return void 0;
     const delta = new Delta().retain(start).delete(len);
     this.editor.state.apply(delta, { range: raw });
+    return void 0;
   }
 
   /**
@@ -122,6 +148,7 @@ export class Perform {
     // FIX: 跨行 \n 的 delta 会越过当前的 sel, 因此需要手动校准
     this.editor.state.apply(delta, { range: raw, autoCaret: !point });
     point && this.editor.selection.set(new Range(point, point.clone()));
+    return void 0;
   }
 
   /**
@@ -134,6 +161,7 @@ export class Perform {
     if (!raw) return void 0;
     const newDelta = new Delta().retain(raw.start).delete(raw.len).concat(delta);
     this.editor.state.apply(newDelta, { range: raw });
+    return void 0;
   }
 
   /**
@@ -180,6 +208,7 @@ export class Perform {
       delta.retain(minOffset, attributes);
     }
     this.editor.state.apply(delta.chop());
+    return void 0;
   }
 
   /**
@@ -201,5 +230,6 @@ export class Perform {
       delta.retain(1, attributes);
     }
     this.editor.state.apply(delta);
+    return void 0;
   }
 }

@@ -4,6 +4,8 @@ export { BackgroundPlugin } from "./background";
 export { BACKGROUND_KEY } from "./background/types";
 export { BoldPlugin } from "./bold";
 export { BOLD_KEY } from "./bold/types";
+export { DividerPlugin } from "./divider";
+export { DIVIDER_KEY } from "./divider/types";
 export { FontColorPlugin } from "./font-color";
 export { FONT_COLOR_KEY } from "./font-color/types";
 export { FontSizePlugin } from "./font-size";

@@ -1,5 +1,8 @@
+import type { Range } from "../../selection/modules/range";
+
 export type CMDPayload = {
   value: string;
+  range?: Range;
   [key: string]: unknown;
 };
 
