@@ -3,7 +3,7 @@ import type { Range } from "./range";
 import { RawPoint } from "./raw-point";
 
 /**
- * ModalRawRange
+ * Raw Modal Range
  */
 export class RawRange {
   constructor(

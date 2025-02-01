@@ -92,9 +92,10 @@ export class EditorState {
     const { source = "user", autoCaret = true } = options;
     const previous = this.toBlockSet();
     this._delta = null;
+    const selection = this.editor.selection;
 
     // 获取当前选区位置
-    const raw: RawRange | null = options.range || this.editor.selection.toRaw();
+    const raw: RawRange | null = autoCaret ? options.range || selection.toRaw() : null;
     this.editor.event.trigger(EDITOR_EVENT.CONTENT_WILL_CHANGE, {
       current: previous,
       source: source,

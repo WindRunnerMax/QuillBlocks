@@ -2,7 +2,7 @@ import type { Editor } from "../../editor";
 import type { Point } from "./point";
 
 /**
- * ModalRawPoint
+ * Raw Modal Point
  */
 export class RawPoint {
   constructor(

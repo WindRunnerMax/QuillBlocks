@@ -61,8 +61,8 @@ export class Perform {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
     const line = this.editor.state.block.getLine(sel.start.line);
     const prevLine = line && line.prev();
-    // 上一行为块节点时, 删除则移动光标到该节点上
-    if (prevLine && this.editor.schema.isBlockLine(prevLine)) {
+    // 上一行为块节点且处于当前行首时, 删除则移动光标到该节点上
+    if (!sel.start.offset && prevLine && this.editor.schema.isBlockLine(prevLine)) {
       const firstLeaf = prevLine.getFirstLeaf();
       const range = firstLeaf && firstLeaf.toRange();
       range && this.editor.selection.set(range, true);
@@ -90,8 +90,22 @@ export class Perform {
   public deleteForward(sel: Range) {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
     const line = this.editor.state.block.getLine(sel.start.line);
-    // 当前行为块结构时, 舍弃 forward 删除操作
+    // 当前行为块结构时, 执行 backward 删除操作
     if (line && sel.start.offset === 1 && this.editor.schema.isBlockLine(line)) {
+      this.deleteBackward(sel);
+      return void 0;
+    }
+    const nextLine = line && line.next();
+    // 下一行为块节点且处于当前行末时, 删除则移动光标到该节点上
+    if (
+      line &&
+      sel.start.offset === line.length - 1 &&
+      nextLine &&
+      this.editor.schema.isBlockLine(nextLine)
+    ) {
+      const firstLeaf = nextLine.getFirstLeaf();
+      const range = firstLeaf && firstLeaf.toRange();
+      range && this.editor.selection.set(range, true);
       return void 0;
     }
     const raw = RawRange.fromRange(this.editor, sel);

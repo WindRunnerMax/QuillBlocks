@@ -3,7 +3,7 @@ import { binarySearch } from "../../state/utils/normalize";
 import type { RawPoint } from "./raw-point";
 
 /**
- * ModelPoint
+ * Model Point
  */
 export class Point {
   constructor(

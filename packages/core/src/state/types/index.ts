@@ -18,17 +18,24 @@ export const EDITOR_STATE = {
 } as const;
 
 export const APPLY_SOURCE = {
+  /** 用户触发 默认值 */
   USER: "USER",
+  /** 远程触发 协同值 */
   REMOTE: "REMOTE",
+  /** History 模块触发值 */
   HISTORY: "HISTORY",
 };
 
 export type ApplyOptions = {
+  /** 操作源 */
   source?: O.Values<typeof APPLY_SOURCE>;
+  /** 当前 Raw Modal Range */
   range?: RawRange;
+  /** 自动变换光标 */
   autoCaret?: boolean;
 };
 
 export type ApplyResult = {
+  /** 操作 id */
   id: string;
 };

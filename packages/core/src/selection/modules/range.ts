@@ -6,7 +6,7 @@ import { RawPoint } from "./raw-point";
 import type { RawRange } from "./raw-range";
 
 /**
- * ModalRange
+ * Modal Range
  */
 export class Range {
   /** 选区起始点 */
@@ -64,6 +64,24 @@ export class Range {
     const end = !raw.len ? start.clone() : Point.fromRaw(editor, new RawPoint(raw.start + raw.len));
     if (!end) return null;
     return new Range(start, end, false, raw.len === 0);
+  }
+
+  /**
+   * 构建 Range
+   * @param start
+   * @param end
+   * @param isBackward
+   * @param isCollapsed
+   */
+  public static fromTuple(
+    start: [line: number, offset: number],
+    end: [line: number, offset: number],
+    backward?: boolean,
+    collapsed?: boolean
+  ) {
+    const [line1, offset1] = start;
+    const [line2, offset2] = end;
+    return new Range(new Point(line1, offset1), new Point(line2, offset2), backward, collapsed);
   }
 
   /**
