@@ -9,15 +9,16 @@ import {
   isEqualAttributes,
   isInsertOp,
   isRetainOp,
-  normalizeEOL,
   OP_TYPES,
 } from "block-kit-delta";
 import { OpIterator } from "block-kit-delta";
 import { isObject } from "block-kit-utils";
 
+import type { Editor } from "../../editor";
 import type { BlockState } from "../modules/block-state";
 import { LeafState } from "../modules/leaf-state";
 import { LineState } from "../modules/line-state";
+import { normalizeComposeOps } from "../utils/normalize";
 import { Iterator } from "./iterator";
 
 export class Mutate {
@@ -31,6 +32,8 @@ export class Mutate {
   public lines: LineState[];
   /** 新的 Lines */
   public newLines: LineState[];
+  /** Editor 实例 */
+  protected editor: Editor;
 
   /**
    * 构造函数
@@ -41,6 +44,7 @@ export class Mutate {
     this.deletes = [];
     this.revises = [];
     this.newLines = [];
+    this.editor = block.editor;
     this.lines = block.getLines();
   }
 
@@ -77,7 +81,9 @@ export class Mutate {
       isObject<Op>(lastOp) &&
       isEqualAttributes(newOp.attributes, lastOp.attributes) &&
       isInsertOp(newOp) &&
-      isInsertOp(lastOp)
+      isInsertOp(lastOp) &&
+      // Embed/Block 节点不可合并
+      !this.editor.schema.isVoid(lastOp)
     ) {
       // 合并相同属性的 insert
       const op: InsertOp = { insert: lastOp.insert + newOp.insert };
@@ -102,7 +108,7 @@ export class Mutate {
     this.deletes = [];
     this.revises = [];
     this.newLines = [];
-    const otherOps = normalizeEOL(other.ops);
+    const otherOps = normalizeComposeOps(this.editor, other.ops);
     const thisIter = new Iterator(this.lines);
     const otherIter = new OpIterator(otherOps);
     const firstOther = otherIter.peek();

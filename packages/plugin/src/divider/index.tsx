@@ -43,7 +43,7 @@ export class DividerPlugin extends EditorPlugin {
           .insertEOL();
         point = new Point(line.index + 2, 0);
       }
-      editor.state.apply(delta);
+      editor.state.apply(delta, { autoCaret: false });
       editor.selection.set(new Range(point, point.clone()));
     });
   }

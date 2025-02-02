@@ -29,6 +29,9 @@ export class Schema {
 
   /**
    * 判断 Void 节点
+   * - void: 独立且不可编辑的节点
+   * - void + block: 独占一行的 Void 节点
+   * - void + inline: 行内 Void 节点 => Embed
    * @param op
    */
   public isVoid(op: Op | null): boolean {
@@ -39,6 +42,8 @@ export class Schema {
 
   /**
    * 判断 Inline 节点
+   * - inline + mark: 不追踪末尾 Mark
+   * - inline + void: 行内 Void 节点 => Embed
    * @param op
    */
   public isInline(op: Op | null): boolean {
@@ -49,6 +54,7 @@ export class Schema {
 
   /**
    * 判断 Block 节点
+   * - block + void: 独占一行的 Void 节点
    * @param op
    */
   public isBlock(op: Op | null): boolean {
@@ -59,6 +65,8 @@ export class Schema {
 
   /**
    * 过滤需要追踪的属性
+   * - mark: 输入时会自动追踪样式的节点
+   * - mark + inline: 不追踪末尾 Mark
    * @param op 操作
    * @param isLeafTail 是否在节点尾部
    */
@@ -79,6 +87,7 @@ export class Schema {
 
   /**
    * 判断 Block 行状态
+   * - block + void: 独占一行的 Void 节点
    * @param op
    */
   public isBlockLine(line: LineState | null): boolean {

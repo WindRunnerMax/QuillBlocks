@@ -1,4 +1,4 @@
-import { isEmptyValue } from "block-kit-utils";
+import { isNil } from "block-kit-utils";
 
 import type { AttributeMap } from "../attributes/interface";
 import type { BlockDeltaLike, BlockSetLike, DeltaLike } from "../cluster/interface";
@@ -22,7 +22,7 @@ export const cloneAttributes = (attrs: AttributeMap): AttributeMap => {
  */
 export const cloneOp = (op: Op): Op => {
   const attributes = op.attributes;
-  if (isEmptyValue(attributes)) {
+  if (isNil(attributes)) {
     return { ...op };
   } else {
     return { ...op, attributes: cloneAttributes(attributes) };
