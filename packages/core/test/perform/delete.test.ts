@@ -27,4 +27,12 @@ describe("perform delete", () => {
     editor.perform.deleteForward(sel);
     expect(editor.state.toBlockSet()).toEqual(new MutateDelta().insert("text🧑‍🎨123").insertEOL());
   });
+
+  it("delete backward line head", () => {
+    const delta = new Delta().insert("text").insertEOL().insert("123").insertEOL();
+    const editor = new Editor({ delta });
+    const sel = Range.fromTuple([1, 0], [1, 0]);
+    editor.perform.deleteBackward(sel);
+    expect(editor.state.toBlockSet()).toEqual(new MutateDelta().insert("text123").insertEOL());
+  });
 });

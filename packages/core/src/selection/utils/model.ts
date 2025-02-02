@@ -9,10 +9,10 @@ import { normalizeDOMPoint } from "./native";
 /**
  * 将 DOMPoint 转换为 ModelPoint
  * @param editor
- * @param normalizeDOMPoint
+ * @param domPoint
  */
-export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
-  const { offset, node } = normalizeDOMPoint;
+export const toModelPoint = (editor: Editor, domPoint: DOMPoint) => {
+  const { offset, node } = domPoint;
 
   const leafNode = getLeafNode(node);
   let lineIndex = 0;
@@ -33,7 +33,7 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
 
   // COMPAT: 此处开始根据 case 修正 zero/void offset [节点级别]
   // Case 1: 当前节点为 data-zero-enter 时, 需要将其修正为前节点末尾
-  // content\n[cursor] => content[cursor]\n
+  // content\n[caret] => content[caret]\n
   const isEnterZero = isEnterZeroNode(node);
   if (isEnterZero && offset) {
     leafOffset = Math.max(leafOffset - 1, 0);
@@ -41,17 +41,17 @@ export const toModelPoint = (editor: Editor, normalizeDOMPoint: DOMPoint) => {
   }
   // Case 2: 光标位于 data-zero-void 节点前时, 需要将其修正为节点末
   // 若不修正则会导致选区位置问题, 一些诸如删除之类的操作会失效
-  // [[cursor]void]\n => [void[cursor]]\n
+  // [[caret]void]\n => [void[caret]]\n
   // Case 3: 光标位于 data-zero-void 节点后其他位置时, 修正为节点末
   // 唤起 IME 输入时会导致原本零宽字符出现过多文本, 导致选区映射问题
-  // [ xxx[cursor]]\n => [ [cursor]xxx]\n
+  // [ xxx[caret]]\n => [ [caret]xxx]\n
   const isVoidZero = isVoidZeroNode(node);
   if (isVoidZero && offset !== 1) {
     return new Point(lineIndex, 1);
   }
   // Case 4: 光标位于 data-zero-embed 节点后时, 需要将其修正为节点前
   // 若不校正会携带 DOM-Point CASE1 的零选区位置, 按下左键无法正常移动光标
-  // [embed[cursor]]\n => [[cursor]embed]\n
+  // [embed[caret]]\n => [[caret]embed]\n
   const isEmbedZero = isEmbedZeroNode(node);
   if (isEmbedZero && offset) {
     return new Point(lineIndex, leafOffset - 1);

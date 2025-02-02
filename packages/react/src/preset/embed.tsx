@@ -32,7 +32,7 @@ export const Embed: FC<EmbedProps> = props => {
 
   return (
     <React.Fragment>
-      <ZeroSpace embed />
+      <ZeroSpace embed len={leaf.length > 1 ? leaf.length : void 0} />
       <span
         className={props.className}
         style={{ margin: "0 0.1px", ...props.style }}

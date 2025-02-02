@@ -7,14 +7,14 @@ export type SchemaRule = {
   /**
    * 行内节点
    * - inline + mark: 不追踪末尾 Mark
-   * - inline + void: 行内 Void 节点 = Embed
+   * - inline + void: 行内 Void 节点 => Embed
    */
   inline?: boolean;
   /**
    * 空节点
    * - void: 独立且不可编辑的节点
    * - void + block: 独占一行的 Void 节点
-   * - void + inline: 行内 Void 节点 = Embed
+   * - void + inline: 行内 Void 节点 => Embed
    */
   void?: boolean;
   /**

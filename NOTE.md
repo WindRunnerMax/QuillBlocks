@@ -1219,3 +1219,7 @@ Array.from("🧑‍🎨")
 - <http://www.ruanyifeng.com/blog/2014/12/unicode.html>
 - <https://eev.ee/blog/2015/09/12/dark-corners-of-unicode>
 
+## 连续 Block Op
+1. 连续的`block + void`节点需要`normalize`处理，在增量时主动加入`\n`控制兜底换行处理。
+2. 连续的`inline + void => embed`不能合并，例如`mention`组件，在增量时的`mutate`处理数据。
+3. 已经合并的`block`长度值需要体现在`void`节点属性上，在选区变换时使用，存量数据可能会存在此种情况。

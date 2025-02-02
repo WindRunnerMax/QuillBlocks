@@ -1,7 +1,13 @@
 import { isDOMElement, isDOMText } from "block-kit-utils";
 
 import type { Editor } from "../../editor";
-import { LEAF_STRING, ZERO_EMBED_KEY, ZERO_SPACE_KEY } from "../../model/types";
+import {
+  LEAF_STRING,
+  VOID_LEN_KEY,
+  ZERO_EMBED_KEY,
+  ZERO_SPACE_KEY,
+  ZERO_VOID_KEY,
+} from "../../model/types";
 import type { Point } from "../modules/point";
 import type { Range } from "../modules/range";
 import type { DOMPoint, DOMRange, DOMStaticRange } from "../types";
@@ -77,21 +83,27 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   let start = 0;
   for (let i = 0; i < leaves.length; i++) {
     const leaf = leaves[i];
-    if (!leaf || !(leaf instanceof HTMLElement) || leaf.textContent === null) {
+    if (!leaf || leaf instanceof HTMLElement === false || leaf.textContent === null) {
       continue;
     }
     // Leaf 节点的长度, 即处理 offset 关注的实际偏移量
     let len = leaf.textContent.length;
     if (leaf.hasAttribute(ZERO_SPACE_KEY)) {
-      // 虽然理论上这里的长度应该为 0, 但此处我们通用地处理为 1
-      // 这里的长度可能会被 void element & fake length 影响
+      // 先通用地处理为 1, 此时长度不应该为 0, 具体长度需要检查 fake len
+      // 存在由于 IME 破坏该节点内容的情况, 此时直接取 text len 不可靠
       len = 1;
+      // 这里的长度可能会被 void 的 fake length 影响
+      const fakeLen = leaf.getAttribute(VOID_LEN_KEY);
+      const dataLength = fakeLen && Number.parseInt(fakeLen, 10);
+      if (dataLength && !Number.isNaN(dataLength)) {
+        len = dataLength;
+      }
     }
 
     const end = start + len;
     if (offset <= end) {
       // Offset 在此处会被处理为相对于当前节点的偏移量
-      // text1text2 offset: 7 -> text1te|xt2
+      // 例如: text1text2 offset: 7 -> text1te|xt2
       // current node is text2 -> start = 5
       // end = 5(start) + 5(len) = 10
       // offset = 7 < 10 -> new offset = 7(offset) - 5(start) = 2
@@ -109,6 +121,11 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
       // <s>1|</s><e> </e> => <s>1</s><e>| </e>
       if (nodeOffset === len && nextLeaf && nextLeaf.hasAttribute(ZERO_EMBED_KEY)) {
         return { node: nextLeaf, offset: 0 };
+      }
+      // CASE3: 当光标位于 Void 节点时, 且此时存在后续的 leaf 节点, 需要兜底处理节点偏移
+      // 由于是 Void 而不是 Embed, 通常这种情况不会存在, 但是需要兜底这种情况, 防止 crash
+      if (leaf.hasAttribute(ZERO_VOID_KEY) && nextLeaf) {
+        return { node: leaf, offset: 1 };
       }
       return { node: leaf, offset: nodeOffset };
     }
@@ -137,8 +154,8 @@ export const toDOMRange = (editor: Editor, range: Range): DOMRange | null => {
   const startTextNode = getTextNode(startNode);
   const endTextNode = getTextNode(endNode);
   if (startTextNode && endTextNode) {
-    domRange.setStart(startTextNode, startOffset);
-    domRange.setEnd(endTextNode, endOffset);
+    domRange.setStart(startTextNode, Math.min(startOffset, startTextNode.length));
+    domRange.setEnd(endTextNode, Math.min(endOffset, endTextNode.length));
     return domRange;
   }
   return null;

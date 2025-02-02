@@ -6,6 +6,8 @@ export const INIT = new Delta({
     { insert: "\n", attributes: { heading: "h1" } },
     { insert: "从零实现富文本编辑器" },
     { insert: "\n" },
+    { insert: " ", attributes: { divider: "true" } },
+    { insert: " ", attributes: { divider: "true" } },
     { insert: "行内结构" },
     { insert: "\n", attributes: { heading: "h2" } },
     { insert: "支持 " },

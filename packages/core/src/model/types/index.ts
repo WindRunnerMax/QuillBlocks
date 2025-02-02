@@ -9,6 +9,7 @@ export const LEAF_KEY = "data-leaf";
 export const LEAF_STRING = "data-string";
 export const BLOCK_KEY = "data-block";
 export const VOID_KEY = "data-void";
+export const VOID_LEN_KEY = "data-void-len";
 
 // Space
 export const ZERO_ENTER_KEY = "data-zero-enter";
