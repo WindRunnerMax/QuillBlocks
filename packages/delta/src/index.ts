@@ -19,5 +19,5 @@ export {
   cloneOp,
   cloneOps,
 } from "./utils/clone";
-export { deltaEndsWith, isEOLOp, normalizeEOL } from "./utils/delta";
+export { deltaEndsWith, isEOLOp, normalizeEOL, startsWithEOL } from "./utils/delta";
 export { isEqualAttributes, isEqualOp } from "./utils/equal";

@@ -20,6 +20,8 @@ import {
   UnderlinePlugin,
 } from "block-kit-plugin";
 import { FontColorPlugin } from "block-kit-plugin";
+import { BulletListPlugin } from "block-kit-plugin";
+import { OrderListPlugin } from "block-kit-plugin";
 import { BlockKit, Editable } from "block-kit-react";
 import type { FC } from "react";
 import { useEffect, useMemo } from "react";
@@ -47,7 +49,9 @@ const App: FC = () => {
       new FontSizePlugin(instance),
       new FontColorPlugin(instance),
       new BackgroundPlugin(instance),
-      new DividerPlugin(instance, readonly)
+      new DividerPlugin(instance, readonly),
+      new BulletListPlugin(instance),
+      new OrderListPlugin(instance)
     );
     return instance;
   }, [readonly]);
@@ -76,6 +80,10 @@ const App: FC = () => {
           <Toolbar.Align></Toolbar.Align>
           <Toolbar.LineHeight></Toolbar.LineHeight>
           <Toolbar.Cut></Toolbar.Cut>
+          <Toolbar.BulletList></Toolbar.BulletList>
+          <Toolbar.OrderList></Toolbar.OrderList>
+          <Toolbar.Cut></Toolbar.Cut>
+          <Toolbar.Image></Toolbar.Image>
           <Toolbar.Divider></Toolbar.Divider>
           <Toolbar.Cut></Toolbar.Cut>
           <Toolbar.History></Toolbar.History>

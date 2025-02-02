@@ -12,6 +12,7 @@ export {
   isMatchHTMLTag,
 } from "./clipboard/utils/deserialize";
 export { getFirstUnicodeLen, getLastUnicodeLen } from "./collect/utils/string";
+export type { CMDFunc, CMDPayload } from "./command/types";
 export { Editor } from "./editor";
 export type { EventMapKeys } from "./event/bus/types";
 export type { ContentChangeEvent, SelectionChangeEvent } from "./event/bus/types";

@@ -1,5 +1,5 @@
 import type { Op, Ops } from "block-kit-delta";
-import { cloneOp, EOL, EOL_OP, isEOLOp, isInsertOp } from "block-kit-delta";
+import { cloneOp, EOL, EOL_OP, isInsertOp, startsWithEOL } from "block-kit-delta";
 
 import type { Editor } from "../../editor";
 import type { LineState } from "../modules/line-state";
@@ -59,7 +59,7 @@ export const normalizeComposeOps = (editor: Editor, ops: Ops) => {
     });
     const nextOp = ops[index + 1];
     // 如果当前 Op 是 Block, 且下个节点不是 EOL, 则需要补充 EOL
-    if (editor.schema.isBlock(op) && !isEOLOp(nextOp)) {
+    if (editor.schema.isBlock(op) && !startsWithEOL(nextOp)) {
       collect(cloneOp(EOL_OP));
     }
   });

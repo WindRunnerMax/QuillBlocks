@@ -38,9 +38,9 @@ export class Input {
       return null;
     }
     switch (inputType) {
+      // case "deleteByDrag":
       case "deleteByComposition":
-      case "deleteByCut":
-      case "deleteByDrag": {
+      case "deleteByCut": {
         this.editor.perform.deleteFragment(sel);
         break;
       }
@@ -60,7 +60,7 @@ export class Input {
         this.editor.perform.insertBreak(sel);
         break;
       }
-      case "insertFromDrop":
+      // case "insertFromDrop":
       case "insertFromPaste":
       case "insertFromYank":
       case "insertReplacementText":

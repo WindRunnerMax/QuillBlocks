@@ -19,7 +19,7 @@ export abstract class CorePlugin {
    */
   public abstract destroy(): void;
   /**
-   * 叶子节点匹配插件
+   * 叶子节点/行节点的插件匹配
    * - 与 render/renderLine/renderWrapper 方法匹配使用
    * */
   public abstract match(attrs: AttributeMap, op: Op): boolean;

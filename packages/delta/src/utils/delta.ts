@@ -12,13 +12,14 @@ export const deltaEndsWith = (delta: Delta, text: string): boolean => {
   const ops = delta.ops;
   let index = text.length - 1;
   for (const op of ops) {
-    if (isInsertOp(op)) {
-      const opText = op.insert;
-      for (let i = opText.length - 1; i >= 0; --i) {
-        if (opText[i] !== text[index]) return false;
-        --index;
-        if (index < 0) return true;
-      }
+    if (!isInsertOp(op)) {
+      continue;
+    }
+    const opText = op.insert;
+    for (let i = opText.length - 1; i >= 0; --i) {
+      if (opText[i] !== text[index]) return false;
+      --index;
+      if (index < 0) return true;
     }
   }
   return false;
@@ -70,4 +71,11 @@ export const formatEOL = (text: string) => {
  */
 export const isEOLOp = (op: Op | null) => {
   return op && isInsertOp(op) && op.insert === EOL;
+};
+
+/**
+ * 判断是否以 EOL 起始
+ */
+export const startsWithEOL = (op: Op | null) => {
+  return op && isInsertOp(op) && op.insert.startsWith(EOL);
 };
