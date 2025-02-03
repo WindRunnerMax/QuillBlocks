@@ -45,7 +45,7 @@ export const createLeafDOM = (child: HTMLElement) => {
   return dom;
 };
 
-export const createStringDOM = (text: string) => {
+export const createTextDOM = (text: string) => {
   const dom = document.createElement("span");
   dom.setAttribute(LEAF_STRING, "true");
   dom.textContent = text;
@@ -81,14 +81,25 @@ export const createEditorModel = (editor: Editor, root: HTMLElement) => {
 };
 
 export const createElement = (
-  key: string,
+  name: string,
   attributes: Record<string, string>,
   children: HTMLElement[]
 ) => {
-  const dom = document.createElement(key);
+  const dom = document.createElement(name);
   for (const [key, value] of Object.entries(attributes)) {
     dom.setAttribute(key, value);
   }
   children.forEach(child => dom.appendChild(child));
   return dom;
+};
+
+export const xmlToString = (xml: Node | null): string | null => {
+  if (!xml) return null;
+  try {
+    const serialize = new XMLSerializer();
+    return serialize.serializeToString(xml);
+  } catch (error) {
+    console.log("XmlToString Error: ", error);
+    return null;
+  }
 };

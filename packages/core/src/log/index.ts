@@ -3,7 +3,7 @@ export const LOG_LEVEL = {
   INFO: 0,
   WARNING: 1,
   ERROR: 2,
-};
+} as const;
 
 export class Logger {
   constructor(protected level: number) {}

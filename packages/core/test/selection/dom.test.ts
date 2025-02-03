@@ -2,6 +2,7 @@ import { Delta } from "block-kit-delta";
 import { isDOMText, ROOT_BLOCK } from "block-kit-utils";
 
 import { Editor } from "../../src/editor";
+import { LOG_LEVEL } from "../../src/log";
 import { ZERO_SYMBOL } from "../../src/model/types";
 import { Point } from "../../src/selection/modules/point";
 import { Range } from "../../src/selection/modules/range";
@@ -13,7 +14,7 @@ import {
   createEnterDOM,
   createLeafDOM,
   createLineDOM,
-  createStringDOM,
+  createTextDOM,
 } from "../config/dom";
 
 describe("selection dom", () => {
@@ -27,17 +28,17 @@ describe("selection dom", () => {
       { insert: "\n" },
     ],
   });
-  const editor = new Editor({ delta, logLevel: 0 });
+  const editor = new Editor({ delta, logLevel: LOG_LEVEL.INFO });
 
   beforeAll(() => {
     const line1 = createLineDOM([
-      createLeafDOM(createStringDOM("text")),
-      createLeafDOM(createStringDOM("bold")),
+      createLeafDOM(createTextDOM("text")),
+      createLeafDOM(createTextDOM("bold")),
       createLeafDOM(createEnterDOM()),
     ]);
     const line2 = createLineDOM([
-      createLeafDOM(createStringDOM("text2")),
-      createLeafDOM(createStringDOM("bold2")),
+      createLeafDOM(createTextDOM("text2")),
+      createLeafDOM(createTextDOM("bold2")),
       createLeafDOM(createEnterDOM()),
     ]);
     const block = createBlockDOM(ROOT_BLOCK, [line1, line2]);
