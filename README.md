@@ -1,4 +1,4 @@
-# QuillBlocks
+# BlockKit
 
 <p>
 <a href="https://github.com/WindRunnerMax/QuillBlocks">GitHub</a>
@@ -6,36 +6,15 @@
 <a href="https://windrunnermax.github.io/QuillBlocks/">DEMO</a>
 <span>｜</span>
 <a href="./NOTE.md">NOTE</a>
+<span>｜</span>
+<a href="https://github.com/WindRunnerMax/QuillBlocks/issues/1">BLOG</a>
 </p>
 
-QuillJs for React implementation.
+最初是希望基于`Quill`实现`Blocks`的编辑器，却被跨行的选区问题所困扰。到后来希望以`Embed Blot`为基础实现块结构的嵌套，却被复杂交互所需要的视图层实现掣肘。最终希望能从零实现富文本编辑器，以便能够解决这些问题，并且将想法付诸实现:
 
-## Blog
+- **完备的开发文档:** 在实现过程中将遇到的问题都记录了下来，主要解决了两个问题，为什么要这么设计、这么设计有什么优劣。
+- **精简的数据结构:** 扁平的数据结构设计，无论是在编辑器还是在服务端数据处理的过程中，都能更加方便和精准地操作数据。
+- **可扩展的视图层:** 视图层相关则可以自由地选择组件库实现复杂交互，在编辑器的设计上可以支持多种视图层的接入实现。
+- **精细的协同考量:** `OT`的协同编辑从来都不是简单的问题，除了数据上支持操作变换外，编辑器模块同样需要很多细节设计。
+- **丰富的插件系统:** 任何富文本格式都应该通过插件的方式来实现，编辑器的示例中所有的组件都是通过插件的形式来扩展能力。
 
-* [初探富文本之富文本概述](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之富文本概述.md)
-* [初探富文本之编辑器引擎](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之编辑器引擎.md)
-* [初探富文本之OT协同算法](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之OT协同算法.md)
-* [初探富文本之OT协同实例](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之OT协同实例.md)
-* [初探富文本之CRDT协同算法](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之CRDT协同算法.md)
-* [初探富文本之CRDT协同实例](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之CRDT协同实例.md) 
-* [初探富文本之React实时预览](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之React实时预览.md) 
-* [初探富文本之文档diff算法](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之文档diff算法.md)  
-* [初探富文本之在线文档交付](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之在线文档交付.md)   
-* [初探富文本之划词评论能力](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之划词评论能力.md)   
-* [初探富文本之文档虚拟滚动](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之文档虚拟滚动.md)   
-* [初探富文本之搜索替换算法](https://github.com/WindRunnerMax/EveryDay/blob/master/RichText/初探富文本之搜索替换算法.md)   
-
-## Example
-
-* [delta-diff.ts](https://github.com/WindRunnerMax/webpack-simple-environment/tree/master/packages/quill-delta-diff): `delta`数据结构`diff`算法。 
-* [diff-virtual-layer.html](./examples/diff-virtual-layer.html): 编辑器实时`diff`的虚拟图层实现。
-* [delta-set.ts](./examples/delta-set.ts): 数据结构格式转换。
-* [delta-to-md.ts](./examples/delta-to-md.ts): 将文档数据结构转换为`MarkDown`。
-* [delta-to-word.ts](./examples/delta-to-word.ts): 将文档数据结构转换为`docx`文件。
-* [delta-to-word.html](./examples/delta-to-word.html): 文档数据转换`docx`文件的`HTML`版本。
-* [delta-to-pdf.ts](./examples/delta-to-pdf.ts): 将文档数据结构转换为`PDF`文件。
-* [delta-to-pdf.html](./examples/delta-to-pdf.html): 文档数据转换`PDF`文件的`HTML`版本。
-* [pdf-with-outline.ts](./examples/pdf-with-outline.ts): 将存量`PDF`文件写入大纲`Outline`。
-* [comment-ot.html](./examples/comment-ot.html): 划词评论能力的`OT`实现。
-* [comment-crdt.html](https://github.com/WindRunnerMax/webpack-simple-environment/tree/master/packages/quill-crdt-comment): 划词评论能力的`CRDT`实现。
-* [find-replace.html](./examples/find-replace.ts): `Delta`搜索替换能力实现。

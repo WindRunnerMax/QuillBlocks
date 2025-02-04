@@ -15,9 +15,9 @@ export class ImagePlugin extends EditorPlugin {
   public key = IMAGE_KEY;
   public selection: SelectionPlugin;
 
-  constructor(editor: Editor, readonly: boolean) {
+  constructor(editor: Editor) {
     super();
-    this.selection = new SelectionPlugin(editor, readonly);
+    this.selection = new SelectionPlugin(editor);
   }
 
   public destroy(): void {

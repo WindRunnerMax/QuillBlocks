@@ -18,9 +18,9 @@ export class DividerPlugin extends EditorPlugin {
   public key = DIVIDER_KEY;
   public selection: SelectionPlugin;
 
-  constructor(protected editor: Editor, readonly: boolean) {
+  constructor(protected editor: Editor) {
     super();
-    this.selection = new SelectionPlugin(editor, readonly);
+    this.selection = new SelectionPlugin(editor);
     editor.command.register(DIVIDER_KEY, this.onExec);
   }
 

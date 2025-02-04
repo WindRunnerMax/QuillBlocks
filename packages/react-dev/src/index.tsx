@@ -24,7 +24,7 @@ import { BulletListPlugin } from "block-kit-plugin";
 import { OrderListPlugin } from "block-kit-plugin";
 import { BlockKit, Editable } from "block-kit-react";
 import type { FC } from "react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { GitHubIcon } from "./components/github";
@@ -32,7 +32,7 @@ import { INIT } from "./config/block";
 import { schema } from "./config/schema";
 
 const App: FC = () => {
-  const readonly = false;
+  const [readonly] = useState(false);
   const editor = useMemo(() => {
     const instance = new Editor({ delta: INIT, logLevel: LOG_LEVEL.DEBUG, schema });
     instance.plugin.register(
@@ -40,7 +40,7 @@ const App: FC = () => {
       new ItalicPlugin(instance),
       new UnderlinePlugin(instance),
       new StrikePlugin(instance),
-      new ImagePlugin(instance, readonly),
+      new ImagePlugin(instance),
       new MentionPlugin(),
       new InlineCodePlugin(instance),
       new HeadingPlugin(instance),
@@ -49,12 +49,12 @@ const App: FC = () => {
       new FontSizePlugin(instance),
       new FontColorPlugin(instance),
       new BackgroundPlugin(instance),
-      new DividerPlugin(instance, readonly),
+      new DividerPlugin(instance),
       new BulletListPlugin(instance),
       new OrderListPlugin(instance)
     );
     return instance;
-  }, [readonly]);
+  }, []);
 
   useEffect(() => {
     // @ts-expect-error editor
@@ -64,7 +64,7 @@ const App: FC = () => {
   }, [editor]);
 
   return (
-    <BlockKit editor={editor}>
+    <BlockKit editor={editor} readonly={readonly}>
       <div className="block-kit-editor-container">
         <Toolbar className="block-kit-toolbar">
           <Toolbar.Bold></Toolbar.Bold>

@@ -3,11 +3,6 @@ import React, { createContext } from "react";
 
 export const BlockKitContext = createContext<Editor | null>(null);
 
-export const BlockKit: React.FC<{ editor: Editor }> = props => {
-  const { editor, children } = props;
-  return <BlockKitContext.Provider value={editor}>{children}</BlockKitContext.Provider>;
-};
-
 export const useEditorStatic = () => {
   const editor = React.useContext(BlockKitContext);
 

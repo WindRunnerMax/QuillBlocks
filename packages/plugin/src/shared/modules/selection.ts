@@ -7,7 +7,7 @@ export class SelectionPlugin {
   /** id <-> React.ReactNode */
   protected idToView: Map<string, SelectionHOC>;
 
-  constructor(public editor: Editor, public readonly: boolean) {
+  constructor(public editor: Editor) {
     this.idToView = new Map();
     editor.event.on(EDITOR_EVENT.SELECTION_CHANGE, this.onSelectionChange);
   }

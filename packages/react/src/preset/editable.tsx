@@ -1,16 +1,17 @@
-import { EDITOR_KEY, EDITOR_STATE, Point, Range } from "block-kit-core";
+import { EDITOR_KEY, Point, Range } from "block-kit-core";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 
 import { useEditorStatic } from "../hooks/use-editor";
+import { useReadonly } from "../hooks/use-readonly";
 import { BlockModel } from "../model/block";
 
 export const Editable: React.FC<{
-  readonly?: boolean;
   className?: string;
   autoFocus?: boolean;
 }> = props => {
-  const { readonly, className, autoFocus } = props;
+  const { className, autoFocus } = props;
   const { editor } = useEditorStatic();
+  const { readonly } = useReadonly();
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -20,10 +21,6 @@ export const Editable: React.FC<{
       editor.destroy();
     };
   }, [editor]);
-
-  useEffect(() => {
-    editor.state.set(EDITOR_STATE.READONLY, readonly || false);
-  }, [editor.state, readonly]);
 
   useEffect(() => {
     // COMPAT: 这里有个奇怪的表现

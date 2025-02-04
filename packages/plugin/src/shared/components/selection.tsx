@@ -3,6 +3,7 @@ import "../styles/selection.scss";
 import type { LeafState } from "block-kit-core";
 import type { Editor } from "block-kit-core";
 import { Range } from "block-kit-core";
+import { ReadonlyContext } from "block-kit-react";
 import { cs, getId } from "block-kit-utils";
 import React from "react";
 
@@ -22,6 +23,7 @@ type State = {
 
 export class SelectionHOC extends React.PureComponent<Props, State> {
   protected editor: Editor;
+  public static contextType = ReadonlyContext;
 
   constructor(props: Props) {
     super(props);
@@ -55,7 +57,8 @@ export class SelectionHOC extends React.PureComponent<Props, State> {
   public render() {
     const selected = this.state.selected;
     const { border = true } = this.props;
-    if (this.props.selection.readonly) {
+    // readonly context
+    if (this.context as boolean) {
       return this.props.children;
     }
     return (
