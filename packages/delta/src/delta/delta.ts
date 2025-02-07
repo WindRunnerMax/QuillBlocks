@@ -203,13 +203,14 @@ export class Delta {
   }
 
   /**
-   * 获取应用后的 Ops 长度
+   * 获取 Ops 变更的长度
+   * - 即 insert 长度 - delete 长度
    * @link https://www.npmjs.com/package/quill-delta/v/4.2.2#changelength
    */
   public changeLength(): number {
     return this.reduce((length, elem) => {
       if (elem.insert) {
-        return length + getOpLength(elem);
+        return length + elem.insert.length;
       } else if (elem.delete) {
         return length - elem.delete;
       }
