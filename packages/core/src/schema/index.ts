@@ -1,7 +1,6 @@
-import type { AttributeMap, Op } from "block-kit-delta";
+import type { Op } from "block-kit-delta";
 import { isEOLOp } from "block-kit-delta";
 
-import type { LineState } from "../state/modules/line-state";
 import type { EditorSchema } from "./types";
 
 export class Schema {
@@ -30,69 +29,86 @@ export class Schema {
   /**
    * 判断 Void 节点
    * - void: 独立且不可编辑的节点
-   * - void + block: 独占一行的 Void 节点
-   * - void + inline: 行内 Void 节点 => Embed
    * @param op
    */
   public isVoid(op: Op | null): boolean {
-    if (!op || !op.attributes || isEOLOp(op)) return false;
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return false;
+    }
+    const attrs = op.attributes;
     const keys = Object.keys(op.attributes);
-    return keys.some(key => this.void.has(key));
+    return keys.some(key => this.void.has(key) && !this.inline.has(key) && attrs[key]);
   }
 
   /**
    * 判断 Inline 节点
    * - inline + mark: 不追踪末尾 Mark
-   * - inline + void: 行内 Void 节点 => Embed
    * @param op
    */
   public isInline(op: Op | null): boolean {
-    if (!op || !op.attributes || isEOLOp(op)) return false;
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return false;
+    }
+    const attrs = op.attributes;
     const keys = Object.keys(op.attributes);
-    return keys.some(key => this.inline.has(key));
+    return keys.some(key => this.inline.has(key) && !this.void.has(key) && attrs[key]);
   }
 
   /**
    * 判断 Block 节点
-   * - block + void: 独占一行的 Void 节点
+   * - block: 独占一行的可编辑节点
    * @param op
    */
   public isBlock(op: Op | null): boolean {
-    if (!op || !op.attributes || isEOLOp(op)) return false;
-    const keys = Object.keys(op.attributes);
-    return keys.some(key => this.block.has(key));
-  }
-
-  /**
-   * 过滤需要追踪的属性
-   * - mark: 输入时会自动追踪样式的节点
-   * - mark + inline: 不追踪末尾 Mark
-   * @param op 操作
-   * @param isLeafTail 是否在节点尾部
-   */
-  public filterTailMark(op: Op | null, isLeafTail: boolean | null): AttributeMap | undefined {
-    if (!op || !op.attributes || isEOLOp(op)) return void 0;
-    const keys = Object.keys(op.attributes);
-    const result: AttributeMap = {};
-    for (const key of keys) {
-      if (this.mark.has(key)) {
-        result[key] = op.attributes[key];
-      }
-      if (isLeafTail && this.inline.has(key)) {
-        delete result[key];
-      }
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return false;
     }
-    return Object.keys(result).length ? result : void 0;
+    const attrs = op.attributes;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.block.has(key) && attrs[key]);
   }
 
   /**
-   * 判断 Block 行状态
-   * - block + void: 独占一行的 Void 节点
+   * 判断 Embed 节点
+   * - void + inline: 行内 Void 节点 => Embed
    * @param op
    */
-  public isBlockLine(line: LineState | null): boolean {
-    if (!line) return false;
-    const firstLeaf = line.getFirstLeaf();
-    return !!firstLeaf && this.isBlock(firstLeaf.op);
+  public isEmbed(op: Op | null): boolean {
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return false;
+    }
+    const attrs = op.attributes;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.void.has(key) && this.inline.has(key) && attrs[key]);
+  }
+
+  /**
+   * 存在 Void Key 值
+   * - void: 独立且不可编辑的节点
+   * - void + inline: 行内 Void 节点 => Embed
+   * @param op
+   */
+  public hasVoidKey(op: Op | null): boolean {
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return false;
+    }
+    const attrs = op.attributes;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.void.has(key) && attrs[key]);
+  }
+
+  /**
+   * 存在 Inline Key 值
+   * - inline + mark: 不追踪末尾 Mark
+   * - void + inline: 行内 Void 节点 => Embed
+   * @param op
+   */
+  public hasInlineKey(op: Op | null): boolean {
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return false;
+    }
+    const attrs = op.attributes;
+    const keys = Object.keys(op.attributes);
+    return keys.some(key => this.inline.has(key) && attrs[key]);
   }
 }

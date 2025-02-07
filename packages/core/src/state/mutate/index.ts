@@ -83,7 +83,7 @@ export class Mutate {
       isInsertOp(newOp) &&
       isInsertOp(lastOp) &&
       // Embed/Block 节点不可合并
-      !this.editor.schema.isVoid(lastOp)
+      !this.editor.schema.hasVoidKey(lastOp)
     ) {
       // 合并相同属性的 insert
       const op: InsertOp = { insert: lastOp.insert + newOp.insert };

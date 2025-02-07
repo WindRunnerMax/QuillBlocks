@@ -1,7 +1,7 @@
 export type SchemaRule = {
   /**
    * 块级节点
-   * - block + void: 独占一行的 Void 节点
+   * - block: 独占一行的可编辑节点
    */
   block?: boolean;
   /**
@@ -12,8 +12,7 @@ export type SchemaRule = {
   inline?: boolean;
   /**
    * 空节点
-   * - void: 独立且不可编辑的节点
-   * - void + block: 独占一行的 Void 节点
+   * - void: 独占一行且不可编辑的节点
    * - void + inline: 行内 Void 节点 => Embed
    */
   void?: boolean;

@@ -1,6 +1,6 @@
 import type { AttributeMap, Op } from "block-kit-delta";
 import type { InsertOp } from "block-kit-delta";
-import { getOpLength } from "block-kit-delta";
+import { getOpLength, isEOLOp } from "block-kit-delta";
 import { Bind } from "block-kit-utils";
 
 import type { Editor } from "../editor";
@@ -138,6 +138,31 @@ export class Collect {
   }
 
   /**
+   * 过滤需要追踪的属性
+   * - mark: 输入时会自动追踪样式的节点
+   * - mark + inline: 不追踪末尾 Mark
+   * @param op 操作
+   * @param isLeafTail 是否在节点尾部
+   */
+  public getLeafMarks(op: Op | null, isLeafTail: boolean | null): AttributeMap | undefined {
+    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+      return void 0;
+    }
+    const attrs = op.attributes;
+    const keys = Object.keys(attrs);
+    const result: AttributeMap = {};
+    for (const key of keys) {
+      if (this.editor.schema.mark.has(key) && attrs[key]) {
+        result[key] = attrs[key];
+      }
+      if (isLeafTail && this.editor.schema.inline.has(key)) {
+        delete result[key];
+      }
+    }
+    return Object.keys(result).length ? result : void 0;
+  }
+
+  /**
    * 选区变化
    * @param event
    */
@@ -152,7 +177,7 @@ export class Collect {
     const leaf = this.editor.collect.getLeafAtPoint(point);
     if (leaf && leaf.block && leaf.block) return void 0;
     const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
-    const attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
+    const attributes = this.getLeafMarks(leaf && leaf.op, isLeafTail);
     this.marks = attributes || {};
     return void 0;
   }

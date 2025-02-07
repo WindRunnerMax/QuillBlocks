@@ -3,6 +3,7 @@ import { Delta } from "block-kit-delta";
 
 import { getFirstUnicodeLen, getLastUnicodeLen } from "../collect/utils/string";
 import type { Editor } from "../editor";
+import { isBlockLine } from "../schema/utils/is";
 import { Point } from "../selection/modules/point";
 import { Range } from "../selection/modules/range";
 import { RawPoint } from "../selection/modules/raw-point";
@@ -30,7 +31,7 @@ export class Perform {
     if (!sel.isCollapsed) {
       // 非折叠选区时, 需要以 start 起始判断该节点的尾部 marks
       const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
-      attributes = this.editor.schema.filterTailMark(leaf && leaf.op, isLeafTail);
+      attributes = this.editor.collect.getLeafMarks(leaf && leaf.op, isLeafTail);
     }
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });
@@ -62,7 +63,7 @@ export class Perform {
     const line = this.editor.state.block.getLine(sel.start.line);
     const prevLine = line && line.prev();
     // 上一行为块节点且处于当前行首时, 删除则移动光标到该节点上
-    if (!sel.start.offset && prevLine && this.editor.schema.isBlockLine(prevLine)) {
+    if (!sel.start.offset && prevLine && isBlockLine(prevLine)) {
       const firstLeaf = prevLine.getFirstLeaf();
       const range = firstLeaf && firstLeaf.toRange();
       range && this.editor.selection.set(range, true);
@@ -91,18 +92,13 @@ export class Perform {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
     const line = this.editor.state.block.getLine(sel.start.line);
     // 当前行为块结构时, 执行 backward 删除操作
-    if (line && sel.start.offset === 1 && this.editor.schema.isBlockLine(line)) {
+    if (line && sel.start.offset === 1 && isBlockLine(line)) {
       this.deleteBackward(sel);
       return void 0;
     }
     const nextLine = line && line.next();
     // 下一行为块节点且处于当前行末时, 删除则移动光标到该节点上
-    if (
-      line &&
-      sel.start.offset === line.length - 1 &&
-      nextLine &&
-      this.editor.schema.isBlockLine(nextLine)
-    ) {
+    if (line && sel.start.offset === line.length - 1 && nextLine && isBlockLine(nextLine)) {
       const firstLeaf = nextLine.getFirstLeaf();
       const range = firstLeaf && firstLeaf.toRange();
       range && this.editor.selection.set(range, true);
