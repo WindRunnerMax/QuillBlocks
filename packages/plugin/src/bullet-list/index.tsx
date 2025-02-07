@@ -4,7 +4,7 @@ import type { CMDPayload, Editor } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLineContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
-import { Bind, cs, TRUE } from "block-kit-utils";
+import { Bind, cs, TRULY } from "block-kit-utils";
 import type { ReactNode } from "react";
 
 import { BULLET_LIST_KEY, LIST_LEVEL_KEY } from "./types";
@@ -40,6 +40,6 @@ export class BulletListPlugin extends EditorPlugin {
   protected onExec(payload: CMDPayload) {
     const editor = this.editor;
     const sel = editor.selection.get() || payload.range;
-    sel && editor.perform.applyLineMarks(sel, { [BULLET_LIST_KEY]: TRUE, [LIST_LEVEL_KEY]: "1" });
+    sel && editor.perform.applyLineMarks(sel, { [BULLET_LIST_KEY]: TRULY, [LIST_LEVEL_KEY]: "1" });
   }
 }

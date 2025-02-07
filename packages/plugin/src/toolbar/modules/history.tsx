@@ -1,6 +1,7 @@
 import { IconRedo, IconUndo } from "@arco-design/web-react/icon";
 import { EDITOR_EVENT } from "block-kit-core";
-import { cs, useMemoFn } from "block-kit-utils";
+import { cs } from "block-kit-utils";
+import { useMemoFn } from "block-kit-utils/dist/es/hooks";
 import type { FC } from "react";
 import { Fragment, useEffect, useState } from "react";
 

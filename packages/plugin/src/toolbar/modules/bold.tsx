@@ -1,5 +1,5 @@
 import { IconBold } from "@arco-design/web-react/icon";
-import { cs, NIL, TRUE } from "block-kit-utils";
+import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { BOLD_KEY } from "../../bold/types";
@@ -12,7 +12,7 @@ export const Bold: FC = () => {
     <div
       className={cs("menu-toolbar-item", keys[BOLD_KEY] && "active")}
       onClick={() => {
-        editor.command.exec(BOLD_KEY, { value: keys[BOLD_KEY] ? NIL : TRUE });
+        editor.command.exec(BOLD_KEY, { value: keys[BOLD_KEY] ? NIL : TRULY });
         refreshMarks();
       }}
     >

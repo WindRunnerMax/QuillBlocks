@@ -1,0 +1,66 @@
+/**
+ * @usage global singleton global.css;
+ *
+ * ```jsx
+ * import "laser-utils/dist/style/views.css";
+ * <div className="frame-box"></div>
+ * ```
+ */
+
+/* ------ 动画 ------ */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ------ Flex ------ */
+
+.flex-center {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.flex-align-center {
+  align-items: center;
+  display: flex;
+}
+
+.flex-justify-center {
+  display: flex;
+  justify-content: center;
+}
+
+.flex-justify-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ------ 文本 ------ */
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------ 盒子 ------ */
+
+.full-screen {
+  height: 100%;
+  width: 100%;
+}
+
+.frame-box {
+  background-color: var(--color-bg-1, #fff);
+  border: 1px solid var(--color-border-2, rgb(229, 230, 235));
+  border-radius: 3px;
+  box-shadow: 0 0 4px var(--color-border-2, rgb(229, 230, 235));
+}
+
+/* ------ --- ------ */

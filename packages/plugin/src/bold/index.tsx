@@ -4,7 +4,7 @@ import { applyMarker, isMatchHTMLTag } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
-import { isHTMLElement, TRUE } from "block-kit-utils";
+import { isHTMLElement, TRULY } from "block-kit-utils";
 import type { ReactNode } from "react";
 
 import { BOLD_KEY } from "./types";
@@ -44,7 +44,7 @@ export class BoldPlugin extends EditorPlugin {
       isMatchHTMLTag(html, "b") ||
       html.style.fontWeight === "bold"
     ) {
-      applyMarker(delta, { [BOLD_KEY]: TRUE });
+      applyMarker(delta, { [BOLD_KEY]: TRULY });
     }
     return context;
   }

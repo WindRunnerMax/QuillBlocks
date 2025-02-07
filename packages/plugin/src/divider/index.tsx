@@ -7,7 +7,7 @@ import { Delta } from "block-kit-delta";
 import type { ReactLeafContext } from "block-kit-react";
 import { Void } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
-import { Bind, TRUE } from "block-kit-utils";
+import { Bind, TRULY } from "block-kit-utils";
 import type { ReactNode } from "react";
 
 import { SelectionHOC } from "../shared/components/selection";
@@ -40,14 +40,14 @@ export class DividerPlugin extends EditorPlugin {
       // 当前选区为空行
       delta
         .retain(line.start)
-        .insert(" ", { [DIVIDER_KEY]: TRUE })
+        .insert(" ", { [DIVIDER_KEY]: TRULY })
         .insertEOL();
       point = new Point(line.index + 1, 0);
     } else {
       // 移动选区到当前行最后
       delta
         .retain(line.start + line.length)
-        .insert(" ", { [DIVIDER_KEY]: TRUE })
+        .insert(" ", { [DIVIDER_KEY]: TRULY })
         .insertEOL()
         .insertEOL();
       point = new Point(line.index + 2, 0);

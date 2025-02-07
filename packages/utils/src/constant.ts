@@ -1,3 +1,11 @@
+import { IS_MAC } from "./env";
+
+/** 默认节点 */
+export const ROOT_BLOCK = "ROOT";
+
+/** 默认优先级 */
+export const DEFAULT_PRIORITY = 100;
+
 /** 键盘键值 */
 export const KEY_CODE = {
   BACKSPACE: 8,
@@ -27,10 +35,16 @@ export const KEY_CODE = {
 };
 
 /** Truly */
-export const TRUE = "true";
+export const TRULY = "true";
 
 /** Falsy */
-export const FALSE = "false";
+export const FALSY = "false";
 
-/** NIL */
+/** 控制键 */
+export const CTRL_KEY = IS_MAC ? "metaKey" : "ctrlKey";
+
+/** 空函数 */
+export const NOOP = () => null;
+
+/** NIL STRING */
 export const NIL = "";

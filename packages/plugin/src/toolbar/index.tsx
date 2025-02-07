@@ -3,7 +3,8 @@ import "./styles/index.scss";
 import { EDITOR_EVENT } from "block-kit-core";
 import type { Op } from "block-kit-delta";
 import { useEditorStatic } from "block-kit-react";
-import { cs, useMemoFn } from "block-kit-utils";
+import { cs } from "block-kit-utils";
+import { useMemoFn } from "block-kit-utils/dist/es/hooks";
 import { useEffect, useState } from "react";
 
 import { ToolbarContext } from "./context/provider";

@@ -1,5 +1,5 @@
 import { IconUnderline } from "@arco-design/web-react/icon";
-import { cs, NIL, TRUE } from "block-kit-utils";
+import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { UNDERLINE_KEY } from "../../underline/types";
@@ -12,7 +12,7 @@ export const Underline: FC = () => {
     <div
       className={cs("menu-toolbar-item", keys[UNDERLINE_KEY] && "active")}
       onClick={() => {
-        editor.command.exec(UNDERLINE_KEY, { value: keys[UNDERLINE_KEY] ? NIL : TRUE });
+        editor.command.exec(UNDERLINE_KEY, { value: keys[UNDERLINE_KEY] ? NIL : TRULY });
         refreshMarks();
       }}
     >

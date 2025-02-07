@@ -1,5 +1,5 @@
 import { IconCode } from "@arco-design/web-react/icon";
-import { cs, NIL, TRUE } from "block-kit-utils";
+import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { INLINE_CODE } from "../../inline-code/types";
@@ -12,7 +12,7 @@ export const InlineCode: FC = () => {
     <div
       className={cs("menu-toolbar-item", keys[INLINE_CODE] && "active")}
       onClick={() => {
-        editor.command.exec(INLINE_CODE, { value: keys[INLINE_CODE] ? NIL : TRUE });
+        editor.command.exec(INLINE_CODE, { value: keys[INLINE_CODE] ? NIL : TRULY });
         refreshMarks();
       }}
     >

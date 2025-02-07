@@ -6,7 +6,8 @@
     "bootstrap": "pnpm install --frozen-lockfile",
     "dev": "pnpm run --filter ./packages/react-dev dev",
     "build": "pnpm run --filter '*' build",
-    "test": "pnpm run --filter '*' test"
+    "test": "pnpm run --filter '*' test",
+    "lint:ts": "pnpm run --filter '*' lint:ts"
   },
   "repository": {
     "type": "git",

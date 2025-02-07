@@ -1,5 +1,5 @@
 import { IconItalic } from "@arco-design/web-react/icon";
-import { cs, NIL, TRUE } from "block-kit-utils";
+import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { ITALIC_KEY } from "../../italic/types";
@@ -12,7 +12,7 @@ export const Italic: FC = () => {
     <div
       className={cs("menu-toolbar-item", keys[ITALIC_KEY] && "active")}
       onClick={() => {
-        editor.command.exec(ITALIC_KEY, { value: keys[ITALIC_KEY] ? NIL : TRUE });
+        editor.command.exec(ITALIC_KEY, { value: keys[ITALIC_KEY] ? NIL : TRULY });
         refreshMarks();
       }}
     >

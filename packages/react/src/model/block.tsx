@@ -1,6 +1,6 @@
 import type { BlockState, Editor } from "block-kit-core";
 import { BLOCK_KEY, EDITOR_EVENT, EDITOR_STATE } from "block-kit-core";
-import { useMemoFn } from "block-kit-utils";
+import { useMemoFn } from "block-kit-utils/dist/es/hooks";
 import type { FC } from "react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 

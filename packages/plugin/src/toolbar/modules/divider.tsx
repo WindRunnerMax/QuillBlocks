@@ -1,4 +1,4 @@
-import { cs, TRUE } from "block-kit-utils";
+import { cs, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { DIVIDER_KEY } from "../../divider/types";
@@ -12,7 +12,7 @@ export const Divider: FC = () => {
     <div
       className={cs("menu-toolbar-item")}
       onClick={() => {
-        editor.command.exec(DIVIDER_KEY, { value: TRUE });
+        editor.command.exec(DIVIDER_KEY, { value: TRULY });
         refreshMarks();
       }}
     >

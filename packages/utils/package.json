@@ -12,7 +12,8 @@
   "scripts": {
     "build:es": "tsc -p tsconfig.build.json",
     "build:lib": "tsc -p tsconfig.lib.json",
-    "build": "npm run build:es && npm run build:lib",
+    "build:style": "mkdir -p dist/style && cp src/*.*ss dist/style",
+    "build": "npm run build:es && npm run build:lib && npm run build:style",
     "release": "./publish.sh",
     "test": "jest",
     "lint:ts": "tsc -p tsconfig.build.json --noEmit",

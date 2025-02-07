@@ -4,7 +4,7 @@ import { applyMarker, isMatchHTMLTag } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
-import { isHTMLElement, TRUE } from "block-kit-utils";
+import { isHTMLElement, TRULY } from "block-kit-utils";
 import type { ReactNode } from "react";
 
 import { ITALIC_KEY } from "./types";
@@ -39,7 +39,7 @@ export class ItalicPlugin extends EditorPlugin {
     const { delta, html } = context;
     if (!isHTMLElement(html)) return context;
     if (isMatchHTMLTag(html, "em") || html.style.fontStyle === "italic") {
-      applyMarker(delta, { [ITALIC_KEY]: TRUE });
+      applyMarker(delta, { [ITALIC_KEY]: TRULY });
     }
     return context;
   }

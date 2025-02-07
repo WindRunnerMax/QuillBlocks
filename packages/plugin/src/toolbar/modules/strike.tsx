@@ -1,5 +1,5 @@
 import { IconStrikethrough } from "@arco-design/web-react/icon";
-import { cs, NIL, TRUE } from "block-kit-utils";
+import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { STRIKE_KEY } from "../../strike/types";
@@ -12,7 +12,7 @@ export const Strike: FC = () => {
     <div
       className={cs("menu-toolbar-item", keys[STRIKE_KEY] && "active")}
       onClick={() => {
-        editor.command.exec(STRIKE_KEY, { value: keys[STRIKE_KEY] ? NIL : TRUE });
+        editor.command.exec(STRIKE_KEY, { value: keys[STRIKE_KEY] ? NIL : TRULY });
         refreshMarks();
       }}
     >

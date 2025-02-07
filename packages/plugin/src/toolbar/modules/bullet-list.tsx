@@ -1,5 +1,5 @@
 import { IconUnorderedList } from "@arco-design/web-react/icon";
-import { cs, NIL, TRUE } from "block-kit-utils";
+import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { BULLET_LIST_KEY } from "../../bullet-list/types";
@@ -12,7 +12,7 @@ export const BulletList: FC = () => {
     <div
       className={cs("menu-toolbar-item", keys[BULLET_LIST_KEY] && "active")}
       onClick={() => {
-        editor.command.exec(BULLET_LIST_KEY, { value: keys[BULLET_LIST_KEY] ? NIL : TRUE });
+        editor.command.exec(BULLET_LIST_KEY, { value: keys[BULLET_LIST_KEY] ? NIL : TRULY });
         refreshMarks();
       }}
     >
