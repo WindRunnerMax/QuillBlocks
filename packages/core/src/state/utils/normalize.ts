@@ -1,4 +1,5 @@
 import type { Op, Ops } from "block-kit-delta";
+import { Delta } from "block-kit-delta";
 import { cloneOp, EOL, EOL_OP, isInsertOp, startsWithEOL } from "block-kit-delta";
 
 import type { Editor } from "../../editor";
@@ -28,12 +29,14 @@ export const binarySearch = (lines: LineState[], offset: number) => {
 };
 
 /**
- * 标准化独立 EOL 字符
- * - 方便处理 Ops 的换行操作
- * - 针对 void 节点补充 EOL
- * @param ops
+ * 标准化 Delta
+ * - 处理 Ops 的换行操作
+ * - 针对 Void 节点补充 EOL
+ * @param editor
+ * @param delta
  */
-export const normalizeComposeOps = (editor: Editor, ops: Ops) => {
+export const normalizeDelta = (editor: Editor, delta: Delta) => {
+  const ops = delta.ops;
   const collection: Ops = [];
   const collect = (op: Op) => {
     if (!op.attributes) {
@@ -51,17 +54,22 @@ export const normalizeComposeOps = (editor: Editor, ops: Ops) => {
       collect({ insert: EOL, attributes });
       return void 0;
     }
+    // 如果当前 Op 存在 Void Key, 即 Void/Embed 节点
+    if (editor.schema.hasVoidKey(op)) {
+      const nextOp = ops[index + 1];
+      // 当前处理的长度需要规整为 1
+      collect({ ...op, insert: op.insert.slice(0, 1) });
+      // 若下个节点不是 EOL, 则需要补充 EOL
+      if (!startsWithEOL(nextOp)) collect(cloneOp(EOL_OP));
+      return void 0;
+    }
     const part = op.insert.split(EOL);
     part.forEach((text, i) => {
       text && collect({ insert: text, attributes });
       if (i === part.length - 1) return void 0;
       collect({ insert: EOL, attributes });
     });
-    const nextOp = ops[index + 1];
-    // 如果当前 Op 是 Block, 且下个节点不是 EOL, 则需要补充 EOL
-    if (editor.schema.isBlock(op) && !startsWithEOL(nextOp)) {
-      collect(cloneOp(EOL_OP));
-    }
+    return void 0;
   });
-  return collection;
+  return new Delta(collection);
 };

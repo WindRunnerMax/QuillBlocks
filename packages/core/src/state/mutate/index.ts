@@ -9,6 +9,7 @@ import {
   isEqualAttributes,
   isInsertOp,
   isRetainOp,
+  normalizeEOL,
   OP_TYPES,
 } from "block-kit-delta";
 import { OpIterator } from "block-kit-delta";
@@ -18,7 +19,6 @@ import type { Editor } from "../../editor";
 import type { BlockState } from "../modules/block-state";
 import { LeafState } from "../modules/leaf-state";
 import { LineState } from "../modules/line-state";
-import { normalizeComposeOps } from "../utils/normalize";
 import { Iterator } from "./iterator";
 
 export class Mutate {
@@ -101,14 +101,14 @@ export class Mutate {
 
   /**
    * 组合 Ops
-   * @param other
+   * @param other 请注意, 该参数必须要先 normalize
    */
   public compose(other: Delta): LineState[] {
     this.inserts = [];
     this.deletes = [];
     this.revises = [];
     this.newLines = [];
-    const otherOps = normalizeComposeOps(this.editor, other.ops);
+    const otherOps = normalizeEOL(other.ops);
     const thisIter = new Iterator(this.lines);
     const otherIter = new OpIterator(otherOps);
     const firstOther = otherIter.peek();
@@ -170,6 +170,7 @@ export class Mutate {
       }
     }
     // 当行状态存在值或者当前没有行时, 补齐行数据内容
+    // TODO: 这里需要注意会影响协同, 理论上需要避免操作末尾的 \n 符号
     if (lineState.getLeaves().length || !this.newLines.length) {
       this.insert(lineState, new LeafState(cloneOp(EOL_OP), 0, lineState));
     }

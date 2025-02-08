@@ -10,6 +10,7 @@ import { BlockState } from "./modules/block-state";
 import { Mutate } from "./mutate";
 import type { ApplyOptions, ApplyResult } from "./types";
 import { EDITOR_STATE } from "./types";
+import { normalizeDelta } from "./utils/normalize";
 
 export class EditorState {
   /** Delta 缓存 */
@@ -93,24 +94,26 @@ export class EditorState {
     const previous = this.toBlockSet();
     this._delta = null;
     const selection = this.editor.selection;
+    // 必须要先标准化 Delta, 否则会导致协同一致性问题
+    const normalized = normalizeDelta(this.editor, delta);
 
     // 获取当前选区位置
     const raw: RawRange | null = autoCaret ? options.range || selection.toRaw() : null;
     this.editor.event.trigger(EDITOR_EVENT.CONTENT_WILL_CHANGE, {
       current: previous,
       source: source,
-      changes: delta,
+      changes: normalized,
     });
 
     // 更新 BlockSet Model
     const mutate = new Mutate(this.block);
-    const newLines = mutate.compose(delta);
+    const newLines = mutate.compose(normalized);
     this.block.updateLines(newLines);
 
     // 更新选区位置
     if (autoCaret && raw) {
-      const start = delta.transformPosition(raw.start);
-      const end = raw.len ? delta.transformPosition(raw.start + raw.len) : start;
+      const start = normalized.transformPosition(raw.start);
+      const end = raw.len ? normalized.transformPosition(raw.start + raw.len) : start;
       const range = Range.fromRaw(this.editor, new RawRange(start, end - start));
       this.editor.selection.set(range);
     }
@@ -122,7 +125,7 @@ export class EditorState {
       previous: previous,
       current: current,
       source: source,
-      changes: delta,
+      changes: normalized,
       inserts: mutate.inserts,
       revises: mutate.revises,
       deletes: mutate.deletes,

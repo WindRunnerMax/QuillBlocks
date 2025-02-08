@@ -1424,3 +1424,5 @@ const App = () => {
 ReactDOM.render(<App />, document.getElementById("root"));
 ```
 
+## 自绘选区实现
+

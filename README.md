@@ -1,18 +1,20 @@
 # BlockKit
 
 <p>
-<a href="https://github.com/WindRunnerMax/QuillBlocks">GitHub</a>
+<a href="https://github.com/WindRunnerMax/BlockKit">GitHub</a>
 <span>｜</span>
-<a href="https://windrunnermax.github.io/QuillBlocks/">DEMO</a>
+<a href="https://windrunnermax.github.io/BlockKit/">DEMO</a>
 <span>｜</span>
 <a href="./NOTE.md">NOTE</a>
 <span>｜</span>
-<a href="https://github.com/WindRunnerMax/QuillBlocks/issues/1">BLOG</a>
+<a href="https://github.com/WindRunnerMax/BlockKit/issues/1">BLOG</a>
 </p>
 
 从零实现的富文本编辑器 `WYSIWYG Editor` 
 
 ## Why?
+
+纸上得来终觉浅，绝知此事要躬行。
 
 最初，希望基于 [Quill](https://github.com/slab/quill) 实现块结构组织的编辑器，却被跨行的选区问题所困扰。
 

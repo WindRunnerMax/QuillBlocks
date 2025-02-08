@@ -1,7 +1,7 @@
 import { Delta } from "block-kit-delta";
 
 import { Editor } from "../../src/editor";
-import { normalizeComposeOps } from "../../src/state/utils/normalize";
+import { normalizeDelta } from "../../src/state/utils/normalize";
 
 describe("state utils", () => {
   it("normalize compose ops", () => {
@@ -15,7 +15,7 @@ describe("state utils", () => {
       .insert(" ", { block: "true" })
       .insert("789")
       .insert(" ", { block: "true" });
-    const nextOps = normalizeComposeOps(editor, delta.ops);
+    const nextOps = normalizeDelta(editor, delta).ops;
     expect(nextOps).toEqual([
       { insert: "123" },
       { insert: "\n" },
