@@ -175,7 +175,8 @@ export class Collect {
     }
     const point = current.start;
     const leaf = this.editor.collect.getLeafAtPoint(point);
-    if (leaf && leaf.block && leaf.block) return void 0;
+    // FIX: 当前节点为 void 时, 不需要处理文本
+    if (leaf && leaf.void) return void 0;
     const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
     const attributes = this.getLeafMarks(leaf && leaf.op, isLeafTail);
     this.marks = attributes || {};

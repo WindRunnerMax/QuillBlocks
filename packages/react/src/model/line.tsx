@@ -37,7 +37,7 @@ const LineView: FC<{
     // inline-void 在行未时需要预设零宽字符来放置光标
     const eolLeaf = leaves[leaves.length - 1];
     const lastLeaf = textLeaves[textLeaves.length - 1];
-    if (lastLeaf && eolLeaf && lastLeaf.void && lastLeaf.inline) {
+    if (lastLeaf && eolLeaf && lastLeaf.embed) {
       nodes.push(<EOLModel key={EOL} editor={editor} leafState={eolLeaf} />);
     }
     return nodes;

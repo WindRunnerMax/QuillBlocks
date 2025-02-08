@@ -10,8 +10,11 @@ export type Handler<T extends EventKeys> = {
 };
 
 export type EventContext = {
+  /** 事件名 */
   key: string;
+  /** 已停止顺序执行 */
   stopped: boolean;
+  /** 已阻止编辑器默认行为 */
   prevented: boolean;
   /** 停止顺序执行 */
   stop: () => void;

@@ -26,7 +26,8 @@ export class Perform {
     if (!raw) return void 0;
     const point = sel.start;
     const leaf = this.editor.collect.getLeafAtPoint(point);
-    if (leaf && leaf.block && leaf.block) return void 0;
+    // FIX: 当前节点为 void 时, 不能插入文本
+    if (leaf && leaf.void) return void 0;
     let attributes: AttributeMap | undefined = this.editor.collect.marks;
     if (!sel.isCollapsed) {
       // 非折叠选区时, 需要以 start 起始判断该节点的尾部 marks

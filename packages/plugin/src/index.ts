@@ -5,7 +5,7 @@ export { BACKGROUND_KEY } from "./background/types";
 export { BoldPlugin } from "./bold";
 export { BOLD_KEY } from "./bold/types";
 export { BulletListPlugin } from "./bullet-list";
-export { BULLET_LIST_KEY, LIST_LEVEL_KEY } from "./bullet-list/types";
+export { BULLET_LIST_KEY } from "./bullet-list/types";
 export { DividerPlugin } from "./divider";
 export { DIVIDER_KEY } from "./divider/types";
 export { FontColorPlugin } from "./font-color";
@@ -25,6 +25,8 @@ export {
   LOADING_STATUS,
   MIN_WIDTH,
 } from "./image/types";
+export { IndentPlugin } from "./indent";
+export { INDENT_LEVEL_KEY } from "./indent/types";
 export { InlineCodePlugin } from "./inline-code";
 export { INLINE_CODE } from "./inline-code/types/index";
 export { ItalicPlugin } from "./italic/index";

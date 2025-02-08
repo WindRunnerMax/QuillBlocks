@@ -11,6 +11,7 @@ import {
   FontSizePlugin,
   HeadingPlugin,
   ImagePlugin,
+  IndentPlugin,
   InlineCodePlugin,
   ItalicPlugin,
   LineHeightPlugin,
@@ -51,7 +52,8 @@ const App: FC = () => {
       new BackgroundPlugin(instance),
       new DividerPlugin(instance),
       new BulletListPlugin(instance),
-      new OrderListPlugin(instance)
+      new OrderListPlugin(instance),
+      new IndentPlugin(instance)
     );
     return instance;
   }, []);

@@ -1425,4 +1425,41 @@ ReactDOM.render(<App />, document.getElementById("root"));
 ```
 
 ## 自绘选区实现
+在我们的设计中是基于`ContentEditable`实现，也就是说没有准备实现自绘选区，只是最近思考了一下自绘选区的实现。通常来说在整体编辑器内的`contenteditable=false`节点会存在特殊的表现，在类似于`inline-block`节点中，例如`Mention`节点中，当节点前后没有任何内容时，我们就需要在其前后增加零宽字符，用以放置光标。
+
+在下面的例子中，`line-1`是无法将光标放置在`@xxx`内容后的，虽然我们能够将光标放置之前，但此时光标位置是在`line node`上，是不符合我们预期的文本节点的。那么我们就必须要在其后加入零宽字符，在`line-2/3`中我们就可以看到正确的光标放置效果。这里的`0.1px`也是个为了兼容光标的放置的`magic`，没有这个`hack`的话，非同级节点光标同样无法放置在`inline-block`节点后。
+
+```html
+<div contenteditable style="outline: none">
+  <div data-line-node="1">
+    <span data-leaf><span contenteditable="false" style="margin: 0 0.1px;">@xxx</span></span>
+  </div>
+  <div data-line-node="2">
+    <span data-leaf>&#8203;</span>
+    <span data-leaf><span contenteditable="false" style="margin: 0 0.1px;">@xxx</span></span>
+    <span data-leaf>&#8203;</span>
+  </div>
+  <div data-line-node="3">
+    <span data-leaf>&#8203;<span contenteditable="false">@xxx</span>&#8203;</span>
+  </div>
+</div>
+```
+
+那么除了通过零宽字符或者`<br>`标签来放置光标外，自然也可以通过自绘选区来实现，因为此时不再需要`ContentEditable`属性，那么自然就不会存在这些奇怪的行为。因此如果借助原生的选区实现，然后在此基础上实现控制器层，就可以实现完全受控的编辑器。
+
+但是这里存在一个很大的问题，就是内容的输入，因为不启用`ContentEditable`的话是无法出现光标的，自然也无法输入内容。而如果我们想唤醒内容输入，特别是需要唤醒`IME`输入法的话，浏览器给予的常规`API`就是借助`<input>`来完成，因此我们就必须要实现隐藏的`<input>`来实现输入，实际上很多代码编辑器例如 [CodeMirror](https://github.com/codemirror/codemirror5) 就是类似实现。
+
+但是使用隐藏的`<input>`就会出现其他问题，因为焦点在`input`上时，浏览器的文本就无法选中了。因为在同个页面中，焦点只会存在一个位置，因此在这种情况下，我们就必须要自绘选区的实现了。例如钉钉文档、有道云笔记就是自绘选区，开源的 [Monaco](https://github.com/microsoft/monaco-editor) 同样是自绘选区，[TextBus](https://github.com/textbus/textbus) 则绘制了光标，选区则是借助了浏览器实现。
+
+其实这里说起来`TextBus`的实现倒是比较有趣，因为其自绘了光标焦点需要保持在外挂的`textarea`上，但是本身的文本选区也是需要焦点的。因此这里的实现应该是具有比较特殊的实现，特别是`IME`的输入中应该是有特殊处理，可能是重新触发了事件。而且这里的`IME`输入除了本身的非折叠选区内容删除外，还需要唤醒字符的输入，此外还有输入过程中暂态的字符处理，自绘选区复杂的地方就在输入模块上。
+
+那么除了特殊的`TextBus`外，`CodeMirror`、`Monaco/VSCode`、钉钉文档、有道云笔记的编辑器都是自绘选区的实现。那么自绘选区就需要考虑两点内容，首先是如何计算当前光标在何处，其次就是如何绘制虚拟的选区图层。选区图层这部分我们之前的`diff`和虚拟图层实现中已经聊过了，我们还是采取相对简单的三行绘制的形式实现，现在基本都是这么实现的，折行情况下的独行绘制目前只在飞书文档的搜索替换中看到过。
+
+因此复杂的就是光标在何处的计算，我们的编辑器选区依然可以保持浏览器的模型来实现，主要是取得`anchor`和`focus`的位置即可。那么在浏览器中是存在`API`可以实现光标的位置选区`Range`的，目前我看只有`VSCode`中使用了这个`API`，而`CodeMirror`和钉钉文档则是自己实现了光标的位置计算。`CodeMirror`中通过二分查找来不断对比光标和字符位置，这其中折行的查找会导致复杂了不少。
+
+说起来，`VSCode`的包管理则是挺有趣的管理，`VSC`是开源的应用，在其中提取了核心的`monaco-editor-core`包。然后这个包会作为`monaco-editor`的`dev`依赖，在打包的时候会将其打包到`monaco-editor`中，`monaco-editor`则是重新包装了`core`来让编辑器可以运行在浏览器`web`容器内，这样就可以实现`web`版的`VSCode`。
+
+- <https://developer.mozilla.org/zh-CN/docs/Web/API/Document/caretRangeFromPoint>
+- <https://github.com/codemirror/codemirror5/blob/b60e456/src/edit/mouse_events.js#L75>
+- <https://github.com/microsoft/vscode/blob/18a64b/src/vs/editor/browser/controller/mouseTarget.ts#L975>
 

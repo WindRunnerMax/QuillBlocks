@@ -12,8 +12,8 @@ export class LeafState {
   public readonly eol: boolean;
   /** Void 节点 */
   public readonly void: boolean;
-  /** Block 节点 */
-  public readonly block: boolean;
+  /** Embed 节点 */
+  public readonly embed: boolean;
   /** Inline 节点 */
   public readonly inline: boolean;
   /** Op 长度 */
@@ -31,7 +31,7 @@ export class LeafState {
     this.eol = op.insert === EOL;
     const editor = parent.parent.editor;
     this.void = editor.schema.isVoid(op);
-    this.block = editor.schema.isBlock(op);
+    this.embed = editor.schema.isEmbed(op);
     this.inline = editor.schema.isInline(op);
     this.length = op.insert ? op.insert.length : 0;
     if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
