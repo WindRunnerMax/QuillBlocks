@@ -17,6 +17,12 @@ body {
     z-index: 100;
   }
 
+  .block-kit-mount-dom {
+    left: 0;
+    position: absolute;
+    top: 0;
+  }
+
   .block-kit-editable {
     background-color: var(--color-bg-1);
     margin: 15px auto;

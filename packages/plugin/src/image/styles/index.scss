@@ -1,3 +1,29 @@
-.block-kit-image-void {
+.block-kit-image-container {
   display: inline-block;
+  position: relative;
+
+  .block-kit-image {
+    display: block;
+    height: auto;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  .block-kit-image-loading {
+    align-items: center;
+    background-color: rgba(var(--gray-3), 0.5);
+    bottom: 0;
+    box-sizing: border-box;
+    color: var(--color-text-2);
+    display: flex;
+    font-size: 23px;
+    justify-content: center;
+    left: 0;
+    padding: 1px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2;
+  }
 }

@@ -1,4 +1,4 @@
-import { isObject, isPlainNumber, isString } from "./is";
+import { isNil, isObject, isPlainNumber, isString } from "./is";
 import type { Primitive } from "./types";
 
 export class Styles {
@@ -10,7 +10,7 @@ export class Styles {
   public static pixelate(value: Primitive.Nil): null;
   public static pixelate(value: string | number): string;
   public static pixelate(value: string | number | Primitive.Nil): string | null {
-    if (!value) return null;
+    if (isNil(value) || value === "") return null;
     if (isString(value) && value.endsWith("px")) return value;
     return isPlainNumber(value) ? value + "px" : null;
   }

@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 
 import { SelectionHOC } from "../shared/components/selection";
 import { SelectionPlugin } from "../shared/modules/selection";
+import { isEmptyLine } from "../shared/utils/is";
 import { DIVIDER_KEY } from "./types";
 
 export class DividerPlugin extends EditorPlugin {
@@ -34,24 +35,22 @@ export class DividerPlugin extends EditorPlugin {
     const sel = editor.selection.get() || context.range;
     const line = sel && editor.state.block.getLine(sel.start.line);
     if (!sel || !line) return void 0;
-    let point: Point | null = null;
+    const isEmptyTextLine = isEmptyLine(line);
+    let nextLineIndex = line.index + 1;
     const delta = new Delta();
-    if (line.length < 2) {
+    if (isEmptyTextLine) {
       // 当前选区为空行
-      delta
-        .retain(line.start)
-        .insert(" ", { [DIVIDER_KEY]: TRULY })
-        .insertEOL();
-      point = new Point(line.index + 1, 0);
+      delta.retain(line.start);
     } else {
       // 移动选区到当前行最后
-      delta
-        .retain(line.start + line.length)
-        .insert(" ", { [DIVIDER_KEY]: TRULY })
-        .insertEOL()
-        .insertEOL();
-      point = new Point(line.index + 2, 0);
+      delta.retain(line.start + line.length);
     }
+    delta.insert(" ", { [DIVIDER_KEY]: TRULY }).insertEOL();
+    if (!isEmptyTextLine) {
+      nextLineIndex++;
+      delta.insertEOL();
+    }
+    const point = new Point(nextLineIndex, 0);
     editor.state.apply(delta, { autoCaret: false });
     editor.selection.set(new Range(point, point.clone()));
   }

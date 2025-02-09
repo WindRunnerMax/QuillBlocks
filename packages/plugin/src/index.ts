@@ -39,6 +39,7 @@ export { OrderListPlugin } from "./order-list";
 export { LIST_START_KEY, ORDER_LIST_KEY } from "./order-list/types";
 export { SelectionHOC } from "./shared/components/selection";
 export { SelectionPlugin } from "./shared/modules/selection";
+export { getMountDOM, setMountDOM } from "./shared/utils/dom";
 export { isEmptyLine, isKeyCode } from "./shared/utils/is";
 export { StrikePlugin } from "./strike/index";
 export { STRIKE_KEY } from "./strike/types";

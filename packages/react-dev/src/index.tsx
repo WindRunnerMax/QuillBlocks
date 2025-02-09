@@ -16,6 +16,7 @@ import {
   ItalicPlugin,
   LineHeightPlugin,
   MentionPlugin,
+  setMountDOM,
   StrikePlugin,
   Toolbar,
   UnderlinePlugin,
@@ -65,6 +66,10 @@ const App: FC = () => {
     window.Delta = Delta;
   }, [editor]);
 
+  const onMountRef = (e: HTMLElement | null) => {
+    setMountDOM(editor, e);
+  };
+
   return (
     <BlockKit editor={editor} readonly={readonly}>
       <div className="block-kit-editor-container">
@@ -92,6 +97,7 @@ const App: FC = () => {
           <Toolbar.Cut></Toolbar.Cut>
           <GitHubIcon></GitHubIcon>
         </Toolbar>
+        <div className="block-kit-mount-dom" ref={onMountRef}></div>
         <Editable autoFocus className="block-kit-editable"></Editable>
       </div>
     </BlockKit>

@@ -22,7 +22,10 @@ export const INIT = new Delta({
     { insert: "\n" },
     { insert: "块级结构" },
     { insert: "\n", attributes: { heading: "h2" } },
-    { insert: " ", attributes: { image: "true" } },
+    {
+      insert: " ",
+      attributes: { image: "true", src: "./favicon.ico", width: "200", height: "200" },
+    },
     { insert: "\n" },
     { insert: "嵌入结构" },
     { insert: "\n", attributes: { heading: "h2" } },

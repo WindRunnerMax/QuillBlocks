@@ -30,10 +30,10 @@ export class Ref {
    * range 创建引用
    * @param range
    */
-  public range(range: RawRange) {
+  public pack(range: RawRange) {
     const ref: RawRangeRef = {
       current: range,
-      unref: () => this.unref(ref),
+      unpack: () => this.unpack(ref),
     };
     this.rangeRefs.add(ref);
     if (process.env.NODE_ENV === "development") {
@@ -48,7 +48,7 @@ export class Ref {
    * 拆离引用
    * @param ref
    */
-  protected unref(ref: RawRangeRef) {
+  protected unpack(ref: RawRangeRef) {
     const current = ref.current;
     this.rangeRefs.delete(ref);
     ref.current = null;
