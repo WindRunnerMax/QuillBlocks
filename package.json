@@ -1,6 +1,6 @@
 {
   "name": "block-kit",
-  "description": "QuillJs for React implementation",
+  "description": "WYSIWYG Editor Widget",
   "version": "1.0.0",
   "scripts": {
     "bootstrap": "pnpm install --frozen-lockfile",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/WindrunnerMax/BlocksKit.git"
+    "url": "git+https://github.com/WindrunnerMax/BlockKit.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/WindrunnerMax/BlocksKit/issues"
+    "url": "https://github.com/WindrunnerMax/BlockKit/issues"
   },
-  "homepage": "https://github.com/WindrunnerMax/BlocksKit",
+  "homepage": "https://github.com/WindrunnerMax/BlockKit",
   "devDependencies": {
     "@types/jest": "29.4.0",
     "@types/node": "20.12.5",

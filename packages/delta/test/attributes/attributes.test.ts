@@ -107,7 +107,7 @@ describe("AttributeMap", () => {
       expect(invertAttributes(attributes, base)).toEqual(expected);
     });
 
-    it('""', () => {
+    it("value", () => {
       const attributes = { bold: "" };
       const base = { bold: "true" };
       const expected = { bold: "true" };

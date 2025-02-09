@@ -69,7 +69,7 @@ export class RawRange {
   public static fromRange(editor: Editor, range: Range | null): RawRange | null {
     if (!range) return null;
     const start = RawPoint.fromPoint(editor, range.start);
-    const end = RawPoint.fromPoint(editor, range.end);
+    const end = range.isCollapsed ? start : RawPoint.fromPoint(editor, range.end);
     if (start && end) {
       // 此处保证 start 指向 end
       return new RawRange(start.offset, Math.max(end.offset - start.offset, 0));

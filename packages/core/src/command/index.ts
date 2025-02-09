@@ -42,4 +42,12 @@ export class Command {
   public exec(key: string, data: CMDPayload) {
     return this.commands[key] && this.commands[key](data);
   }
+
+  /**
+   * 卸载命令
+   * @param key
+   */
+  public unregister(key: string) {
+    delete this.commands[key];
+  }
 }

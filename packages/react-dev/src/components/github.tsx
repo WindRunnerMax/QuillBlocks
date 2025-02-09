@@ -5,7 +5,7 @@ export const GitHubIcon: FC = () => {
   return (
     <div
       className="menu-toolbar-item"
-      onClick={() => window.open("https://github.com/WindRunnerMax/QuillBlocks")}
+      onClick={() => window.open("https://github.com/WindRunnerMax/BlockKit")}
     >
       <IconGithub />
     </div>

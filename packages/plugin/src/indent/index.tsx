@@ -5,7 +5,7 @@ import { Delta } from "block-kit-delta";
 import type { ReactLineContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
 import type { EventContext } from "block-kit-utils";
-import { Bind, CTRL_KEY, KEY_CODE } from "block-kit-utils";
+import { Bind, KEY_CODE } from "block-kit-utils";
 
 import { INDENT_LEVEL_KEY } from "./types";
 
@@ -52,9 +52,10 @@ export class IndentPlugin extends EditorPlugin {
       delta.retain(lineState.length - 1);
       const attrs = lineState.attributes;
       const current = Number(attrs[INDENT_LEVEL_KEY]) || 0;
-      const ins = event[CTRL_KEY] ? 5 : 1;
+      const ins = event.shiftKey ? -1 : 1;
+      const next = Math.max(0, current + ins);
       delta.retain(1, {
-        [INDENT_LEVEL_KEY]: Math.max(0, current + ins).toString(),
+        [INDENT_LEVEL_KEY]: next ? next.toString() : "",
       });
     }
     this.editor.state.apply(delta);

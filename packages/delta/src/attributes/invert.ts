@@ -9,7 +9,6 @@ export const invertAttributes = (
   attr: AttributeMap = {},
   base: AttributeMap = {}
 ): AttributeMap => {
-  attr = attr || {};
   const baseInverted = Object.keys(base).reduce<AttributeMap>((memo, key) => {
     if (base[key] !== attr[key] && attr[key] !== undefined) {
       memo[key] = base[key];

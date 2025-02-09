@@ -1,5 +1,6 @@
 import type { AttributeMap } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
+import { invertAttributes } from "block-kit-delta";
 
 import { getFirstUnicodeLen, getLastUnicodeLen } from "../collect/utils/string";
 import type { Editor } from "../editor";
@@ -62,14 +63,38 @@ export class Perform {
   public deleteBackward(sel: Range) {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
     const line = this.editor.state.block.getLine(sel.start.line);
-    const prevLine = line && line.prev();
-    // 上一行为块节点且处于当前行首时, 删除则移动光标到该节点上
-    if (!sel.start.offset && prevLine && isBlockLine(prevLine)) {
-      const firstLeaf = prevLine.getFirstLeaf();
-      const range = firstLeaf && firstLeaf.toRange();
-      range && this.editor.selection.set(range, true);
-      return void 0;
+    // 处于当前行的行首, 且存在行状态节点
+    if (sel.start.offset === 0 && line) {
+      const prevLine = line && line.prev();
+      // 上一行为块节点且处于当前行首时, 删除则移动光标到该节点上
+      if (prevLine && isBlockLine(prevLine)) {
+        const firstLeaf = prevLine.getFirstLeaf();
+        const range = firstLeaf && firstLeaf.toRange();
+        range && this.editor.selection.set(range, true);
+        return void 0;
+      }
+      const attrsLength = Object.keys(line.attributes).length;
+      // 如果在当前行的行首, 且存在其他行属性, 则删除当前行的行属性
+      if (attrsLength > 0) {
+        const delta = new Delta()
+          .retain(line.start + line.length - 1)
+          .retain(1, invertAttributes(line.attributes));
+        this.editor.state.apply(delta, { autoCaret: false });
+        return void 0;
+      }
+      // 如果在当前行的行首, 且不存在其他行属性, 则将当前行属性移到下一行
+      if (prevLine && !attrsLength) {
+        const prevAttrs = { ...prevLine.attributes };
+        const delta = new Delta()
+          .retain(line.start - 1)
+          .delete(1)
+          .retain(line.length - 1)
+          .retain(1, prevAttrs);
+        this.editor.state.apply(delta);
+        return void 0;
+      }
     }
+    // 处理基本的删除操作
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const op = this.editor.collect.getBackwardOpAtPoint(sel.start);
@@ -105,6 +130,7 @@ export class Perform {
       range && this.editor.selection.set(range, true);
       return void 0;
     }
+    // 处理基本的删除操作
     const raw = RawRange.fromRange(this.editor, sel);
     if (!raw) return void 0;
     const start = raw.start;
@@ -138,7 +164,7 @@ export class Perform {
     let point: Point | null = null;
     if (start === startLine.start) {
       // 当光标在行首时, 直接移动行属性
-      // |xx(\n {y:1}) => (\n)|xx(\n {y:1})
+      // |xx(\n {y:1}) => (\n)|xx(\n {y:1} & attributes)
       delta.insertEOL();
       const lineOffset = endLine.length - 1;
       delta.retain(lineOffset - sel.end.offset).retain(1, attributes);
