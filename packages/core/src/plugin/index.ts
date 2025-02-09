@@ -27,8 +27,8 @@ export class Plugin {
     for (const plugin of this.current) {
       plugin.destroy();
     }
-    this.current = [];
     this.cache = {};
+    this.current = [];
   }
 
   /**

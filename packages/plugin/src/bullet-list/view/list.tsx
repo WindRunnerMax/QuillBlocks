@@ -1,9 +1,11 @@
+import "../styles/index.scss";
+
 import type { Editor } from "block-kit-core";
 import type { ReactLineContext } from "block-kit-react";
 import { cs } from "block-kit-utils";
 import type { FC } from "react";
 
-export const ListView: FC<{
+export const BulletListView: FC<{
   context: ReactLineContext;
   editor: Editor;
   level: number;

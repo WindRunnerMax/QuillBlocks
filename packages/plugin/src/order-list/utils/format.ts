@@ -57,14 +57,14 @@ export const formatListLevel = (start: number, level: number) => {
   let serial = "";
   const value = level % 3;
   if (value === 0) {
-    // 1 -> i
-    serial = startToRoman(start);
-  } else if (value === 1) {
     // 1 -> 1
     serial = start.toString();
-  } else if (value === 2) {
+  } else if (value === 1) {
     // 1 -> a
     serial = startToLatin(start);
+  } else if (value === 2) {
+    // 1 -> i
+    serial = startToRoman(start);
   }
   return serial + ".";
 };

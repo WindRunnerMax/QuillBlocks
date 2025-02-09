@@ -64,7 +64,7 @@ export class Perform {
     if (!sel.isCollapsed) return this.deleteFragment(sel);
     const line = this.editor.state.block.getLine(sel.start.line);
     // 处于当前行的行首, 且存在行状态节点
-    if (sel.start.offset === 0 && line) {
+    if (line && sel.start.offset === 0) {
       const prevLine = line && line.prev();
       // 上一行为块节点且处于当前行首时, 删除则移动光标到该节点上
       if (prevLine && isBlockLine(prevLine)) {

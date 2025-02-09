@@ -4,9 +4,9 @@ import type { AttributeMap } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
 import type { ReactLineContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
-import type { EventContext } from "block-kit-utils";
 import { Bind, KEY_CODE } from "block-kit-utils";
 
+import { isKeyCode } from "../shared/utils/is";
 import { INDENT_LEVEL_KEY } from "./types";
 
 export class IndentPlugin extends EditorPlugin {
@@ -14,7 +14,8 @@ export class IndentPlugin extends EditorPlugin {
 
   constructor(protected editor: Editor) {
     super();
-    editor.event.on(EDITOR_EVENT.KEY_DOWN, this.onKeydown);
+    // 保证优先级需要大于相关插件, 例如有序列表插件
+    editor.event.on(EDITOR_EVENT.KEY_DOWN, this.onKeydown, 90);
   }
 
   public destroy(): void {
@@ -36,8 +37,8 @@ export class IndentPlugin extends EditorPlugin {
   }
 
   @Bind
-  protected onKeydown(event: KeyboardEvent, context: EventContext): void {
-    if (event.keyCode !== KEY_CODE.TAB) return void 0;
+  protected onKeydown(event: KeyboardEvent): void {
+    if (!isKeyCode(event, KEY_CODE.TAB)) return void 0;
     const sel = this.editor.selection.get();
     if (!sel) return void 0;
     const { start, end } = sel;
@@ -53,13 +54,13 @@ export class IndentPlugin extends EditorPlugin {
       const attrs = lineState.attributes;
       const current = Number(attrs[INDENT_LEVEL_KEY]) || 0;
       const ins = event.shiftKey ? -1 : 1;
-      const next = Math.max(0, current + ins);
+      // 限制缩进的最大值与最小值
+      const next = Math.min(Math.max(0, current + ins), 15);
       delta.retain(1, {
         [INDENT_LEVEL_KEY]: next ? next.toString() : "",
       });
     }
     this.editor.state.apply(delta);
-    context.stop();
     event.preventDefault();
     event.stopPropagation();
   }
