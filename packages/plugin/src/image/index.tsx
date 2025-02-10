@@ -49,12 +49,12 @@ export class ImagePlugin extends EditorPlugin {
       getMountDOM(this.editor).append(imageInput);
     }
     return new Promise<FileList | null>(resolve => {
-      imageInput.onchange = e => {
+      imageInput!.onchange = e => {
         const target = e.target as HTMLInputElement;
         const files = target.files;
         resolve(files);
       };
-      imageInput.click();
+      imageInput!.click();
     });
   }
 
@@ -74,7 +74,7 @@ export class ImagePlugin extends EditorPlugin {
     if (!sel || !line || !files) return void 0;
     // 开始计算索引值
     const isEmptyTextLine = isEmptyLine(line);
-    let nextLineIndex = line.index + 1;
+    let nextLineIndex = line.index;
     const delta = new Delta();
     let index = line.start;
     if (isEmptyTextLine) {
@@ -93,6 +93,7 @@ export class ImagePlugin extends EditorPlugin {
         .insertEOL();
       packIndex.push(index);
       index = index + 2;
+      nextLineIndex++;
     }
     if (!isEmptyTextLine) {
       nextLineIndex++;
@@ -107,6 +108,7 @@ export class ImagePlugin extends EditorPlugin {
       const file = files[i];
       const refIndex = packIndex[i];
       const ref = editor.ref.pack(RawRange.from(refIndex, 0));
+      // 独立并行上传, 且独立 unpack
       this.uploadImage(file)
         .then(res => {
           const rawRange = ref.unpack();
@@ -116,7 +118,7 @@ export class ImagePlugin extends EditorPlugin {
             [IMAGE_STATUS]: LOADING_STATUS.SUCCESS,
           };
           const change = new Delta().retain(rawRange.start).retain(1, next);
-          editor.state.apply(change, { source: APPLY_SOURCE.REMOTE });
+          editor.state.apply(change, { source: APPLY_SOURCE.NO_UNDO });
         })
         .catch(() => {
           const rawRange = ref.unpack();
@@ -125,7 +127,7 @@ export class ImagePlugin extends EditorPlugin {
             [IMAGE_STATUS]: LOADING_STATUS.FAIL,
           };
           const change = new Delta().retain(rawRange.start).retain(rawRange.len, next);
-          editor.state.apply(change, { source: APPLY_SOURCE.REMOTE, autoCaret: false });
+          editor.state.apply(change, { source: APPLY_SOURCE.NO_UNDO, autoCaret: false });
         });
     }
   }

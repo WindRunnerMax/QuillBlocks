@@ -6,7 +6,7 @@ import type { LeafState } from "block-kit-core";
 import { RawRange } from "block-kit-core";
 import { Delta } from "block-kit-delta";
 import { useReadonly } from "block-kit-react";
-import { cs } from "block-kit-utils";
+import { cs, throttle } from "block-kit-utils";
 import type { FC } from "react";
 import React, { Fragment, useRef, useState } from "react";
 
@@ -34,9 +34,10 @@ export const ImageWrapper: FC<{
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const resider = e.target;
-    const config = props.leaf.op.attributes || {};
-    const width = config[IMAGE_WIDTH] || null;
-    const height = config[IMAGE_HEIGHT] || null;
+    if (!ref.current) return void 0;
+    // 这里直接取图片的宽高，若取原始图宽高会导致拖拽缩放问题
+    const width = ref.current.clientWidth;
+    const height = ref.current.clientHeight;
     e.stopPropagation();
     e.preventDefault();
     if (resider instanceof HTMLDivElement && resider.dataset.type && width && height) {
@@ -49,7 +50,7 @@ export const ImageWrapper: FC<{
       const range = props.leaf.toRange();
       const raw = RawRange.fromRange(props.editor, range);
       if (!raw) return;
-      const onMouseMove = (event: MouseEvent) => {
+      const onMouseMove = throttle((event: MouseEvent) => {
         const currentX = event.clientX;
         const currentY = event.clientY;
         const diffX = currentX - startX;
@@ -80,11 +81,11 @@ export const ImageWrapper: FC<{
           nextWidth = nextHeight * ratio;
         }
         const delta = new Delta().retain(raw.start).retain(raw.len, {
-          [IMAGE_WIDTH]: String(nextWidth),
-          [IMAGE_HEIGHT]: String(nextHeight),
+          [IMAGE_WIDTH]: String(Math.max(nextWidth, 100)),
+          [IMAGE_HEIGHT]: String(Math.max(nextHeight, 100)),
         });
         props.editor.state.apply(delta, { autoCaret: false });
-      };
+      }, 10);
       const onMouseUp = () => {
         document.removeEventListener("mousemove", onMouseMove);
         document.removeEventListener("mouseup", onMouseUp);

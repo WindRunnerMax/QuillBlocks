@@ -49,7 +49,7 @@ export const ImageView: FC<{
     const rawRange = RawRange.fromRange(editor, range);
     if (!rawRange) return void 0;
     const delta = new Delta().retain(rawRange.start).retain(rawRange.len, next);
-    editor.state.apply(delta, { source: APPLY_SOURCE.REMOTE, autoCaret: false });
+    editor.state.apply(delta, { source: APPLY_SOURCE.NO_UNDO, autoCaret: false });
   };
 
   return (

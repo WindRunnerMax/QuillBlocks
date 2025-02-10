@@ -13,6 +13,7 @@ describe("history remote", () => {
     editor.state.apply(new Delta().retain(1, { src: "http" }), { source: APPLY_SOURCE.REMOTE });
     // @ts-expect-error protected readonly property
     const undoStack = editor.history.undoStack.map(it => it.delta);
+    expect(undoStack.length).toEqual(1);
     expect(undoStack[0]).toEqual(new Delta().delete(1));
   });
 });

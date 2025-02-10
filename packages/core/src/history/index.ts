@@ -212,7 +212,7 @@ export class History {
     if (!changes.ops.length || source === APPLY_SOURCE.HISTORY) {
       return void 0;
     }
-    if (event.source === APPLY_SOURCE.REMOTE) {
+    if (event.source === APPLY_SOURCE.REMOTE || event.source === APPLY_SOURCE.NO_UNDO) {
       this.transformStack(this.undoStack, changes);
       this.transformStack(this.redoStack, changes);
       return void 0;

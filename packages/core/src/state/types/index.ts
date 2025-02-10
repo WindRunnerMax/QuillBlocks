@@ -22,8 +22,10 @@ export const APPLY_SOURCE = {
   USER: "USER",
   /** 远程触发 协同值 */
   REMOTE: "REMOTE",
-  /** History 模块触发值 */
+  /** History 模块触发 */
   HISTORY: "HISTORY",
+  /** 不记录 History */
+  NO_UNDO: "NO_UNDO",
 };
 
 export type ApplyOptions = {

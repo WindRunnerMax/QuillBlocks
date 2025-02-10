@@ -4,12 +4,16 @@ import type { AttributeMap } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
 import type { ReactLineContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
-import { Bind, KEY_CODE, NIL, preventNativeEvent, TRULY } from "block-kit-utils";
+import type { EventContext } from "block-kit-utils";
+import { Bind, KEY_CODE, NIL } from "block-kit-utils";
 import type { ReactNode } from "react";
 
+import { LIST_TYPE_KEY } from "../bullet-list/types";
 import { INDENT_LEVEL_KEY } from "../indent/types";
+import { preventContextEvent } from "../shared/utils/dom";
 import { isEmptyLine, isKeyCode } from "../shared/utils/is";
-import { LIST_START_KEY, ORDER_LIST_KEY } from "./types";
+import { LIST_RESTART_KEY, LIST_START_KEY, ORDER_LIST_KEY, ORDER_LIST_TYPE } from "./types";
+import { isOrderList } from "./utils/is";
 import { applyNewOrderList } from "./utils/serial";
 import { OrderListView } from "./view/list";
 
@@ -27,7 +31,7 @@ export class OrderListPlugin extends EditorPlugin {
   }
 
   public match(attrs: AttributeMap): boolean {
-    return !!attrs[ORDER_LIST_KEY];
+    return isOrderList(attrs);
   }
 
   public renderLine(context: ReactLineContext): ReactNode {
@@ -48,7 +52,7 @@ export class OrderListPlugin extends EditorPlugin {
     const { start, end } = sel;
     // 先检查当前需要设置/解除列表状态
     const lines = editor.state.block.getLines().slice(start.line, end.line + 1);
-    const isList = lines.every(line => line.attributes[ORDER_LIST_KEY]);
+    const isList = lines.every(line => isOrderList(line.attributes));
     // 计算需要操作的范围
     const rawPoint = RawPoint.fromPoint(this.editor, Point.from(start.line, 0));
     if (!rawPoint) return void 0;
@@ -61,10 +65,14 @@ export class OrderListPlugin extends EditorPlugin {
       if (!lineState) break;
       delta.retain(lineState.length - 1);
       const attrs: AttributeMap = {
-        [ORDER_LIST_KEY]: isList ? NIL : TRULY,
+        [LIST_TYPE_KEY]: isList ? NIL : ORDER_LIST_TYPE,
+        [LIST_START_KEY]: isList ? NIL : "1",
       };
-      if (!isList) {
+      if (!isList && lineState.attributes[INDENT_LEVEL_KEY]) {
         attrs[INDENT_LEVEL_KEY] = lineState.attributes[INDENT_LEVEL_KEY];
+      }
+      if (!isList && lineState.attributes[LIST_RESTART_KEY]) {
+        attrs[LIST_RESTART_KEY] = lineState.attributes[LIST_RESTART_KEY];
       }
       delta.retain(1, attrs);
     }
@@ -73,7 +81,7 @@ export class OrderListPlugin extends EditorPlugin {
   }
 
   @Bind
-  protected onKeyDown(event: KeyboardEvent) {
+  protected onKeyDown(event: KeyboardEvent, context: EventContext) {
     const sel = this.editor.selection.get();
     if (!sel) return void 0;
     const block = this.editor.state.block;
@@ -85,7 +93,7 @@ export class OrderListPlugin extends EditorPlugin {
     // => 处理列表的缩进等级
     if (
       isKeyCode(event, KEY_CODE.ENTER) &&
-      attrs[ORDER_LIST_KEY] &&
+      isOrderList(attrs) &&
       sel.isCollapsed &&
       isEmptyLine(startLine)
     ) {
@@ -97,36 +105,38 @@ export class OrderListPlugin extends EditorPlugin {
         nextAttrs[INDENT_LEVEL_KEY] = nextLevel;
       } else {
         // 否则, 取消列表状态
-        nextAttrs[ORDER_LIST_KEY] = NIL;
+        nextAttrs[LIST_TYPE_KEY] = NIL;
+        nextAttrs[LIST_START_KEY] = NIL;
+        nextAttrs[LIST_RESTART_KEY] = NIL;
       }
       const delta = new Delta().retain(startLine.start + startLine.length - 1).retain(1, nextAttrs);
       this.editor.state.apply(delta, { autoCaret: false });
       applyNewOrderList(this.editor, sel);
-      preventNativeEvent(event);
+      preventContextEvent(event, context);
       return void 0;
     }
     // 当前行是列表行, 且按下回车键, 且选区折叠, 且位于行首, 且上一行是列表行
-    // => 避免默认的处理, 保持列表的连续性
+    // => 继续编号, 避免默认的处理, 保持列表的连续性
     if (
       isKeyCode(event, KEY_CODE.ENTER) &&
-      attrs[ORDER_LIST_KEY] &&
+      isOrderList(attrs) &&
       sel.isCollapsed &&
       !sel.start.offset &&
       prevLine &&
-      prevLine.attributes[ORDER_LIST_KEY]
+      isOrderList(prevLine.attributes)
     ) {
       const delta = new Delta().retain(startLine.start).insertEOL({ ...prevLine.attributes });
       this.editor.state.apply(delta);
       applyNewOrderList(this.editor, sel);
-      preventNativeEvent(event);
+      preventContextEvent(event, context);
       return void 0;
     }
     // 当前行是列表行, 且按下回车键
     // => 在列表行内部插入换行符, 且携带列表状态
-    if (isKeyCode(event, KEY_CODE.ENTER) && attrs[ORDER_LIST_KEY]) {
+    if (isKeyCode(event, KEY_CODE.ENTER) && isOrderList(attrs)) {
       this.editor.perform.insertBreak(sel, attrs);
       applyNewOrderList(this.editor, sel);
-      preventNativeEvent(event);
+      preventContextEvent(event, context);
       return void 0;
     }
     // 当前行是列表行, 且折叠选区, 且在行首, 且按下退格键
@@ -134,31 +144,34 @@ export class OrderListPlugin extends EditorPlugin {
     if (
       isKeyCode(event, KEY_CODE.BACKSPACE) &&
       sel.isCollapsed &&
-      attrs[ORDER_LIST_KEY] &&
+      isOrderList(attrs) &&
       !sel.start.offset
     ) {
-      const delta = new Delta()
-        .retain(startLine.start + startLine.length - 1)
-        .retain(1, { [ORDER_LIST_KEY]: NIL, [LIST_START_KEY]: NIL });
+      const delta = new Delta().retain(startLine.start + startLine.length - 1).retain(1, {
+        [LIST_TYPE_KEY]: NIL,
+        [LIST_START_KEY]: NIL,
+        [LIST_RESTART_KEY]: NIL,
+      });
       this.editor.state.apply(delta, { autoCaret: false });
       applyNewOrderList(this.editor, sel);
-      preventNativeEvent(event);
+      preventContextEvent(event, context);
       return void 0;
     }
     // 当前行是列表行, 按下 Tab 键
     // => 由列表的缩进状态调整列表的序号
-    if (isKeyCode(event, KEY_CODE.TAB) && attrs[ORDER_LIST_KEY]) {
+    if (isKeyCode(event, KEY_CODE.TAB) && isOrderList(attrs)) {
       applyNewOrderList(this.editor, sel);
-      preventNativeEvent(event);
+      preventContextEvent(event, context);
       return void 0;
     }
     // 处于当前行的行首, 且不存在其他行属性, 且前一行是列表行
-    // => 将当前行属性移到下一行, 且刷新列表值
+    // => 将当前上一行属性移到当前行, 且刷新列表值
     if (
+      isKeyCode(event, KEY_CODE.BACKSPACE) &&
       !sel.start.offset &&
       !Object.keys(attrs).length &&
       prevLine &&
-      prevLine.attributes[ORDER_LIST_KEY]
+      isOrderList(prevLine.attributes)
     ) {
       const prevAttrs = { ...prevLine.attributes };
       const delta = new Delta()
@@ -168,7 +181,7 @@ export class OrderListPlugin extends EditorPlugin {
         .retain(1, prevAttrs);
       this.editor.state.apply(delta);
       applyNewOrderList(this.editor, sel);
-      preventNativeEvent(event);
+      preventContextEvent(event, context);
       return void 0;
     }
   }

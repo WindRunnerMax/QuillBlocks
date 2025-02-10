@@ -4,7 +4,8 @@ import { Delta } from "block-kit-delta";
 import type { O } from "block-kit-utils/dist/es/types";
 
 import { INDENT_LEVEL_KEY } from "../../indent/types";
-import { LIST_RESTART_KEY, LIST_START_KEY, ORDER_LIST_KEY } from "../types";
+import { LIST_RESTART_KEY, LIST_START_KEY } from "../types";
+import { isOrderList } from "./is";
 
 /**
  * 批量刷新选区的列表序号 [批量刷新简单方便]
@@ -25,21 +26,21 @@ export const applyNewOrderList = (editor: Editor, range?: Range) => {
   // 如果当前行不是列表项，且选区结尾下一行是列表项，则从下一行开始探查
   if (
     selStartLine &&
-    !selStartLine.attributes[ORDER_LIST_KEY] &&
+    !isOrderList(selStartLine.attributes) &&
     selEndNextLine &&
-    selEndNextLine.attributes[ORDER_LIST_KEY]
+    isOrderList(selEndNextLine.attributes)
   ) {
     start++;
   }
   // 如果 start 的行属性不存在列表项, 则无需刷新
   const currentLine = block.getLine(start);
-  if (!currentLine || !currentLine.attributes[ORDER_LIST_KEY]) {
+  if (!currentLine || !isOrderList(currentLine.attributes)) {
     return void 0;
   }
   // 向前查找到第一个列表项
   while (--start >= 0) {
     const line = block.getLine(start);
-    if (!line || !line.attributes[ORDER_LIST_KEY]) {
+    if (!line || !isOrderList(line.attributes)) {
       start++;
       break;
     }
@@ -53,7 +54,7 @@ export const applyNewOrderList = (editor: Editor, range?: Range) => {
   for (let i = start; i < block.size; i++) {
     const line = block.getLine(i);
     const attrs = line && line.attributes;
-    if (!line || !attrs || !attrs[ORDER_LIST_KEY]) break;
+    if (!line || !attrs || !isOrderList(attrs)) break;
     const level = attrs[INDENT_LEVEL_KEY];
     // 重置序号
     if (attrs[LIST_RESTART_KEY]) {

@@ -5,7 +5,7 @@ export { BACKGROUND_KEY } from "./background/types";
 export { BoldPlugin } from "./bold";
 export { BOLD_KEY } from "./bold/types";
 export { BulletListPlugin } from "./bullet-list";
-export { BULLET_LIST_KEY } from "./bullet-list/types";
+export { BULLET_LIST_KEY, BULLET_LIST_TYPE, LIST_TYPE_KEY } from "./bullet-list/types";
 export { DividerPlugin } from "./divider";
 export { DIVIDER_KEY } from "./divider/types";
 export { FontColorPlugin } from "./font-color";
@@ -36,7 +36,12 @@ export { LINE_HEIGHT_KEY } from "./line-height/types";
 export { MentionPlugin } from "./mention";
 export { MENTION_KEY, MENTION_NAME } from "./mention/types";
 export { OrderListPlugin } from "./order-list";
-export { LIST_START_KEY, ORDER_LIST_KEY } from "./order-list/types";
+export {
+  LIST_RESTART_KEY,
+  LIST_START_KEY,
+  ORDER_LIST_KEY,
+  ORDER_LIST_TYPE,
+} from "./order-list/types";
 export { SelectionHOC } from "./shared/components/selection";
 export { SelectionPlugin } from "./shared/modules/selection";
 export { getMountDOM, setMountDOM } from "./shared/utils/dom";
