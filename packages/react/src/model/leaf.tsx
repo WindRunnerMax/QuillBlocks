@@ -5,6 +5,7 @@ import React, { useMemo } from "react";
 
 import type { ReactLeafContext } from "../plugin";
 import { Text } from "../preset/text";
+import { LEAF_TO_TEXT as LT } from "../utils/weak-map";
 
 const LeafView: FC<{
   editor: Editor;
@@ -20,6 +21,7 @@ const LeafView: FC<{
   };
 
   const runtime = useMemo(() => {
+    const text = leafState.getText();
     const context: ReactLeafContext = {
       op: leafState.op,
       classList: [],
@@ -27,7 +29,7 @@ const LeafView: FC<{
       leafState: leafState,
       attributes: leafState.op.attributes,
       style: {},
-      children: <Text>{leafState.getText()}</Text>,
+      children: <Text ref={el => LT.set(leafState, el)}>{text}</Text>,
     };
     const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER);
     for (const plugin of plugins) {

@@ -30,6 +30,7 @@ export type LineContext = {
  */
 export type LeafContext = {
   op: Op;
+  key?: string;
   classList: string[];
   lineState: LineState;
   leafState: LeafState;

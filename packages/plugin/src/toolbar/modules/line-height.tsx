@@ -9,7 +9,7 @@ import { LINE_HEIGHT_KEY } from "../../line-height/types";
 import { LineHeightIcon } from "../../shared/icons/line-height";
 import { useToolbarContext } from "../context/provider";
 
-const STEP = [...Array.from({ length: 10 }, (_, i) => (i + 1) * 0.1 + 1), 2.5, 3].map(v =>
+const STEP = [...Array.from({ length: 11 }, (_, i) => i * 0.1 + 1.5), 3].map(v =>
   v.toFixed(1).toString()
 );
 

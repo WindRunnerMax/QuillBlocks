@@ -11,6 +11,7 @@ body {
   .block-kit-toolbar {
     background-color: var(--color-bg-1);
     border-bottom: unset;
+    border-bottom: 1px solid var(--color-fill-2);
     justify-content: center;
     position: sticky;
     top: 0;

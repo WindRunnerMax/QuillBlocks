@@ -1,11 +1,13 @@
 import type { Editor, LineState } from "block-kit-core";
 import { NODE_KEY, PLUGIN_TYPE } from "block-kit-core";
 import { EOL, EOL_OP } from "block-kit-delta";
-import { cs } from "block-kit-utils";
+import { cs, isDOMText } from "block-kit-utils";
+import { useUpdateLayoutEffect } from "block-kit-utils/dist/es/hooks";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
 import type { ReactLineContext } from "../plugin";
+import { LEAF_TO_TEXT } from "../utils/weak-map";
 import { EOLModel } from "./eol";
 import { LeafModel } from "./leaf";
 
@@ -15,7 +17,6 @@ const LineView: FC<{
   lineState: LineState;
 }> = props => {
   const { editor, lineState } = props;
-  const leaves = lineState.getLeaves();
 
   const setModel = (ref: HTMLDivElement | null) => {
     if (ref) {
@@ -24,6 +25,7 @@ const LineView: FC<{
   };
 
   const children = useMemo(() => {
+    const leaves = lineState.getLeaves();
     const textLeaves = leaves.slice(0, -1);
     const nodes = textLeaves.map((n, i) => (
       <LeafModel key={i} editor={editor} index={i} leafState={n} />
@@ -41,7 +43,7 @@ const LineView: FC<{
       nodes.push(<EOLModel key={EOL} editor={editor} leafState={eolLeaf} />);
     }
     return nodes;
-  }, [editor, leaves]);
+  }, [editor, lineState]);
 
   const runtime = useMemo(() => {
     const context: ReactLineContext = {
@@ -60,6 +62,28 @@ const LineView: FC<{
     }
     return context;
   }, [children, editor.plugin, lineState]);
+
+  // 首次处理会将所有 DOM 渲染, 不需要执行脏数据检查
+  // 需要 LayoutEffect 以保证 DOM -> Sel 的执行顺序
+  useUpdateLayoutEffect(() => {
+    const leaves = lineState.getLeaves();
+    for (const leaf of leaves) {
+      const dom = LEAF_TO_TEXT.get(leaf);
+      if (!dom) continue;
+      const text = leaf.getText();
+      // 避免 React 非受控与 IME 造成的 DOM 内容问题
+      if (text === dom.textContent) continue;
+      editor.logger.debug("Correct Text Node", dom);
+      const nodes = dom.childNodes;
+      for (let i = 1; i < nodes.length; ++i) {
+        const node = nodes[i];
+        node && node.remove();
+      }
+      if (isDOMText(dom.firstChild)) {
+        dom.firstChild.nodeValue = text;
+      }
+    }
+  }, [lineState]);
 
   return (
     <div

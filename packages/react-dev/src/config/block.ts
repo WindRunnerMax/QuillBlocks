@@ -4,9 +4,9 @@ export const INIT = new Delta({
   ops: [
     { insert: "Block Kit" },
     { insert: "\n", attributes: { align: "center", heading: "h1" } },
-    { insert: "纸上得来终觉浅，绝知此事要躬行。从零实现富文本编辑器，基于" },
-    { attributes: { "inline-code": "true" }, insert: "ContentEdiable" },
-    { insert: "构建" },
+    { insert: "从零实现富文本编辑器，在" },
+    { attributes: { "inline-code": "true" }, insert: "ContentEditable" },
+    { insert: "的基础上构建" },
     { attributes: { "inline-code": "true" }, insert: "MVC" },
     { insert: "架构，设计可扩展的" },
     { insert: "Controller", attributes: { "inline-code": "true" } },

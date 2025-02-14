@@ -1242,9 +1242,9 @@ Array.from("🧑‍🎨")
 - <https://eev.ee/blog/2015/09/12/dark-corners-of-unicode>
 
 ## 连续 Block Op
-2. 连续的`inline + void => embed`不能合并，例如`mention`组件，在增量时的`mutate`处理数据。
-1. 连续的`block + void`节点需要预处理，在增量时主动加入`\n`控制兜底换行，且需要将长度压缩为`1`。
-3. 已经合并的`block`长度值需要体现在`void`节点属性上，在选区变换时使用，存量数据可能会存在此种情况。
+- 连续的`inline + void => embed`不能合并，例如`mention`组件，在增量时的`mutate`处理数据。
+- 连续的`block + void`节点需要预处理，在增量时主动加入`\n`控制兜底换行，且需要将长度压缩为`1`。
+- 已经合并的`block`长度值需要体现在`void`节点属性上，在选区变换时使用，存量数据可能会存在此种情况。
 
 ## Readonly 状态
 前段时间在考虑`readonly`这个状态的实现，最开始的实现是将这个状态置于插件当中，但是这种实现会让编辑器的状态管理变得复杂了不少。因为当`readonly`这个状态变化时，无法将其状态变化直接通知到所有渲染出的组件当中，因此状态的传递就变成了问题。
@@ -1391,7 +1391,7 @@ r(5).i(3).r(3).d(1).d(2)
 
 后来我发现`Lexical`虽然是`Facebook`推出的，但是却没用`React`进行渲染，从`DOM`节点上就可以看出来是没有`Fiber`的，因此可以确定普通的节点并不是`React`渲染的。诚然使用`React`可能存在性能问题，而且由于非受控模式下可能会造成`crash`，但是能够直接复用视图层还是有价值的。
 
-在`Lexical`的`README`中可以看到是可以支持`React`的，那么这里的支持实际上仅有`DecoratorNode`可以用`React`来渲染，例如在`Playground`中加入`ExcaliDraw`画板的组件的话，就可以发现`svg`外的`DOM`节点是`React`渲染的。
+在`Lexical`的`README`中可以看到是可以支持`React`的，那么这里的支持实际上仅有`DecoratorNode`可以用`React`来渲染，例如在`Playground`中加入`ExcaliDraw`画板的组件的话，就可以发现`svg`外的`DOM`节点是`React`渲染的，可以发现`React`组件是额外挂载上去的。
 
 也就是说，仅有`Void/Embed`类型的节点才会被`React`渲染，其他的内容都是普通的`DOM`结构。这怎么说呢，就有种文艺复兴的感觉，如果使用`Quill`的时候需要将`React`结合的话，通常就需要使用`ReactDOM.render`的方式来挂载`React`节点。还有一点是需要协调的函数都需要用`$`符号开头，这也有点`PHP`的文艺复兴。
 
@@ -1464,4 +1464,83 @@ ReactDOM.render(<App />, document.getElementById("root"));
 - <https://developer.mozilla.org/zh-CN/docs/Web/API/Document/caretRangeFromPoint>
 - <https://github.com/codemirror/codemirror5/blob/b60e456/src/edit/mouse_events.js#L75>
 - <https://github.com/microsoft/vscode/blob/18a64b/src/vs/editor/browser/controller/mouseTarget.ts#L975>
+
+## 非受控的 DOM 行为
+`DOM`结构与`Model`结构的同步在非受控的`React`组件中变得复杂，这其实也就是需要自绘选区的部分原因，可以以此避免非受控问题。那么非受控的行为造成的主要问题可以比较容易地复现出来，首先我们此时存在两个节点，分别是`inline`类型和`text`类型的节点。
+
+```
+inline|text
+```
+
+此时我们的光标在`inline`后，我们的`inline`规则是不会继承前个节点的格式，那么此时如果我们输入内容例如`1`，此时的文本就变成了`inline1|text`。这个操作是符合直觉的，然而当我们在上述的位置唤醒`IME`输入中文内容时，这里的文本就变成了错误的内容。
+
+```
+inline中文|中文text
+```
+
+这里究其原因还是在于非受控的`IME`问题，在输入英文时我们的输入在`beforeinput`事件中被阻止了默认行为，因此不会触发浏览器默认行为的`DOM`变更。然而当前在唤醒`IME`的情况下，`DOM`的变更行为是无法被阻止的，因此此时属于半受控的输入，这样就导致了问题。
+
+此时由于浏览器的默认行为，`inline`节点的内容会被输入法插入中文的文本，而当我们输入完成后，数据结构`Model`层的内容是会将文本放置于`text`前，这跟我们输入非中文的表现是一致的，也是符合预期表现的。
+
+那么由于我们的`immutable`设计，再加上`React.memo`以及`useMemo`的执行，即是我们在最终的纯文本节点加入了脏`DOM`检测也是不够的。就纯粹的是因为我们的策略，导致`React`原地复用了当前的`DOM`节点，因此造成了`IME`输入的`DOM`变更和`Model`层的不一致。
+
+```js
+const onRef = (dom: HTMLSpanElement | null) => {
+  if (props.children === dom.textContent) return void 0;
+  const children = dom.childNodes;
+  // If the text content is inconsistent due to the modification of the input
+  // it needs to be corrected
+  for (let i = 1; i < children.length; ++i) {
+    const node = children[i];
+    node && node.remove();
+  }
+  // Guaranteed to have only one text child
+  if (isDOMText(dom.firstChild)) {
+    dom.firstChild.nodeValue = props.children;
+  }
+};
+```
+
+如果我们直接将`leaf`的`React.memo`以及`useMemo`移除，这个问题自然是会消失，然而这样就会导致编辑器的性能下降。因此我们就需要考虑尽可能检查到脏`DOM`的情况，实际上如果是在`input`事件或者`MutationObserver`中处理输入的纯非受控情况，也需要处理脏`DOM`的问题。
+
+那么我们可以明显的想到，当行状态发生变更时，我们就直接检查当前行的所有`leaf`节点，然后对比文本内容，如果存在不一致的情况则直接进行修正。如果直接使用`querySelector`的话显然不够优雅，我们可以借助`WeakMap`来映射叶子状态到`DOM`结构，以此来快速定位到需要的节点。
+
+然后在行节点的状态变更后，在处理副作用的时候检查脏`DOM`节点，并且由于我们的行状态也是`immutable`的，因此也不需要担心性能问题。那么检查节点的方法自然也跟上述`onRef`一致。
+
+```js
+const leaves = lineState.getLeaves();
+for (const leaf of leaves) {
+  const dom = LEAF_TO_TEXT.get(leaf);
+  if (!dom) continue;
+  const text = leaf.getText();
+  // 避免 React 非受控与 IME 造成的 DOM 内容问题
+  if (text === dom.textContent) continue;
+  editor.logger.debug("Correct Text Node", dom);
+  const nodes = dom.childNodes;
+  for (let i = 1; i < nodes.length; ++i) {
+    const node = nodes[i];
+    node && node.remove();
+  }
+  if (isDOMText(dom.firstChild)) {
+    dom.firstChild.nodeValue = text;
+  }
+}
+```
+
+这里需要注意的是，脏节点的状态检查是需要在`useLayoutEffect`时机执行的，因为我们需要保证执行的顺序是先校正`DOM`再更新选区，如果反过来的话就会，即先更新选区则选区依然停留在脏节点上，此时再校正`DOM`就会导致选区的丢失，表现是此时选区会在`inline`的最前方。此外，这里的实现在首次渲染并不需要检查，此时不会存在脏节点的情况。
+
+以这种策略来处理脏`DOM`的问题，还可以避免部分其他可能存在的问题，零宽字符文本的内容暂时先不处理，如果再碰到类似的情况是需要额外的检查的。此外，这里的问题也可能是我们的选区策略是尽可能偏左侧的查找，如果在这种情况将其校正到右侧节点可能也可以解决问题，不过因为在空行的情况下我们的末尾`\n`节点并不会渲染，因此这样的策略目前并不能彻底解决问题。
+
+## 全量存储 VS 增量存储
+假设我们现在的编辑器是表单、输入框等场景，那么自然是不需要协同的调度的，在这种情况下数据就可以直接全量存储。但是假如我们现在并不是这种小型场景，而是类似于知识库、笔记文档等这种相对不太需要多人协同的情况，或者以此为基础搭建`CMS`管理系统，就需要考虑增量文档存储的情况了。
+
+这种场景下，相当于是处于小型编辑器和重型协同编辑器的中间状态。通常来说可以使用编辑锁来保证可能存在的协作需求，而在这里对于增量存储和全量存储就是值得讨论的情况，我们这里主要是讨论增量存储带来的优势，增量存储相当于在客户端和服务端同时将变更应用。
+
+- 降低宽带的消耗，全量文档存储会导致每次保存都需要上传整个文档，而增量存储则只需要上传变更的部分。当然成本通常不会消失只会转移，增量存储情况下会需要服务端同时应用变更，这样就增加了计算的成本。
+- 文字级别变更记录，在实现自动保存的情况下通常是不能将所有草稿都存储起来的，这样的存储压力会很大。增量存储则可以直接应用存储过的`op`，直接根据版本号读取变更即可，在检查相关文档的变更记录时非常有用。
+- 降低数据覆盖风险，全量文档存储需要将全部内容写入数据库，如果状态控制不好就容易造成文档覆盖的情况。增量存储可以增加校验位，在文档变更时就可以检查变更文本的附近文档状态，以此可以数据覆盖带来的风险。
+- 精准统计变更片段，全量存储的情况下通常是不容易精确统计变更人的，主要是全量存储是需要从客户端发起的，这样的数据是不可信的。基于变更的数据则可以在服务端将变更人记录，甚至能统计每个人的字数变更来统计人效。
+- 避免全量数据处理，当存储数据时可能会读取其中数据来处理相关的功能，例如复用文档关系，断链关系等。使用增量存储的话，则数据处理不再需要遍历整个数据结构，直接根据增量数据变更处理，降低了服务端的数据处理成本。
+- 客户端临时变更，全量数据存储是需要将文档全部存储的，而增量存储则可以实现`client-side`数据。也就是说某些数据属性可以仅临时处于客户端，例如代码块的高亮结构、超链接编辑面板失去焦点时的状态，这样的数据无需真正存储在数据库。
+- 评论数据位置更新，当实现评论功能时，假设我们整套系统是不存在协同，并存在管理/消费的多端内容，那么此时就会存在多个文档状态需要同步。这种情况下如果是全量存储，那么必须要在发布时进行`diff`再同步，增量存储则仅需要根据版本差异来同步即可。
 

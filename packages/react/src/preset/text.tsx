@@ -12,25 +12,26 @@ export type TextProps = {
  */
 export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
   const onRef = (dom: HTMLSpanElement | null) => {
-    if (!dom) return null;
     // 处理外部引用的 ref
     if (isFunction(ref)) {
       ref(dom);
-    } else {
-      ref && (ref.current = dom);
+    } else if (ref) {
+      ref.current = dom;
+    }
+    if (!dom || props.children === dom.textContent) {
+      return void 0;
     }
     // COMPAT: 避免 React 非受控与 IME 造成的 DOM 内容问题
-    if (props.children !== dom.textContent) {
-      // If the text content is inconsistent due to the modification of the input
-      // it needs to be corrected
-      dom.childNodes.forEach((node, index) => {
-        // Guaranteed to have only one text child
-        if (index === 0) return null;
-        node.parentNode && node.parentNode.removeChild(node);
-      });
-      if (isDOMText(dom.firstChild)) {
-        dom.firstChild.nodeValue = props.children;
-      }
+    const nodes = dom.childNodes;
+    // If the text content is inconsistent due to the modification of the input
+    // it needs to be corrected
+    for (let i = 1; i < nodes.length; ++i) {
+      const node = nodes[i];
+      node && node.remove();
+    }
+    // Guaranteed to have only one text child
+    if (isDOMText(dom.firstChild)) {
+      dom.firstChild.nodeValue = props.children;
     }
   };
 

@@ -1,5 +1,5 @@
 import type { DependencyList, EffectCallback, MutableRefObject, SetStateAction } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Func } from "./types";
 
@@ -81,6 +81,23 @@ export const useUpdateEffect = (effect: EffectCallback, deps?: DependencyList) =
   const isMounted = useRef(false);
 
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+    } else {
+      return effect();
+    }
+  }, deps);
+};
+
+/**
+ * 避免挂载时触发副作用
+ * @param {EffectCallback} effect 副作用依赖
+ * @param {DependencyList} deps 依赖
+ */
+export const useUpdateLayoutEffect = (effect: EffectCallback, deps?: DependencyList) => {
+  const isMounted = useRef(false);
+
+  useLayoutEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true;
     } else {
