@@ -44,7 +44,7 @@ export {
 export { CorePlugin } from "./plugin/modules/implement";
 export { getPluginPriority, Priority, PRIORITY_KEY } from "./plugin/modules/priority";
 export { CALLER_TYPE, PLUGIN_TYPE } from "./plugin/types";
-export type { LeafContext, LineContext, WrapperContext } from "./plugin/types/context";
+export type { LeafContext, LineContext } from "./plugin/types/context";
 export type { EditorSchema, SchemaRule } from "./schema/types";
 export { Point } from "./selection/modules/point";
 export { Range } from "./selection/modules/range";

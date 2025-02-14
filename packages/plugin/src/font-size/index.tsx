@@ -23,7 +23,7 @@ export class FontSizePlugin extends EditorPlugin {
     return !!attrs[FONT_SIZE_KEY];
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     const attrs = context.attributes || {};
     const size = attrs[FONT_SIZE_KEY];
     if (size) {

@@ -7,7 +7,7 @@ import type {
   PasteContext,
   SerializeContext,
 } from "../../clipboard/types";
-import type { LeafContext, LineContext, WrapperContext } from "../types/context";
+import type { LeafContext, LineContext } from "../types/context";
 
 export abstract class CorePlugin {
   /**
@@ -24,6 +24,24 @@ export abstract class CorePlugin {
    * */
   public abstract match(attrs: AttributeMap, op: Op): boolean;
   /**
+   * 渲染包装行节点的 key
+   */
+  public wrapLineKeys?: string[];
+  /**
+   * 渲染包装叶子节点的 key
+   */
+  public wrapLeafKeys?: string[];
+  /**
+   * 渲染包装行节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public wrapLine?(children: P.Any): P.Any;
+  /**
+   * 渲染包装叶子节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public wrapLeaf?(children: P.Any): P.Any;
+  /**
    * 渲染行节点
    * - 调度优先级值越大 DOM 结构在越外层
    */
@@ -32,12 +50,7 @@ export abstract class CorePlugin {
    * 渲染块级子节点
    * - 调度优先级值越大 DOM 结构在越外层
    */
-  public render?(context: LeafContext): P.Any;
-  /**
-   * 渲染包装行节点
-   * - 调度优先级值越大 DOM 结构在越外层
-   */
-  public renderWrapper?(context: WrapperContext): P.Any;
+  public renderLeaf?(context: LeafContext): P.Any;
   /**
    * 将 Fragment(Delta) 序列化为 HTML
    */

@@ -21,7 +21,7 @@ export class MentionPlugin extends EditorPlugin {
     return !!attrs[MENTION_KEY];
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     const attrs = context.attributes || {};
     const name = attrs[MENTION_NAME] || "";
     return (

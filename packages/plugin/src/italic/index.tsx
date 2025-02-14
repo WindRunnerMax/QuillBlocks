@@ -44,7 +44,7 @@ export class ItalicPlugin extends EditorPlugin {
     return context;
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     context.style.fontStyle = "italic";
     return context.children;
   }

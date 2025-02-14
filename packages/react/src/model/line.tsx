@@ -7,7 +7,7 @@ import type { FC } from "react";
 import React, { useMemo } from "react";
 
 import type { ReactLineContext } from "../plugin";
-import { LEAF_TO_TEXT } from "../utils/weak-map";
+import { JSX_TO_LEAF, LEAF_TO_TEXT } from "../utils/weak-map";
 import { EOLModel } from "./eol";
 import { LeafModel } from "./leaf";
 
@@ -23,45 +23,6 @@ const LineView: FC<{
       editor.model.setLineModel(ref, lineState);
     }
   };
-
-  const children = useMemo(() => {
-    const leaves = lineState.getLeaves();
-    const textLeaves = leaves.slice(0, -1);
-    const nodes = textLeaves.map((n, i) => (
-      <LeafModel key={i} editor={editor} index={i} leafState={n} />
-    ));
-    // 空行则仅存在一个 Leaf, 此时需要渲染空的占位节点
-    if (!nodes.length && leaves[0]) {
-      const leaf = leaves[0];
-      nodes.push(<EOLModel key={EOL} editor={editor} leafState={leaf} />);
-      return nodes;
-    }
-    // inline-void 在行未时需要预设零宽字符来放置光标
-    const eolLeaf = leaves[leaves.length - 1];
-    const lastLeaf = textLeaves[textLeaves.length - 1];
-    if (lastLeaf && eolLeaf && lastLeaf.embed) {
-      nodes.push(<EOLModel key={EOL} editor={editor} leafState={eolLeaf} />);
-    }
-    return nodes;
-  }, [editor, lineState]);
-
-  const runtime = useMemo(() => {
-    const context: ReactLineContext = {
-      classList: [],
-      lineState: lineState,
-      attributes: lineState.attributes,
-      style: {},
-      children: children,
-    };
-    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER_LINE);
-    for (const plugin of plugins) {
-      const op = { ...EOL_OP, attributes: context.attributes };
-      if (plugin.match(context.attributes, op)) {
-        context.children = plugin.renderLine(context);
-      }
-    }
-    return context;
-  }, [children, editor.plugin, lineState]);
 
   // 首次处理会将所有 DOM 渲染, 不需要执行脏数据检查
   // 需要 LayoutEffect 以保证 DOM -> Sel 的执行顺序
@@ -84,6 +45,60 @@ const LineView: FC<{
       }
     }
   }, [lineState]);
+
+  const elements = useMemo(() => {
+    const leaves = lineState.getLeaves();
+    const textLeaves = leaves.slice(0, -1);
+    const nodes = textLeaves.map((n, i) => {
+      const node = <LeafModel key={i} editor={editor} index={i} leafState={n} />;
+      JSX_TO_LEAF.set(node, n);
+      return node;
+    });
+    // 空行则仅存在一个 Leaf, 此时需要渲染空的占位节点
+    if (!nodes.length && leaves[0]) {
+      const leaf = leaves[0];
+      const node = <EOLModel key={EOL} editor={editor} leafState={leaf} />;
+      JSX_TO_LEAF.set(node, leaf);
+      nodes.push(node);
+      return nodes;
+    }
+    // inline-void(embed) 在行未时需要预设零宽字符来放置光标
+    const eolLeaf = leaves[leaves.length - 1];
+    const lastLeaf = textLeaves[textLeaves.length - 1];
+    if (lastLeaf && eolLeaf && lastLeaf.embed) {
+      const node = <EOLModel key={EOL} editor={editor} leafState={eolLeaf} />;
+      JSX_TO_LEAF.set(node, eolLeaf);
+      nodes.push(node);
+      return nodes;
+    }
+    return nodes;
+  }, [editor, lineState]);
+
+  const children = useMemo(() => {
+    const wrapped: JSX.Element[] = [];
+    for (let i = 0; i < elements.length; ++i) {
+      wrapped.push(elements[i]);
+    }
+    return wrapped;
+  }, [elements]);
+
+  const runtime = useMemo(() => {
+    const context: ReactLineContext = {
+      classList: [],
+      lineState: lineState,
+      attributes: lineState.attributes,
+      style: {},
+      children,
+    };
+    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER_LINE);
+    for (const plugin of plugins) {
+      const op = { ...EOL_OP, attributes: context.attributes };
+      if (plugin.match(context.attributes, op)) {
+        context.children = plugin.renderLine(context);
+      }
+    }
+    return context;
+  }, [children, editor.plugin, lineState]);
 
   return (
     <div

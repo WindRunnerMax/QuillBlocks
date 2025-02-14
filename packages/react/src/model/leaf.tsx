@@ -31,10 +31,10 @@ const LeafView: FC<{
       style: {},
       children: <Text ref={el => LT.set(leafState, el)}>{text}</Text>,
     };
-    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER);
+    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.RENDER_LEAF);
     for (const plugin of plugins) {
       if (plugin.match(context.attributes || {}, context.op)) {
-        context.children = plugin.render(context);
+        context.children = plugin.renderLeaf(context);
       }
     }
     return context;

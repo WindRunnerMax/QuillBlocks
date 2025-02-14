@@ -36,7 +36,7 @@ export const FontSize: FC = () => {
               onClick={() => editor.command.exec(FONT_SIZE_KEY, { value: item })}
             >
               {keys[FONT_SIZE_KEY] === item && <IconCheck />}
-              {item}
+              {item}px
             </div>
           ))}
         </div>

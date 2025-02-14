@@ -59,7 +59,7 @@ export class DividerPlugin extends EditorPlugin {
     return !!attrs[DIVIDER_KEY];
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     return (
       <SelectionHOC selection={this.selection} leaf={context.leafState}>
         <Void tag="div" className="block-kit-divider-container" context={context}>

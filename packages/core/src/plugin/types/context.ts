@@ -7,14 +7,6 @@ import type { LeafState } from "../../state/modules/leaf-state";
 import type { LineState } from "../../state/modules/line-state";
 
 /**
- * 包装行状态
- */
-export type WrapperContext = {
-  attributes: AttributeMap;
-  children?: P.Any;
-};
-
-/**
  * 行状态
  */
 export type LineContext = {

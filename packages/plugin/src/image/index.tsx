@@ -31,7 +31,7 @@ export class ImagePlugin extends EditorPlugin {
     return !!attrs[IMAGE_KEY];
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     return (
       <ImageView editor={this.editor} context={context} selection={this.selection}></ImageView>
     );

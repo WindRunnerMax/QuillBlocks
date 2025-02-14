@@ -36,7 +36,7 @@ export class InlineCodePlugin extends EditorPlugin {
   }
 
   @Priority(100)
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     const leaf = context.leafState;
     const prev = leaf.prev(false);
     const next = leaf.next(false);

@@ -10,14 +10,20 @@ export class Plugin {
   public current: CorePlugin[];
   /** 插件缓存 */
   protected cache: Record<string, CorePlugin[]>;
+  /** 包装叶子结点的 keys */
+  protected wrapLeafKeys: string[];
+  /** 包装行结点的 keys */
+  protected wrapLineKeys: string[];
 
   /**
    * 构造函数
    * @param editor
    */
   constructor(protected editor: Editor) {
-    this.current = [];
     this.cache = {};
+    this.current = [];
+    this.wrapLineKeys = [];
+    this.wrapLeafKeys = [];
   }
 
   /**
@@ -41,6 +47,12 @@ export class Plugin {
     const map: Record<string, CorePlugin> = {};
     for (const plugin of plugins) {
       map[plugin.key] = plugin;
+      if (plugin.wrapLineKeys) {
+        this.wrapLineKeys.push(...plugin.wrapLineKeys);
+      }
+      if (plugin.wrapLeafKeys) {
+        this.wrapLeafKeys.push(...plugin.wrapLeafKeys);
+      }
     }
     this.current = Object.values(map);
   }

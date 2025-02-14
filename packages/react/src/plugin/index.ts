@@ -1,4 +1,4 @@
-import type { LeafContext, LineContext, WrapperContext } from "block-kit-core";
+import type { LeafContext, LineContext } from "block-kit-core";
 import { CorePlugin } from "block-kit-core";
 
 export interface ReactLineContext extends LineContext {
@@ -9,12 +9,9 @@ export interface ReactLeafContext extends LeafContext {
   children?: React.ReactNode;
 }
 
-export interface ReactWrapperContext extends WrapperContext {
-  children?: React.ReactNode;
-}
-
 export abstract class EditorPlugin extends CorePlugin {
-  renderWrapper?(context: ReactWrapperContext): React.ReactNode;
+  wrapLine?(context: React.ReactNode): React.ReactNode;
+  wrapLeaf?(context: React.ReactNode): React.ReactNode;
   renderLine?(context: ReactLineContext): React.ReactNode;
-  render?(context: ReactLeafContext): React.ReactNode;
+  renderLeaf?(context: ReactLeafContext): React.ReactNode;
 }

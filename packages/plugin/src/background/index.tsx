@@ -22,7 +22,7 @@ export class BackgroundPlugin extends EditorPlugin {
     return !!attrs[BACKGROUND_KEY];
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     const attrs = context.attributes || {};
     const background = attrs[BACKGROUND_KEY];
     if (background) {

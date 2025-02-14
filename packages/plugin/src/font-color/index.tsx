@@ -22,7 +22,7 @@ export class FontColorPlugin extends EditorPlugin {
     return !!attrs[FONT_COLOR_KEY];
   }
 
-  public render(context: ReactLeafContext): ReactNode {
+  public renderLeaf(context: ReactLeafContext): ReactNode {
     const attrs = context.attributes || {};
     const color = attrs[FONT_COLOR_KEY];
     if (color) {

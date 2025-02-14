@@ -7,7 +7,7 @@ describe("plugin priority", () => {
     public destroy(): void {}
     public match = () => true;
     @Priority(10)
-    public render(context: LeafContext) {
+    public renderLeaf(context: LeafContext) {
       return context.children;
     }
   }
@@ -17,7 +17,7 @@ describe("plugin priority", () => {
     public destroy(): void {}
     public match = () => true;
     @Priority(9)
-    public render(context: LeafContext) {
+    public renderLeaf(context: LeafContext) {
       return context.children;
     }
     public renderLine(context: LineContext) {
@@ -27,7 +27,7 @@ describe("plugin priority", () => {
 
   const editor = new Editor();
   editor.plugin.register(new Plugin1(), new Plugin2());
-  const renderPlugins = editor.plugin.getPriorityPlugins("render");
+  const renderPlugins = editor.plugin.getPriorityPlugins("renderLeaf");
   const renderLinePlugins = editor.plugin.getPriorityPlugins("renderLine");
 
   it("pick plugins", () => {
@@ -41,9 +41,9 @@ describe("plugin priority", () => {
   it("pick cache", () => {
     // @ts-expect-error cache
     const cache = editor.plugin.cache;
-    expect(renderPlugins).toBe(cache.render);
+    expect(renderPlugins).toBe(cache.renderLeaf);
     expect(renderLinePlugins).toBe(cache.renderLine);
-    const renderPlugins1 = editor.plugin.getPriorityPlugins("render");
+    const renderPlugins1 = editor.plugin.getPriorityPlugins("renderLeaf");
     const renderLinePlugins1 = editor.plugin.getPriorityPlugins("renderLine");
     expect(renderPlugins).toBe(renderPlugins1);
     expect(renderLinePlugins).toBe(renderLinePlugins1);

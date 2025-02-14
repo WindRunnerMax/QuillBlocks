@@ -15,8 +15,10 @@ export const CALLER_TYPE = {
 
 export const PLUGIN_TYPE = {
   ...CALLER_TYPE,
-  RENDER: "render",
   RENDER_LINE: "renderLine",
+  RENDER_LEAF: "renderLeaf",
+  WRAP_LINE: "wrapLine",
+  WRAP_LEAF: "wrapLeaf",
 } as const;
 
 export type CallerMap = {
@@ -27,7 +29,7 @@ export type PluginFuncKeys = Exclude<
   O.Values<{
     [key in PluginType]: RequiredPlugin[key] extends F.Any ? key : never;
   }>,
-  "destroy" | "match"
+  "destroy" | "match" | "wrapLineKeys" | "wrapLeafKeys"
 >;
 
 export type PickPluginFunc<key extends PluginType> = RequiredPlugin[key] extends F.Any
