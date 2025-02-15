@@ -53,6 +53,7 @@ export type {
   WrapLineContext,
 } from "./plugin/types/context";
 export type { EditorSchema, SchemaRule } from "./schema/types";
+export { Selection } from "./selection";
 export { Point } from "./selection/modules/point";
 export { Range } from "./selection/modules/range";
 export { RawPoint } from "./selection/modules/raw-point";

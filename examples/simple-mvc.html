@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple MVC</title>
+  </head>
+  <body>
+    <div contenteditable="false" id="$container"></div>
+    <button id="$btn">加粗</button>
+    <script>
+      const container = $container;
+      const MODEL_TO_DOM = new WeakMap();
+      const DOM_TO_MODEL = new WeakMap();
+
+      // 数据模型
+      let model = [
+        { type: "strong", text: "123", start: 0, len: 3 },
+        { type: "span", text: "123123", start: 3, len: 6 },
+      ];
+
+      class Iterator {
+        constructor(data) {
+          this.data = data;
+          this.index = 0;
+          this.offset = 0;
+        }
+        next(length) {
+          if (!length) {
+            length = Infinity;
+          }
+          const nextOp = this.data[this.index];
+          if (nextOp) {
+            const offset = this.offset;
+            const opLength = nextOp.text.length;
+            const restLength = opLength - offset;
+            if (length >= restLength) {
+              length = restLength;
+              this.index = this.index + 1;
+              this.offset = 0;
+            } else {
+              this.offset = this.offset + length;
+            }
+            const newOp = { ...nextOp };
+            newOp.text = newOp.text.slice(offset, offset + length);
+            return newOp;
+          }
+          return null;
+        }
+
+        peekLength() {
+          if (this.data[this.index]) {
+            return this.data[this.index].text.length - this.offset;
+          } else {
+            return Infinity;
+          }
+        }
+
+        hasNext() {
+          return this.peekLength() < Infinity;
+        }
+      }
+
+      // 控制器
+      const editor = {
+        selection: null,
+        execCommand: (range, type) => {
+          const selection = editor.selection;
+          if (!selection) return void 0;
+          const { start, len } = range;
+          let retain = [start, len, Infinity];
+          let retainIndex = 0;
+          const newModel = [];
+          const iterator = new Iterator(model);
+          while (iterator.hasNext()) {
+            const length = Math.min(iterator.peekLength(), retain[retainIndex]);
+            const isApplyAttrs = retainIndex === 1;
+            const thisOp = iterator.next(length);
+            const nextRetain = retain[retainIndex] - length;
+            retain[retainIndex] = nextRetain;
+            if (retain[retainIndex] === 0) {
+              retainIndex = retainIndex + 1;
+            }
+            if (!thisOp) break;
+            isApplyAttrs && (thisOp.type = type);
+            newModel.push(thisOp);
+          }
+          let index = 0;
+          for (const data of newModel) {
+            data.start = index;
+            data.len = data.text.length;
+            index = index + data.text.length;
+          }
+          model = newModel;
+          render();
+        },
+        setSelection: selection => {
+          console.log("Selection Change:", selection);
+          editor.selection = selection;
+        },
+        updateDOMselection: () => {
+          // 根据 model 选区来更新 dom 选区
+          const windowSelection = window.getSelection();
+          if (!editor.selection || !windowSelection) {
+            window.getSelection().removeAllRanges();
+            return void 0;
+          }
+          const { start, len } = editor.selection;
+          const end = start + len;
+          const leaves = Array.from(container.querySelectorAll("[data-leaf]"));
+          let startLeaf = null;
+          let endLeaf = null;
+          let startLeafOffset = 0;
+          let endLeafOffset = 0;
+          // 从 MODEL 查找到 DOM 的选区
+          for (const leaf of leaves) {
+            const data = DOM_TO_MODEL.get(leaf);
+            if (!data) continue;
+            const leafStart = data.start;
+            const leafLen = data.text.length;
+            if (start >= leafStart && start <= leafStart + leafLen) {
+              startLeaf = leaf;
+              startLeafOffset = start - leafStart;
+              // 折叠选区状态下可以 start 与 end 一致
+              if (windowSelection.isCollapsed) {
+                endLeaf = startLeaf;
+                endLeafOffset = startLeafOffset;
+                break;
+              }
+            }
+            if (end >= leafStart && end <= leafStart + leafLen) {
+              endLeaf = leaf;
+              endLeafOffset = end - leafStart;
+              break;
+            }
+          }
+          if (!startLeaf || !endLeaf) {
+            window.getSelection().removeAllRanges();
+            return void 0;
+          }
+          const modelRange = document.createRange();
+          modelRange.setStart(startLeaf.firstChild, startLeafOffset);
+          modelRange.setEnd(endLeaf.firstChild, endLeafOffset);
+          // 获取当前的静态选区
+          let range = null;
+          if (windowSelection.rangeCount > 0) {
+            range = windowSelection.getRangeAt(0);
+            // 当前选区与 Model 选区相同, 则不需要更新
+            if (
+              range.startContainer === modelRange.startContainer &&
+              range.startOffset === modelRange.startOffset &&
+              range.endContainer === modelRange.endContainer &&
+              range.endOffset === modelRange.endOffset
+            ) {
+              return void 0;
+            }
+          }
+          windowSelection.setBaseAndExtent(
+            startLeaf.firstChild,
+            startLeafOffset,
+            endLeaf.firstChild,
+            endLeafOffset
+          );
+          console.log("Update DOM Selection:", windowSelection);
+        },
+      };
+
+      // 渲染层
+      const render = () => {
+        container.innerHTML = "";
+        let index = 0;
+        for (const data of model) {
+          const node = document.createElement(data.type);
+          node.setAttribute("data-leaf", "true");
+          index = index + data.text.length;
+          node.textContent = data.text;
+          container.appendChild(node);
+          MODEL_TO_DOM.set(data, node);
+          DOM_TO_MODEL.set(node, data);
+        }
+        editor.updateDOMselection();
+      };
+
+      // 事件处理
+      document.addEventListener("selectionchange", () => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+          editor.setSelection(null);
+          return void 0;
+        }
+        const range = selection.getRangeAt(0);
+        const startContainer = range.startContainer;
+        const endContainer = range.endContainer;
+        const startOffset = range.startOffset;
+        const endOffset = range.endOffset;
+        const startLeaf = startContainer.parentElement.closest("[data-leaf]");
+        const endLeaf = endContainer.parentElement.closest("[data-leaf]");
+        const startModel = DOM_TO_MODEL.get(startLeaf);
+        const endModel = DOM_TO_MODEL.get(endLeaf);
+        if (!startLeaf || !endLeaf || !startModel || !endModel) {
+          editor.setSelection(null);
+          return void 0;
+        }
+        const start = startModel.start + startOffset;
+        const end = endModel.start + endOffset;
+        editor.setSelection({ start, len: end - start });
+        editor.updateDOMselection();
+      });
+
+      // 初始化
+      render();
+      $btn.onclick = () => {
+        const selection = editor.selection;
+        if (!selection) return void 0;
+        editor.execCommand(selection, "strong");
+      };
+    </script>
+  </body>
+</html>

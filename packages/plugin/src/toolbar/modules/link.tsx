@@ -3,7 +3,7 @@ import "../styles/link.scss";
 import { Button, Form, Input, Switch, Trigger } from "@arco-design/web-react";
 import useForm from "@arco-design/web-react/es/Form/useForm";
 import { IconLink, IconRight } from "@arco-design/web-react/icon";
-import { EDITOR_EVENT } from "block-kit-core";
+import { APPLY_SOURCE, EDITOR_EVENT } from "block-kit-core";
 import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ export const Link: FC<{
   const [form] = useForm();
   const [visible, setVisible] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
-  const { keys, refreshMarks, editor } = useToolbarContext();
+  const { keys, refreshMarks, editor, selection } = useToolbarContext();
 
   const onConfirm = () => {
     const sel = editor.selection.get();
@@ -79,11 +79,19 @@ export const Link: FC<{
     const sel = editor.selection.get();
     if (sel && !sel.isCollapsed) {
       // 由于焦点转移, 因此需要将临时标记应用到选区
-      editor.perform.applyMarks(sel, { [LINK_TEMP_KEY]: TRULY }, { autoCaret: false });
+      editor.perform.applyMarks(
+        sel,
+        { [LINK_TEMP_KEY]: TRULY },
+        { autoCaret: false, source: APPLY_SOURCE.NO_UNDO }
+      );
       editor.event.once(EDITOR_EVENT.SELECTION_CHANGE, () => {
         // 这里是需要等待渲染后再执行, 否则会导致选区校正无法获取 LineNode
         Promise.resolve().then(() => {
-          editor.perform.applyMarks(sel, { [LINK_TEMP_KEY]: NIL }, { autoCaret: false });
+          editor.perform.applyMarks(
+            sel,
+            { [LINK_TEMP_KEY]: NIL },
+            { autoCaret: false, source: APPLY_SOURCE.NO_UNDO }
+          );
         });
       });
     }
@@ -114,12 +122,13 @@ export const Link: FC<{
             >
               {collapsed && (
                 <Form.Item label="文本内容" field="link-insert">
-                  <Input data-no-prevent size="mini" placeholder="输入文本" />
+                  <Input data-no-prevent autoComplete="off" size="mini" placeholder="输入文本" />
                 </Form.Item>
               )}
               <Form.Item label="链接地址" field={LINK_KEY}>
                 <Input
                   data-no-prevent
+                  autoComplete="off"
                   size="mini"
                   placeholder="输入链接"
                   onFocus={onFocus}
@@ -142,7 +151,12 @@ export const Link: FC<{
         );
       }}
     >
-      <div className={cs("menu-toolbar-item", keys[LINK_KEY] && "active")}>
+      <div
+        className={cs(
+          "menu-toolbar-item",
+          keys[LINK_KEY] && selection && !selection.isCollapsed && "active"
+        )}
+      >
         <IconLink />
       </div>
     </Trigger>

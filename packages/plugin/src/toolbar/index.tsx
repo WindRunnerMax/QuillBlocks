@@ -84,6 +84,7 @@ export const Toolbar = (props: ToolbarProps) => {
           editor,
           setKeys,
           refreshMarks,
+          selection: editor.selection.get(),
         }}
       >
         {props.children}

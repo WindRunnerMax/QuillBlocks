@@ -65,6 +65,8 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   const { line, offset } = point;
   const blockState = editor.state.block;
   const lineState = blockState && blockState.getLine(line);
+  // 这里理论上可以增加从 DOM 找最近的 LineNode 的逻辑
+  // 可以防止修改内容后状态变更, 此时立即更新选区导致的节点查找问题
   const lineNode = editor.model.getLineNode(lineState);
   if (!lineNode) {
     return { node: null, offset: 0 };

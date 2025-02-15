@@ -68,11 +68,20 @@ export class Mutate {
     }
     if (isNewEOLOp) {
       lineState._appendLeaf(newLeaf);
-      // 1. Other 则为新 \n 2. This 则为原 \n
+      // LineState 对象是新的, 可通过 Leaf 判断是否可复用 key
+      // 1. Other Leaf 则为新 \n 2. This Leaf 则为原 \n
       const key = newLeaf.parent.key;
       this.newLines.push(lineState);
-      // this.key => 复用 other.key => 更新
-      lineState.updateKey(key);
+      // Other Leaf 是以新的 LineState 创建的, 因此 key 值相同
+      // key 值不相等, 那就说明是取得 This Leaf 的 key
+      if (lineState.key !== key) {
+        // this.key => 复用 other.key => 更新
+        lineState.updateKey(key);
+        // 复用的 LineState 可以直接更新到 Model
+        const reuseState = newLeaf.parent;
+        const lineDOM = this.editor.model.getLineNode(reuseState);
+        lineDOM && this.editor.model.setLineModel(lineDOM, lineState);
+      }
       lineState.updateLeaves();
       lineState.attributes = newOp.attributes || {};
       return LineState.create([], {}, this.block);
