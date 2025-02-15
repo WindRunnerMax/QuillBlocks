@@ -2,6 +2,7 @@ import type { AttributeMap } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
 import { invertAttributes } from "block-kit-delta";
 
+import { isLeafOffsetTail } from "../collect/utils/is";
 import { getFirstUnicodeLen, getLastUnicodeLen } from "../collect/utils/string";
 import type { Editor } from "../editor";
 import { isBlockLine } from "../schema/utils/is";
@@ -32,8 +33,8 @@ export class Perform {
     let attributes: AttributeMap | undefined = this.editor.collect.marks;
     if (!sel.isCollapsed) {
       // 非折叠选区时, 需要以 start 起始判断该节点的尾部 marks
-      const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
-      attributes = this.editor.collect.getLeafMarks(leaf && leaf.op, isLeafTail);
+      const isLeafTail = isLeafOffsetTail(leaf, point);
+      attributes = this.editor.collect.getLeafMarks(leaf, isLeafTail);
     }
     const delta = new Delta().retain(raw.start).delete(raw.len).insert(text, attributes);
     this.editor.state.apply(delta, { range: raw });

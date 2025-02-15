@@ -33,6 +33,8 @@ export { ItalicPlugin } from "./italic/index";
 export { ITALIC_KEY } from "./italic/types";
 export { LineHeightPlugin } from "./line-height/index";
 export { LINE_HEIGHT_KEY } from "./line-height/types";
+export { LinkPlugin } from "./link";
+export { LINK_BLANK_KEY, LINK_KEY } from "./link/types";
 export { MentionPlugin } from "./mention";
 export { MENTION_KEY, MENTION_NAME } from "./mention/types";
 export { OrderListPlugin } from "./order-list";

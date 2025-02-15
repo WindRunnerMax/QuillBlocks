@@ -9,6 +9,7 @@ import { EDITOR_EVENT } from "../event/bus/types";
 import type { Point } from "../selection/modules/point";
 import type { Range } from "../selection/modules/range";
 import type { LeafState } from "../state/modules/leaf-state";
+import { isLeafOffsetTail } from "./utils/is";
 
 export class Collect {
   /** 选区折叠时的 marks */
@@ -141,11 +142,15 @@ export class Collect {
    * 过滤需要追踪的属性
    * - mark: 输入时会自动追踪样式的节点
    * - mark + inline: 不追踪末尾 Mark
-   * @param op 操作
+   * @param leaf 叶子结点状态
    * @param isLeafTail 是否在节点尾部
    */
-  public getLeafMarks(op: Op | null, isLeafTail: boolean | null): AttributeMap | undefined {
-    if (!op || !op.insert || !op.attributes || isEOLOp(op)) {
+  public getLeafMarks(
+    leaf: LeafState | null,
+    isLeafTail: boolean | null
+  ): AttributeMap | undefined {
+    const op = leaf && leaf.op;
+    if (!leaf || !op || !op.insert || !op.attributes || isEOLOp(op)) {
       return void 0;
     }
     const attrs = op.attributes;
@@ -156,6 +161,11 @@ export class Collect {
         result[key] = attrs[key];
       }
       if (isLeafTail && this.editor.schema.inline.has(key)) {
+        const next = leaf.next(false);
+        // 如果下个节点存在相同的属性, 则仍然需要追加属性
+        if (next && next.op.attributes && next.op.attributes[key]) {
+          continue;
+        }
         delete result[key];
       }
     }
@@ -177,8 +187,8 @@ export class Collect {
     const leaf = this.editor.collect.getLeafAtPoint(point);
     // FIX: 当前节点为 void 时, 不需要处理文本
     if (leaf && leaf.void) return void 0;
-    const isLeafTail = leaf && point.offset - leaf.offset - leaf.length >= 0;
-    const attributes = this.getLeafMarks(leaf && leaf.op, isLeafTail);
+    const isLeafTail = isLeafOffsetTail(leaf, point);
+    const attributes = this.getLeafMarks(leaf, isLeafTail);
     this.marks = attributes || {};
     return void 0;
   }

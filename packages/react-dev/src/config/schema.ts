@@ -6,6 +6,7 @@ import {
   FONT_COLOR_KEY,
   FONT_SIZE_KEY,
   ITALIC_KEY,
+  LINK_KEY,
   STRIKE_KEY,
   UNDERLINE_KEY,
 } from "block-kit-plugin";
@@ -19,6 +20,7 @@ export const schema: EditorSchema = {
   [UNDERLINE_KEY]: { mark: true },
   [STRIKE_KEY]: { mark: true },
   [INLINE_CODE]: { mark: true, inline: true },
+  [LINK_KEY]: { mark: true, inline: true },
   [FONT_COLOR_KEY]: { mark: true },
   [FONT_SIZE_KEY]: { mark: true },
   [BACKGROUND_KEY]: { mark: true },

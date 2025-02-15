@@ -20,7 +20,7 @@ export class BulletListPlugin extends EditorPlugin {
 
   constructor(protected editor: Editor) {
     super();
-    editor.command.register(BULLET_LIST_KEY, this.onExec);
+    editor.command.register(this.key, this.onExec);
     editor.event.on(EDITOR_EVENT.KEY_DOWN, this.onKeyDown);
   }
 

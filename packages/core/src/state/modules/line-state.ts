@@ -1,6 +1,6 @@
 import type { AttributeMap } from "block-kit-delta";
 import type { Op } from "block-kit-delta";
-import { Delta, getOpLength } from "block-kit-delta";
+import { Delta, EOL, getOpLength } from "block-kit-delta";
 import { isInsertOp } from "block-kit-delta";
 import { OpIterator } from "block-kit-delta";
 
@@ -13,6 +13,8 @@ import { LeafState } from "./leaf-state";
 export class LineState {
   /** 唯一 key */
   public key: string;
+  /** 行节点 op */
+  public op: Op;
   /** 行 Leaf 数量 */
   public size: number;
   /** 行起始偏移 */
@@ -45,8 +47,10 @@ export class LineState {
     this.key = Key.getId(this);
     this._leafToIndex = new WeakMap();
     this._initFromDelta(delta);
+    this.op = { insert: EOL, attributes };
     if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
       // 在开发模式和测试环境下冻结, 避免 immutable 的对象被修改
+      Object.freeze(this.op);
       Object.freeze(this.attributes);
     }
   }

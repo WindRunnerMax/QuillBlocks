@@ -15,6 +15,7 @@ import {
   InlineCodePlugin,
   ItalicPlugin,
   LineHeightPlugin,
+  LinkPlugin,
   MentionPlugin,
   setMountDOM,
   StrikePlugin,
@@ -54,7 +55,8 @@ const App: FC = () => {
       new DividerPlugin(instance),
       new BulletListPlugin(instance),
       new OrderListPlugin(instance),
-      new IndentPlugin(instance)
+      new IndentPlugin(instance),
+      new LinkPlugin(instance)
     );
     return instance;
   }, []);

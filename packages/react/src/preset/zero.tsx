@@ -28,7 +28,7 @@ export type ZeroSpaceProps = {
  * - void hide => 独占一行的空节点, 例如 Image
  * - embed => 嵌入节点, 例如 Mention
  * - enter => 行末尾占位, 保留于 EOLView
- * - len => 空节点占位长度, 配合 void/embed
+ * - len => 空节点占位长度, 配合 Void/Embed
  * @param props
  * @param ref
  */

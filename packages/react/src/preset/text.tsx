@@ -18,10 +18,8 @@ export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
     } else if (ref) {
       ref.current = dom;
     }
-    if (!dom || props.children === dom.textContent) {
-      return void 0;
-    }
     // COMPAT: 避免 React 非受控与 IME 造成的 DOM 内容问题
+    if (!dom || props.children === dom.textContent) return void 0;
     const nodes = dom.childNodes;
     // If the text content is inconsistent due to the modification of the input
     // it needs to be corrected

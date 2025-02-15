@@ -59,4 +59,25 @@ describe("perform insert-text", () => {
         .insertEOL()
     );
   });
+
+  it("insert wrapper inline mark", () => {
+    const delta = new Delta()
+      .insert("text2", { link: "true" })
+      .insert("text", { bold: "true", link: "true" });
+    const editor = new Editor({
+      delta,
+      schema: {
+        bold: { mark: true },
+        link: { mark: true, inline: true },
+      },
+    });
+    editor.selection.set(new Range(new Point(0, 5), new Point(0, 5)));
+    editor.perform.insertText(editor.selection.get()!, "1");
+    expect(editor.state.toBlockSet()).toEqual(
+      new MutateDelta()
+        .insert("text21", { link: "true" })
+        .insert("text", { bold: "true", link: "true" })
+        .insertEOL()
+    );
+  });
 });

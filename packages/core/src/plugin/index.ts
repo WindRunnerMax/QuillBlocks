@@ -8,12 +8,12 @@ import type { CallerMap, CallerType, PluginFuncKeys, PluginRequiredKeyFunc } fro
 export class Plugin {
   /** 当前注册的插件 */
   public current: CorePlugin[];
+  /** 包装叶子结点的 keys */
+  public wrapLeafKeys: string[];
+  /** 包装行结点的 keys */
+  public wrapLineKeys: string[];
   /** 插件缓存 */
   protected cache: Record<string, CorePlugin[]>;
-  /** 包装叶子结点的 keys */
-  protected wrapLeafKeys: string[];
-  /** 包装行结点的 keys */
-  protected wrapLineKeys: string[];
 
   /**
    * 构造函数

@@ -4,7 +4,12 @@ export { BlockModel } from "./model/block";
 export { EOLModel } from "./model/eol";
 export { LeafModel } from "./model/leaf";
 export { LineModel } from "./model/line";
-export type { ReactLeafContext, ReactLineContext } from "./plugin/index";
+export type {
+  ReactLeafContext,
+  ReactLineContext,
+  ReactWrapLeafContext,
+  ReactWrapLineContext,
+} from "./plugin/index";
 export { EditorPlugin } from "./plugin/index";
 export { BlockKit } from "./preset/block-kit";
 export { Editable } from "./preset/editable";
