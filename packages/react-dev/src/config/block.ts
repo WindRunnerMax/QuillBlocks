@@ -4,6 +4,32 @@ export const INIT = new Delta({
   ops: [
     { insert: "Block Kit" },
     { insert: "\n", attributes: { align: "center", heading: "h1" } },
+    {
+      attributes: { "link": "https://github.com/WindRunnerMax/BlockKit", "link-blank": "true" },
+      insert: "GitHub",
+    },
+    { insert: " ｜ " },
+    {
+      attributes: { "link": "https://windrunnermax.github.io/BlockKit/", "link-blank": "true" },
+      insert: "DEMO",
+    },
+    { insert: " ｜ " },
+    {
+      attributes: {
+        "link": "https://github.com/WindRunnerMax/BlockKit/blob/master/NOTE.md",
+        "link-blank": "true",
+      },
+      insert: "NOTE",
+    },
+    { insert: " ｜ " },
+    {
+      attributes: {
+        "link": "https://github.com/WindRunnerMax/BlockKit/issues/1",
+        "link-blank": "true",
+      },
+      insert: "BLOG",
+    },
+    { insert: "\n", attributes: { align: "center" } },
     { insert: "从零实现富文本编辑器，在" },
     { attributes: { "inline-code": "true" }, insert: "ContentEditable" },
     { insert: "的基础上构建" },
@@ -34,6 +60,11 @@ export const INIT = new Delta({
     { attributes: { background: "rgba(186, 206, 253, 0.7)" }, insert: "背景颜色" },
     { insert: "、" },
     { insert: "字体大小", attributes: { "font-size": "14" } },
+    { insert: "、" },
+    {
+      insert: "超链接",
+      attributes: { "link": "https://www.baidu.com", "link-blank": "true" },
+    },
     { insert: " 等" },
     { insert: "\n", attributes: { align: "center" } },
     { insert: "段落结构" },

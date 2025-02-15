@@ -1,0 +1,29 @@
+.block-kit-link-popup {
+  background-color: var(--color-bg-1);
+  box-shadow: 0 0 4px var(--color-border-2);
+  padding: 10px 15px;
+  position: relative;
+  width: 330px;
+
+  .arco-form-size-small .arco-form-label-item > label {
+    font-size: 13px;
+  }
+
+  .arco-form-item {
+    margin: 5px 0;
+  }
+
+  .block-kit-link-popup-button {
+    bottom: 15px;
+    position: absolute;
+    right: 15px;
+
+    .arco-btn {
+      margin-left: 10px;
+    }
+  }
+
+  .block-kit-link-popup-go {
+    cursor: pointer;
+  }
+}

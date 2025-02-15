@@ -11,7 +11,9 @@ export const getWrapSymbol = (keys: string[], el: JSX.Element | undefined): stri
   const cache = state && STATE_TO_SYMBOL.get(state);
   if (cache || !state) return cache || null;
   const attrs = state.op.attributes;
-  if (!attrs || !Object.keys(attrs).length) return null;
+  if (!attrs || !Object.keys(attrs).length || !keys.length) {
+    return null;
+  }
   const suite: string[] = [];
   for (const key of keys) {
     attrs[key] && suite.push(`${key}${attrs[key]}`);

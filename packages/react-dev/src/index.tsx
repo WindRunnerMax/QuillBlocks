@@ -80,6 +80,7 @@ const App: FC = () => {
           <Toolbar.Italic></Toolbar.Italic>
           <Toolbar.Underline></Toolbar.Underline>
           <Toolbar.Strike></Toolbar.Strike>
+          <Toolbar.Link></Toolbar.Link>
           <Toolbar.InlineCode></Toolbar.InlineCode>
           <Toolbar.Cut></Toolbar.Cut>
           <Toolbar.FontSize></Toolbar.FontSize>

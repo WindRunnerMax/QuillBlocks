@@ -10,20 +10,24 @@ import type { ReactNode } from "react";
 import { SelectionPlugin } from "../shared/modules/selection";
 import { getMountDOM } from "../shared/utils/dom";
 import { isEmptyLine } from "../shared/utils/is";
-import { IMAGE_INPUT_DOM_ID, IMAGE_KEY, IMAGE_SRC, IMAGE_STATUS, LOADING_STATUS } from "./types";
+import { IMAGE_KEY, IMAGE_SRC, IMAGE_STATUS, LOADING_STATUS } from "./types";
 import { ImageView } from "./view/image";
 
 export class ImagePlugin extends EditorPlugin {
   public key = IMAGE_KEY;
   public selection: SelectionPlugin;
+  protected input: HTMLInputElement | null;
 
   constructor(protected editor: Editor) {
     super();
+    this.input = null;
     this.selection = new SelectionPlugin(editor);
     editor.command.register(IMAGE_KEY, this.onExec);
   }
 
   public destroy(): void {
+    this.input && this.input.remove();
+    this.input = null;
     this.selection.destroy();
   }
 
@@ -38,14 +42,14 @@ export class ImagePlugin extends EditorPlugin {
   }
 
   protected pickMultiImage() {
-    let imageInput = document.getElementById(IMAGE_INPUT_DOM_ID);
+    let imageInput = this.input;
     if (!imageInput) {
       imageInput = document.createElement("input");
       imageInput.setAttribute("type", "file");
-      imageInput.setAttribute("id", IMAGE_INPUT_DOM_ID);
       imageInput.setAttribute("accept", "image/png, image/jpeg, image/svg+xml");
       imageInput.hidden = true;
       imageInput.setAttribute("multiple", "true");
+      this.input = imageInput;
       getMountDOM(this.editor).append(imageInput);
     }
     return new Promise<FileList | null>(resolve => {

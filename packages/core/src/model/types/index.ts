@@ -21,3 +21,7 @@ export const ZERO_NO_BREAK_SYMBOL = "\uFEFF";
 
 // Attributes
 export const EDITABLE = "contenteditable";
+
+// Keywords
+export const CLIENT_KEY = "_client_";
+export const REF_KEY = "_ref_";

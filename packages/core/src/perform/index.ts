@@ -10,6 +10,7 @@ import { Point } from "../selection/modules/point";
 import { Range } from "../selection/modules/range";
 import { RawPoint } from "../selection/modules/raw-point";
 import { RawRange } from "../selection/modules/raw-range";
+import type { ApplyOptions } from "../state/types";
 
 export class Perform {
   /**
@@ -207,7 +208,7 @@ export class Perform {
    * @param sel
    * @param attributes
    */
-  public applyMarks(sel: Range, attributes: AttributeMap) {
+  public applyMarks(sel: Range, attributes: AttributeMap, options?: ApplyOptions) {
     if (sel.isCollapsed) {
       this.editor.collect.marks = {
         ...this.editor.collect.marks,
@@ -227,7 +228,7 @@ export class Perform {
     if (start.line === end.line) {
       const minOffset = Math.min(end.offset, endOffset);
       delta.retain(minOffset - start.offset, attributes);
-      return this.editor.state.apply(delta.chop());
+      return this.editor.state.apply(delta.chop(), options);
     }
     // 处理首行
     delta.retain(endOffset - start.offset, attributes);
@@ -245,7 +246,7 @@ export class Perform {
       const minOffset = Math.min(end.offset, endLine.length - 1);
       delta.retain(minOffset, attributes);
     }
-    this.editor.state.apply(delta.chop());
+    this.editor.state.apply(delta.chop(), options);
     return void 0;
   }
 
@@ -254,7 +255,7 @@ export class Perform {
    * @param sel
    * @param attributes
    */
-  public applyLineMarks(sel: Range, attributes: AttributeMap) {
+  public applyLineMarks(sel: Range, attributes: AttributeMap, options?: ApplyOptions) {
     const { start, end } = sel;
     const block = this.editor.state.block;
     const rawPoint = RawPoint.fromPoint(this.editor, Point.from(start.line, 0));
@@ -267,7 +268,7 @@ export class Perform {
       delta.retain(lineState.length - 1);
       delta.retain(1, attributes);
     }
-    this.editor.state.apply(delta);
+    this.editor.state.apply(delta, options);
     return void 0;
   }
 }

@@ -21,6 +21,7 @@ import { Image } from "./modules/image";
 import { InlineCode } from "./modules/inline-code";
 import { Italic } from "./modules/italic";
 import { LineHeight } from "./modules/line-height";
+import { Link } from "./modules/link";
 import { OrderList } from "./modules/order-list";
 import { Strike } from "./modules/strike";
 import { Underline } from "./modules/underline";
@@ -68,7 +69,14 @@ export const Toolbar = (props: ToolbarProps) => {
   return (
     <div
       className={cs("block-kit-menu-toolbar", props.className)}
-      onMouseDown={e => e.preventDefault()}
+      onMouseDown={e => {
+        const target = e.target;
+        // 存在需要抢夺焦点的情况, 例如超链接输入的弹出层
+        if (target instanceof HTMLElement && target.hasAttribute("data-no-prevent")) {
+          return void 0;
+        }
+        e.preventDefault();
+      }}
     >
       <ToolbarContext.Provider
         value={{
@@ -86,6 +94,7 @@ export const Toolbar = (props: ToolbarProps) => {
 
 Toolbar.Cut = Cut;
 Toolbar.Bold = Bold;
+Toolbar.Link = Link;
 Toolbar.Image = Image;
 Toolbar.Align = Align;
 Toolbar.Italic = Italic;

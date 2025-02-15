@@ -28,10 +28,12 @@ export {
 export { LOG_LEVEL } from "./log";
 export {
   BLOCK_KEY,
+  CLIENT_KEY,
   EDITOR_KEY,
   LEAF_KEY,
   LEAF_STRING,
   NODE_KEY,
+  REF_KEY,
   VOID_KEY,
   VOID_LEN_KEY,
   ZERO_EMBED_KEY,
