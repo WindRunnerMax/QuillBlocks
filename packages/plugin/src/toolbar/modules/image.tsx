@@ -3,7 +3,7 @@ import { cs, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { IMAGE_KEY } from "../../image/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Image: FC = () => {
   const { refreshMarks, editor } = useToolbarContext();

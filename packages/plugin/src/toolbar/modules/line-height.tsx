@@ -7,7 +7,7 @@ import type { FC } from "react";
 
 import { LINE_HEIGHT_KEY } from "../../line-height/types";
 import { LineHeightIcon } from "../../shared/icons/line-height";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 const STEP = [...Array.from({ length: 11 }, (_, i) => i * 0.1 + 1.5), 3].map(v =>
   v.toFixed(1).toString()
@@ -19,6 +19,7 @@ export const LineHeight: FC = () => {
   return (
     <Trigger
       trigger="click"
+      popupAlign={{ bottom: 10 }}
       popup={() => (
         <div className="block-kit-toolbar-dropdown" onClick={refreshMarks}>
           <div

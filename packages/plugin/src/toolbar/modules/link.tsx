@@ -9,7 +9,7 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 
 import { LINK_BLANK_KEY, LINK_KEY, LINK_TEMP_KEY } from "../../link/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Link: FC<{
   filterXSS?: (v: string) => string;
@@ -108,6 +108,7 @@ export const Link: FC<{
       popupVisible={visible}
       onVisibleChange={setVisible}
       trigger="click"
+      popupAlign={{ bottom: 10 }}
       popup={() => {
         return (
           <div className="block-kit-link-popup">

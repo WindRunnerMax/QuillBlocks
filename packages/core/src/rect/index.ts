@@ -90,4 +90,31 @@ export class Rect {
     const editorRect = this.getEditorRect();
     return relativeTo(rangeRect, editorRect);
   }
+
+  /**
+   * 获取原始选区的 Rect
+   * - 相对页面 (0, 0) 的位置
+   */
+  public getRawSelectionRect(): RectType | null {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+    const range = selection.getRangeAt(0);
+    if (!range) return null;
+    const clientRect = range.getBoundingClientRect();
+    return fromDOMRect(clientRect);
+  }
+
+  /**
+   * 获取编辑器选区的 Rect
+   * - 相对编辑器 (0, 0) 的位置
+   */
+  public getSelectionRect(): RectType | null {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+    const range = selection.getRangeAt(0);
+    if (!range) return null;
+    const clientRect = range.getBoundingClientRect();
+    const editorRect = this.getEditorRect();
+    return relativeTo(clientRect, editorRect);
+  }
 }

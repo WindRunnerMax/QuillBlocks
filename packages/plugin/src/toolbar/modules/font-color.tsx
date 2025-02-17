@@ -8,7 +8,7 @@ import type { FC } from "react";
 import { BACKGROUND_KEY } from "../../background/types";
 import { FONT_COLOR_KEY } from "../../font-color/types";
 import { FontColorIcon } from "../../shared/icons/font-color";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 const COLOR = [
   "",
@@ -46,6 +46,7 @@ export const FontColor: FC = () => {
   return (
     <Trigger
       trigger="click"
+      popupAlign={{ bottom: 10 }}
       popup={() => (
         <div className="block-kit-toolbar-dropdown block-kit-color-picker" onClick={refreshMarks}>
           <div className="kit-color-picker-label">字体颜色</div>

@@ -3,7 +3,7 @@ import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { ITALIC_KEY } from "../../italic/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Italic: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();

@@ -6,7 +6,7 @@ import type { FC } from "react";
 
 import { HEADING_KEY } from "../../heading/types";
 import { TextIcon } from "../../shared/icons/text";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 const MAP: O.Map<JSX.Element> = {
   h1: <IconH1 />,
@@ -24,6 +24,7 @@ export const Heading: FC = () => {
   return (
     <Trigger
       trigger="click"
+      popupAlign={{ bottom: 10 }}
       popup={() => (
         <div className="block-kit-toolbar-dropdown" onClick={refreshMarks}>
           <div

@@ -4,6 +4,12 @@ body {
   background-color: var(--color-fill-2);
 }
 
+.block-kit-editable-container {
+  margin: 15px auto;
+  position: relative;
+  width: 800px;
+}
+
 .block-kit-editor-container {
   box-sizing: border-box;
   position: relative;
@@ -26,9 +32,7 @@ body {
 
   .block-kit-editable {
     background-color: var(--color-bg-1);
-    margin: 15px auto;
     padding: 10px 20px;
-    width: 800px;
   }
 
   div[data-node] {

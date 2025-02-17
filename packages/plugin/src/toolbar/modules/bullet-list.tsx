@@ -4,7 +4,7 @@ import type { FC } from "react";
 
 import { BULLET_LIST_KEY } from "../../bullet-list/types";
 import { isBulletList } from "../../bullet-list/utils/is";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const BulletList: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();

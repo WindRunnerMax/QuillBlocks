@@ -3,7 +3,7 @@ import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { BOLD_KEY } from "../../bold/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Bold: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();

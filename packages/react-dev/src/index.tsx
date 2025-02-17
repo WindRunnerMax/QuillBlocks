@@ -8,6 +8,7 @@ import {
   BackgroundPlugin,
   BoldPlugin,
   DividerPlugin,
+  FloatToolbar,
   FontSizePlugin,
   HeadingPlugin,
   ImagePlugin,
@@ -17,6 +18,7 @@ import {
   LineHeightPlugin,
   LinkPlugin,
   MentionPlugin,
+  Mixin,
   setMountDOM,
   StrikePlugin,
   Toolbar,
@@ -69,39 +71,51 @@ const App: FC = () => {
   }, [editor]);
 
   const onMountRef = (e: HTMLElement | null) => {
-    setMountDOM(editor, e);
+    e && setMountDOM(editor, e);
   };
 
   return (
     <BlockKit editor={editor} readonly={readonly}>
       <div className="block-kit-editor-container">
         <Toolbar className="block-kit-toolbar">
-          <Toolbar.Bold></Toolbar.Bold>
-          <Toolbar.Italic></Toolbar.Italic>
-          <Toolbar.Underline></Toolbar.Underline>
-          <Toolbar.Strike></Toolbar.Strike>
-          <Toolbar.Link></Toolbar.Link>
-          <Toolbar.InlineCode></Toolbar.InlineCode>
-          <Toolbar.Cut></Toolbar.Cut>
-          <Toolbar.FontSize></Toolbar.FontSize>
-          <Toolbar.FontColor></Toolbar.FontColor>
-          <Toolbar.Cut></Toolbar.Cut>
-          <Toolbar.Heading></Toolbar.Heading>
-          <Toolbar.Align></Toolbar.Align>
-          <Toolbar.LineHeight></Toolbar.LineHeight>
-          <Toolbar.Cut></Toolbar.Cut>
-          <Toolbar.BulletList></Toolbar.BulletList>
-          <Toolbar.OrderList></Toolbar.OrderList>
-          <Toolbar.Cut></Toolbar.Cut>
-          <Toolbar.Image></Toolbar.Image>
-          <Toolbar.Divider></Toolbar.Divider>
-          <Toolbar.Cut></Toolbar.Cut>
-          <Toolbar.History></Toolbar.History>
-          <Toolbar.Cut></Toolbar.Cut>
+          <Mixin.Bold></Mixin.Bold>
+          <Mixin.Italic></Mixin.Italic>
+          <Mixin.Underline></Mixin.Underline>
+          <Mixin.Strike></Mixin.Strike>
+          <Mixin.Link></Mixin.Link>
+          <Mixin.InlineCode></Mixin.InlineCode>
+          <Mixin.Cut></Mixin.Cut>
+          <Mixin.FontSize></Mixin.FontSize>
+          <Mixin.FontColor></Mixin.FontColor>
+          <Mixin.Cut></Mixin.Cut>
+          <Mixin.Heading></Mixin.Heading>
+          <Mixin.Align></Mixin.Align>
+          <Mixin.LineHeight></Mixin.LineHeight>
+          <Mixin.Cut></Mixin.Cut>
+          <Mixin.BulletList></Mixin.BulletList>
+          <Mixin.OrderList></Mixin.OrderList>
+          <Mixin.Cut></Mixin.Cut>
+          <Mixin.Image></Mixin.Image>
+          <Mixin.Divider></Mixin.Divider>
+          <Mixin.Cut></Mixin.Cut>
+          <Mixin.History></Mixin.History>
+          <Mixin.Cut></Mixin.Cut>
           <GitHubIcon></GitHubIcon>
         </Toolbar>
-        <div className="block-kit-mount-dom" ref={onMountRef}></div>
-        <Editable autoFocus className="block-kit-editable"></Editable>
+        <FloatToolbar width={344} offsetHeight={50}>
+          <Mixin.Bold></Mixin.Bold>
+          <Mixin.Italic></Mixin.Italic>
+          <Mixin.Underline></Mixin.Underline>
+          <Mixin.Strike></Mixin.Strike>
+          <Mixin.Link></Mixin.Link>
+          <Mixin.InlineCode></Mixin.InlineCode>
+          <Mixin.FontSize></Mixin.FontSize>
+          <Mixin.FontColor></Mixin.FontColor>
+        </FloatToolbar>
+        <div className="block-kit-editable-container">
+          <div className="block-kit-mount-dom" ref={onMountRef}></div>
+          <Editable autoFocus className="block-kit-editable"></Editable>
+        </div>
       </div>
     </BlockKit>
   );

@@ -7,4 +7,6 @@ export const TOOLBAR_KEY_SET = new Set(TOOLBAR_TYPES);
 export type ToolbarProps = {
   className?: string;
   children: React.ReactNode;
+  top?: number;
+  left?: number;
 };

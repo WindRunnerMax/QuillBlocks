@@ -6,7 +6,7 @@ import { useRef } from "react";
 
 import { FONT_SIZE_KEY } from "../../font-size/types";
 import { FontSizeIcon } from "../../shared/icons/font-size";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 const STEP = Array(10)
   .fill(null)
@@ -19,6 +19,7 @@ export const FontSize: FC = () => {
   return (
     <Trigger
       ref={triggerRef}
+      popupAlign={{ bottom: 10 }}
       trigger="click"
       popup={() => (
         <div className="block-kit-toolbar-dropdown" onClick={refreshMarks}>

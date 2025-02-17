@@ -3,7 +3,7 @@ import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { UNDERLINE_KEY } from "../../underline/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Underline: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();

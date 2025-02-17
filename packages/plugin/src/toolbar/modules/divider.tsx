@@ -3,7 +3,7 @@ import type { FC } from "react";
 
 import { DIVIDER_KEY } from "../../divider/types";
 import { DividerIcon } from "../../shared/icons/divider";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Divider: FC = () => {
   const { refreshMarks, editor } = useToolbarContext();

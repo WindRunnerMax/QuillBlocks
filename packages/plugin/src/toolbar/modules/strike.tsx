@@ -3,7 +3,7 @@ import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { STRIKE_KEY } from "../../strike/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const Strike: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();

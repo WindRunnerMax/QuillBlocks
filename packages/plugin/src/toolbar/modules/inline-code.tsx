@@ -3,7 +3,7 @@ import { cs, NIL, TRULY } from "block-kit-utils";
 import type { FC } from "react";
 
 import { INLINE_CODE } from "../../inline-code/types";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 export const InlineCode: FC = () => {
   const { keys, refreshMarks, editor } = useToolbarContext();

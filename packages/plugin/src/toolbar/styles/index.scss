@@ -7,9 +7,11 @@
   user-select: none;
 
   .menu-toolbar-item {
+    align-items: center;
     border-radius: 3px;
     color: var(--color-text-1);
     cursor: pointer;
+    display: flex;
     margin: 0 3px;
     padding: 3px 7px;
 

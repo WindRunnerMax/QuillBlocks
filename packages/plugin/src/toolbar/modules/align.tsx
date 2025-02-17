@@ -11,7 +11,7 @@ import type { FC } from "react";
 
 import { ALIGN_KEY } from "../../align/types";
 import { JustifyIcon } from "../../shared/icons/justify";
-import { useToolbarContext } from "../context/provider";
+import { useToolbarContext } from "../context/store";
 
 const MAP: O.Map<JSX.Element> = {
   left: <IconAlignLeft />,
@@ -26,6 +26,7 @@ export const Align: FC = () => {
   return (
     <Trigger
       trigger="click"
+      popupAlign={{ bottom: 10 }}
       popup={() => (
         <div className="block-kit-toolbar-dropdown" onClick={refreshMarks}>
           <div
