@@ -78,7 +78,7 @@ export const toDOMPoint = (editor: Editor, point: Point): DOMPoint => {
   // For each leaf, we need to isolate its content, which means filtering
   // to its direct text and zero-width spans. (We have to filter out any
   // other siblings that may have been rendered alongside them.)
-  const selector = `[${LEAF_STRING}], [${ZERO_SPACE_KEY}]`;
+  const selector = `span[${LEAF_STRING}], span[${ZERO_SPACE_KEY}]`;
   // Maybe use LineState Model to iterate over node ?
   // 所有文本类型标记的节点
   const leaves = Array.from(lineNode.querySelectorAll(selector));

@@ -58,7 +58,7 @@ export class Rect {
 
   /**
    * 获取光标的 Rect
-   * - 相对编辑器的位置
+   * - 相对编辑器 (0, 0) 的位置
    */
   public getCaretRect(): RectType | null {
     const caretRect = this.getRawCaretRect();
@@ -69,7 +69,7 @@ export class Rect {
 
   /**
    * 获取指定 Point 的 Rect
-   * - 相对编辑器的位置
+   * - 相对编辑器 (0, 0) 的位置
    * @param point
    */
   public getPointRect(point: Point): RectType | null {
@@ -81,7 +81,7 @@ export class Rect {
 
   /**
    * 获取指定 Range 的 Rect
-   * - 相对编辑器的位置
+   * - 相对编辑器 (0, 0) 的位置
    * @param range
    */
   public getRangeRect(range: Range): RectType | null {

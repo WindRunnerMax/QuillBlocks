@@ -168,11 +168,9 @@
       // 渲染层
       const render = () => {
         container.innerHTML = "";
-        let index = 0;
         for (const data of model) {
           const node = document.createElement(data.type);
           node.setAttribute("data-leaf", "true");
-          index = index + data.text.length;
           node.textContent = data.text;
           container.appendChild(node);
           MODEL_TO_DOM.set(data, node);

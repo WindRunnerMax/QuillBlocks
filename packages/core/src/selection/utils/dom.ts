@@ -49,10 +49,9 @@ export const getStaticSelection = (sel?: Selection | null): DOMStaticRange | nul
 
 /**
  * 获取 parent 中 index 处附近的可编辑节点和索引
- * 优先 direction 方向的查找
  * @param parent
  * @param index
- * @param direction
+ * @param direction 优先 direction 方向的查找
  */
 export const getEditableChildAndIndex = (
   parent: DOMElement,
@@ -105,10 +104,9 @@ export const getEditableChildAndIndex = (
 
 /**
  * 获取 parent 中 index 处附近的可编辑节点
- * 优先 direction 方向的查找
  * @param parent
  * @param index
- * @param direction
+ * @param direction 优先 direction 方向的查找
  */
 export const getEditableChild = (
   parent: DOMElement,

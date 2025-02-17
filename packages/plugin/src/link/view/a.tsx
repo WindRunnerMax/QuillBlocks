@@ -17,7 +17,7 @@ export const A: FC<{
   const target = attrs[LINK_BLANK_KEY] ? "_blank" : "_self";
 
   const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e[CTRL_KEY] && window.open(href, "_blank");
+    e[CTRL_KEY as "ctrlKey"] && window.open(href, "_blank");
     e.preventDefault();
   };
 
