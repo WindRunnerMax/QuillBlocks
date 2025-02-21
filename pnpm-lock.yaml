@@ -229,58 +229,6 @@ importers:
         specifier: 17.0.2
         version: 17.0.2
 
-  packages/react-dev:
-    dependencies:
-      '@arco-design/web-react':
-        specifier: ^2.64.0
-        version: 2.64.0(@types/react@17.0.2)(react-dom@17.0.2)(react@17.0.2)
-      block-kit-core:
-        specifier: 'workspace: *'
-        version: link:../core
-      block-kit-delta:
-        specifier: 'workspace: *'
-        version: link:../delta
-      block-kit-plugin:
-        specifier: 'workspace: *'
-        version: link:../plugin
-      block-kit-react:
-        specifier: 'workspace: *'
-        version: link:../react
-      block-kit-utils:
-        specifier: 'workspace: *'
-        version: link:../utils
-      react:
-        specifier: 17.0.2
-        version: 17.0.2
-      react-dom:
-        specifier: 17.0.2
-        version: 17.0.2(react@17.0.2)
-    devDependencies:
-      '@rspack/cli':
-        specifier: ^0.2.5
-        version: 0.2.12(react-refresh@0.14.0)(webpack@5.95.0)
-      '@rspack/plugin-html':
-        specifier: ^0.2.5
-        version: 0.2.12(@rspack/core@0.2.12)
-      '@types/react':
-        specifier: 17.0.2
-        version: 17.0.2
-      '@types/react-dom':
-        specifier: 17.0.2
-        version: 17.0.2
-      copy-webpack-plugin:
-        specifier: '5'
-        version: 5.1.2(webpack@5.95.0)
-      less:
-        specifier: 4.2.0
-        version: 4.2.0
-      less-loader:
-        specifier: 12.1.0
-        version: 12.1.0(less@4.2.0)(webpack@5.95.0)
-      sass-loader:
-        specifier: 13.3.3
-        version: 13.3.3(sass@1.52.3)(webpack@5.95.0)
-
   packages/tools:
     dependencies:
       docx:
@@ -357,6 +305,58 @@ importers:
       ts-jest:
         specifier: 29.1.2
         version: 29.1.2(@babel/core@7.20.12)(babel-jest@29.4.1)(jest@29.4.1)(typescript@5.3.2)
+
+  website:
+    dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.64.0
+        version: 2.64.0(@types/react@17.0.2)(react-dom@17.0.2)(react@17.0.2)
+      block-kit-core:
+        specifier: 'workspace: *'
+        version: link:../packages/core
+      block-kit-delta:
+        specifier: 'workspace: *'
+        version: link:../packages/delta
+      block-kit-plugin:
+        specifier: 'workspace: *'
+        version: link:../packages/plugin
+      block-kit-react:
+        specifier: 'workspace: *'
+        version: link:../packages/react
+      block-kit-utils:
+        specifier: 'workspace: *'
+        version: link:../packages/utils
+      react:
+        specifier: 17.0.2
+        version: 17.0.2
+      react-dom:
+        specifier: 17.0.2
+        version: 17.0.2(react@17.0.2)
+    devDependencies:
+      '@rspack/cli':
+        specifier: ^0.2.5
+        version: 0.2.12(react-refresh@0.14.0)(webpack@5.95.0)
+      '@rspack/plugin-html':
+        specifier: ^0.2.5
+        version: 0.2.12(@rspack/core@0.2.12)
+      '@types/react':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@types/react-dom':
+        specifier: 17.0.2
+        version: 17.0.2
+      copy-webpack-plugin:
+        specifier: '5'
+        version: 5.1.2(webpack@5.95.0)
+      less:
+        specifier: 4.2.0
+        version: 4.2.0
+      less-loader:
+        specifier: 12.1.0
+        version: 12.1.0(less@4.2.0)(webpack@5.95.0)
+      sass-loader:
+        specifier: 13.3.3
+        version: 13.3.3(sass@1.52.3)(webpack@5.95.0)
 
 packages:
 
@@ -2520,7 +2520,7 @@ packages:
   /@swc/helpers@0.5.1:
     resolution: {integrity: sha512-sJ902EfIzn1Fa+qYmjdQqh8tPsoxyBz+8yBKC2HKUxyezKJFwPGOn7pv4WY6QuQW//ySQi5lJjA/ZT9sNWWNTg==}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /@tootallnate/once@2.0.0:
@@ -3807,7 +3807,7 @@ packages:
     resolution: {integrity: sha512-gxGWBrTT1JuMx6R+o5PTXMmUnhnVzLQ9SNutD4YqKtI6ap897t3tKECYla6gCWEkplXnlNybEkZg9GEGxKFCgw==}
     dependencies:
       pascal-case: 3.1.2
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /camelcase-keys@6.2.2:
@@ -4577,7 +4577,7 @@ packages:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /duplexer@0.1.2:
@@ -7050,6 +7050,7 @@ packages:
 
   /lodash.template@4.5.0:
     resolution: {integrity: sha512-84vYFxIkmidUiFxidA/KjjH9pAycqW+h980j7Fuz5qxRtO9pgB7MDFTdys1N7A5mcucRiDyEq4fusljItR1T/A==}
+    deprecated: This package is deprecated. Use https://socket.dev/npm/package/eta instead.
     dependencies:
       lodash._reinterpolate: 3.0.0
       lodash.templatesettings: 4.2.0
@@ -7081,7 +7082,7 @@ packages:
   /lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /lru-cache@10.2.2:
@@ -7371,7 +7372,7 @@ packages:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
     dependencies:
       lower-case: 2.0.2
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /node-forge@1.3.1:
@@ -7652,7 +7653,7 @@ packages:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /parent-module@1.0.1:
@@ -7698,7 +7699,7 @@ packages:
     resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.8.1
     dev: true
 
   /path-dirname@1.0.2:
@@ -9827,10 +9828,6 @@ packages:
   /tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
     dev: false
-
-  /tslib@2.6.2:
-    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
-    dev: true
 
   /tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}

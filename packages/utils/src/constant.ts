@@ -41,7 +41,7 @@ export const TRULY = "true";
 export const FALSY = "false";
 
 /** 控制键 */
-export const CTRL_KEY = IS_MAC ? "metaKey" : "ctrlKey";
+export const CTRL_KEY: "metaKey" | "ctrlKey" = IS_MAC ? "metaKey" : "ctrlKey";
 
 /** 空函数 */
 export const NOOP = () => null;

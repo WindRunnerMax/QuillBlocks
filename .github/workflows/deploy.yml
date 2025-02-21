@@ -28,11 +28,11 @@ jobs:
 
       - name: build project
         run: |
-          pnpm run --filter ./packages/react-dev build
+          pnpm run --filter ./website build
 
       - name: deploy project
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: packages/react-dev/build
+          FOLDER: website/build
