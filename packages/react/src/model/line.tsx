@@ -1,4 +1,4 @@
-import type { Editor, LineState, WrapLeafContext } from "block-kit-core";
+import type { Editor, LineState } from "block-kit-core";
 import type { LeafState } from "block-kit-core";
 import { NODE_KEY, PLUGIN_TYPE } from "block-kit-core";
 import { EOL, EOL_OP } from "block-kit-delta";
@@ -7,7 +7,8 @@ import { useUpdateLayoutEffect } from "block-kit-utils/dist/es/hooks";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
-import type { ReactLineContext } from "../plugin";
+import type { ReactLineContext, ReactWrapLeafContext } from "../plugin/types";
+import { EDITOR_TO_WRAP_LEAF_KEYS, EDITOR_TO_WRAP_LEAF_PLUGINS } from "../plugin/wrap";
 import { JSX_TO_STATE, LEAF_TO_TEXT } from "../utils/weak-map";
 import { getWrapSymbol } from "../utils/wrapper";
 import { EOLModel } from "./eol";
@@ -89,9 +90,10 @@ const LineView: FC<{
    */
   const children = useMemo(() => {
     const wrapped: JSX.Element[] = [];
-    const keys = editor.plugin.wrapLeafKeys;
+    const keys = EDITOR_TO_WRAP_LEAF_KEYS.get(editor);
+    const plugins = EDITOR_TO_WRAP_LEAF_PLUGINS.get(editor);
+    if (!keys || !plugins) return elements;
     const len = elements.length;
-    const plugins = editor.plugin.getPriorityPlugins(PLUGIN_TYPE.WRAP_LEAF);
     for (let i = 0; i < len; ++i) {
       const element = elements[i];
       const symbol = getWrapSymbol(keys, element);
@@ -118,11 +120,11 @@ const LineView: FC<{
       const op = leaf.op;
       for (const plugin of plugins) {
         // 这里的状态以首个节点为准
-        const context: WrapLeafContext = {
+        const context: ReactWrapLeafContext = {
           leafState: leaf,
           children: wrapper,
         };
-        if (plugin.match(leaf.op.attributes || {}, op)) {
+        if (plugin.match(leaf.op.attributes || {}, op) && plugin.wrapLeaf) {
           wrapper = plugin.wrapLeaf(context);
         }
       }
@@ -130,7 +132,7 @@ const LineView: FC<{
       wrapped.push(<React.Fragment key={key}>{wrapper}</React.Fragment>);
     }
     return wrapped;
-  }, [elements, editor.plugin]);
+  }, [editor, elements]);
 
   /**
    * 处理行级节点的渲染

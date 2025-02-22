@@ -3,7 +3,7 @@ import { LEAF_KEY, PLUGIN_TYPE } from "block-kit-core";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
-import type { ReactLeafContext } from "../plugin";
+import type { ReactLeafContext } from "../plugin/types";
 import { Text } from "../preset/text";
 import { LEAF_TO_TEXT as LT } from "../utils/weak-map";
 

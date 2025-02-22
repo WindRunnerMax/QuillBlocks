@@ -41,7 +41,7 @@ export class EventBus {
    * 监听事件
    * @param {T} key
    * @param {Listener<T>} listener
-   * @param {number} priority
+   * @param {number} priority 默认为 100
    */
   public on<T extends EventKeys>(key: T, listener: Listener<T>, priority = DEFAULT_PRIORITY) {
     this.addEventListener(key, listener, priority, false);
@@ -51,7 +51,7 @@ export class EventBus {
    * 一次性事件监听
    * @param {T} key
    * @param {Listener<T>} listener
-   * @param {number} priority
+   * @param {number} priority 默认为 100
    */
   public once<T extends EventKeys>(key: T, listener: Listener<T>, priority = DEFAULT_PRIORITY) {
     this.addEventListener(key, listener, priority, true);

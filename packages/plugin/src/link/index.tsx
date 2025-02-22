@@ -1,10 +1,10 @@
 import type { Editor } from "block-kit-core";
 import type { CMDPayload } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
+import type { ReactLeafContext, ReactWrapLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
 import { Bind } from "block-kit-utils";
 
-import type { ReactLeafContext, ReactWrapLeafContext } from "../../../react/src/plugin";
 import { LINK_KEY, LINK_TEMP_KEY } from "./types";
 import { A } from "./view/a";
 

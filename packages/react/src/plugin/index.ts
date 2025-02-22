@@ -1,25 +1,49 @@
-import type { LeafContext, LineContext, WrapLeafContext, WrapLineContext } from "block-kit-core";
 import { CorePlugin } from "block-kit-core";
 
-export interface ReactWrapLineContext extends WrapLineContext {
-  children?: React.ReactNode;
-}
-
-export interface ReactWrapLeafContext extends WrapLeafContext {
-  children?: React.ReactNode;
-}
-
-export interface ReactLineContext extends LineContext {
-  children?: React.ReactNode;
-}
-
-export interface ReactLeafContext extends LeafContext {
-  children?: React.ReactNode;
-}
+import type {
+  ReactLeafContext,
+  ReactLineContext,
+  ReactWrapLeafContext,
+  ReactWrapLineContext,
+} from "./types";
 
 export abstract class EditorPlugin extends CorePlugin {
-  wrapLine?(context: ReactWrapLineContext): React.ReactNode;
-  wrapLeaf?(context: ReactWrapLeafContext): React.ReactNode;
-  renderLine?(context: ReactLineContext): React.ReactNode;
-  renderLeaf?(context: ReactLeafContext): React.ReactNode;
+  /**
+   * 渲染包装行节点的 key
+   */
+  public wrapLineKeys?: string[];
+  /**
+   * 渲染包装叶子节点的 key
+   */
+  public wrapLeafKeys?: string[];
+  /**
+   * 包装行节点的调度优先级
+   * - 非装饰器模式的实现
+   */
+  public __PRIORITY__wrapLine?: number;
+  /**
+   * 包装叶子节点的调度优先级
+   * - 非装饰器模式的实现
+   */
+  public __PRIORITY__wrapLeaf?: number;
+  /**
+   * 渲染包装行节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public wrapLine?(children: ReactWrapLineContext): React.ReactNode;
+  /**
+   * 渲染包装叶子节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public wrapLeaf?(context: ReactWrapLeafContext): React.ReactNode;
+  /**
+   * 渲染行节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public renderLine?(context: ReactLineContext): React.ReactNode;
+  /**
+   * 渲染块级子节点
+   * - 调度优先级值越大 DOM 结构在越外层
+   */
+  public renderLeaf?(context: ReactLeafContext): React.ReactNode;
 }

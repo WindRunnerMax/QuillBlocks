@@ -5,7 +5,7 @@ import type { FC, PropsWithChildren } from "react";
 import React from "react";
 
 import { useEditorStatic } from "../hooks/use-editor";
-import type { ReactLeafContext } from "../plugin";
+import type { ReactLeafContext } from "../plugin/types";
 import { ZeroSpace } from "./zero";
 
 export type VoidProps = PropsWithChildren<{

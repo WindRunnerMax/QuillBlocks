@@ -36,7 +36,7 @@ export class Event {
    * 监听事件
    * @param key
    * @param listener
-   * @param priority
+   * @param priority 默认为 100
    */
   public on: EventBus["on"] = (key, listener, priority) => {
     return this.bus.on(key, listener, priority);
@@ -46,7 +46,7 @@ export class Event {
    * 一次性事件监听
    * @param key
    * @param listener
-   * @param priority
+   * @param priority 默认为 100
    */
   public once: EventBus["once"] = (key, listener, priority) => {
     return this.bus.once(key, listener, priority);

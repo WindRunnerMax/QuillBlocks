@@ -8,10 +8,6 @@ import type { CallerMap, CallerType, PluginFuncKeys, PluginRequiredKeyFunc } fro
 export class Plugin {
   /** 当前注册的插件 */
   public current: CorePlugin[];
-  /** 包装叶子结点的 keys */
-  public wrapLeafKeys: string[];
-  /** 包装行结点的 keys */
-  public wrapLineKeys: string[];
   /** 插件缓存 */
   protected cache: Record<string, CorePlugin[]>;
 
@@ -22,8 +18,6 @@ export class Plugin {
   constructor(protected editor: Editor) {
     this.cache = {};
     this.current = [];
-    this.wrapLineKeys = [];
-    this.wrapLeafKeys = [];
   }
 
   /**
@@ -47,12 +41,6 @@ export class Plugin {
     const map: Record<string, CorePlugin> = {};
     for (const plugin of plugins) {
       map[plugin.key] = plugin;
-      if (plugin.wrapLineKeys) {
-        this.wrapLineKeys.push(...plugin.wrapLineKeys);
-      }
-      if (plugin.wrapLeafKeys) {
-        this.wrapLeafKeys.push(...plugin.wrapLeafKeys);
-      }
     }
     this.current = Object.values(map);
   }
