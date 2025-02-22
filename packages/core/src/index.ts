@@ -44,7 +44,7 @@ export {
   ZERO_VOID_KEY,
 } from "./model/types";
 export { CorePlugin } from "./plugin/modules/implement";
-export { getPluginPriority, Priority, PRIORITY_KEY } from "./plugin/modules/priority";
+export { Priority, PRIORITY_KEY } from "./plugin/modules/priority";
 export { CALLER_TYPE, PLUGIN_TYPE } from "./plugin/types";
 export type { LeafContext, LineContext } from "./plugin/types/context";
 export type { EditorSchema, SchemaRule } from "./schema/types";

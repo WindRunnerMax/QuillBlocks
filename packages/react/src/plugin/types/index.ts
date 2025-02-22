@@ -29,3 +29,11 @@ export interface ReactLineContext extends LineContext {
 export interface ReactLeafContext extends LeafContext {
   children?: React.ReactNode;
 }
+
+/**
+ * 包装类型
+ */
+export const WRAP_TYPE = {
+  LINE: "wrapLine",
+  LEAF: "wrapLeaf",
+} as const;

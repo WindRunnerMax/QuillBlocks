@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { BlockKitContext } from "../hooks/use-editor";
 import { ReadonlyContext } from "../hooks/use-readonly";
-import { initWrapPlugins } from "../plugin/wrap";
+import { initWrapPlugins } from "../plugin/modules/wrap";
 
 export const BlockKit: React.FC<{ editor: Editor; readonly?: boolean }> = props => {
   const { editor, readonly, children } = props;

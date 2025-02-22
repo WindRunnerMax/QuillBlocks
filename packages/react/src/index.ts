@@ -5,6 +5,8 @@ export { EOLModel } from "./model/eol";
 export { LeafModel } from "./model/leaf";
 export { LineModel } from "./model/line";
 export { EditorPlugin } from "./plugin/index";
+export { Priority } from "./plugin/modules/priority";
+export { InjectWrapKeys } from "./plugin/modules/wrap";
 export type {
   ReactLeafContext,
   ReactLineContext,

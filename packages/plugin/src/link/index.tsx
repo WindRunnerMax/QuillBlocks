@@ -3,6 +3,7 @@ import type { CMDPayload } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import type { ReactLeafContext, ReactWrapLeafContext } from "block-kit-react";
 import { EditorPlugin } from "block-kit-react";
+import { InjectWrapKeys } from "block-kit-react";
 import { Bind } from "block-kit-utils";
 
 import { LINK_KEY, LINK_TEMP_KEY } from "./types";
@@ -27,7 +28,7 @@ export class LinkPlugin extends EditorPlugin {
     return !!attrs[LINK_KEY] || !!attrs[LINK_TEMP_KEY];
   }
 
-  public wrapLeafKeys = [LINK_KEY];
+  @InjectWrapKeys(LINK_KEY)
   public wrapLeaf(context: ReactWrapLeafContext): React.ReactNode {
     const state = context.leafState;
     const attrs = state.op.attributes || {};

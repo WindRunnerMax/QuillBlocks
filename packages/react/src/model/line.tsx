@@ -7,8 +7,8 @@ import { useUpdateLayoutEffect } from "block-kit-utils/dist/es/hooks";
 import type { FC } from "react";
 import React, { useMemo } from "react";
 
+import { EDITOR_TO_WRAP_LEAF_KEYS, EDITOR_TO_WRAP_LEAF_PLUGINS } from "../plugin/modules/wrap";
 import type { ReactLineContext, ReactWrapLeafContext } from "../plugin/types";
-import { EDITOR_TO_WRAP_LEAF_KEYS, EDITOR_TO_WRAP_LEAF_PLUGINS } from "../plugin/wrap";
 import { JSX_TO_STATE, LEAF_TO_TEXT } from "../utils/weak-map";
 import { getWrapSymbol } from "../utils/wrapper";
 import { EOLModel } from "./eol";
