@@ -1,9 +1,14 @@
 import type { BlockState, Editor } from "block-kit-core";
+import type { LineState } from "block-kit-core";
 import { BLOCK_KEY, EDITOR_EVENT, EDITOR_STATE } from "block-kit-core";
 import { useMemoFn } from "block-kit-utils/dist/es/hooks";
 import type { FC } from "react";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
+import { EDITOR_TO_WRAP_LINE_KEYS, EDITOR_TO_WRAP_LINE_PLUGINS } from "../plugin/modules/wrap";
+import type { ReactWrapLineContext } from "../plugin/types";
+import { JSX_TO_STATE } from "../utils/weak-map";
+import { getWrapSymbol } from "../utils/wrapper";
 import { LineModel } from "./line";
 
 /**
@@ -80,11 +85,71 @@ const BlockView: FC<{
     });
   });
 
+  /**
+   * 处理行节点
+   */
+  const elements = useMemo(() => {
+    return lines.map((line, index) => {
+      const node = (
+        <LineModel key={line.key} editor={editor} lineState={line} index={index}></LineModel>
+      );
+      JSX_TO_STATE.set(node, line);
+      return node;
+    });
+  }, [editor, lines]);
+
+  /**
+   * 将行包装组合 O(N)
+   */
+  const children = useMemo(() => {
+    const wrapped: JSX.Element[] = [];
+    const keys = EDITOR_TO_WRAP_LINE_KEYS.get(editor);
+    const plugins = EDITOR_TO_WRAP_LINE_PLUGINS.get(editor);
+    if (!keys || !plugins) return elements;
+    const len = elements.length;
+    for (let i = 0; i < len; ++i) {
+      const element = elements[i];
+      const symbol = getWrapSymbol(keys, element);
+      const line = JSX_TO_STATE.get(element) as LineState;
+      if (!element || !line || !symbol) {
+        wrapped.push(element);
+        continue;
+      }
+      // 执行到此处说明需要包装相关节点(即使仅单个节点)
+      const nodes: JSX.Element[] = [element];
+      for (let k = i + 1; k < len; ++k) {
+        const next = elements[k];
+        const nextSymbol = getWrapSymbol(keys, next);
+        if (!next || !nextSymbol || nextSymbol !== symbol) {
+          // 回退到上一个值, 以便下次循环时重新检查
+          i = k - 1;
+          break;
+        }
+        nodes.push(next);
+        i = k;
+      }
+      // 通过插件渲染包装节点
+      let wrapper: React.ReactNode = nodes;
+      const op = line.op;
+      for (const plugin of plugins) {
+        // 这里的状态以首个节点为准
+        const context: ReactWrapLineContext = {
+          lineState: line,
+          children: wrapper,
+        };
+        if (plugin.match(line.op.attributes || {}, op) && plugin.wrapLine) {
+          wrapper = plugin.wrapLine(context);
+        }
+      }
+      const key = `${i - nodes.length + 1}-${i}`;
+      wrapped.push(<React.Fragment key={key}>{wrapper}</React.Fragment>);
+    }
+    return wrapped;
+  }, [editor, elements]);
+
   return (
     <div className="notranslate" {...{ [BLOCK_KEY]: true }} ref={setModel}>
-      {lines.map((line, index) => (
-        <LineModel key={line.key} editor={editor} lineState={line} index={index}></LineModel>
-      ))}
+      {children}
     </div>
   );
 };

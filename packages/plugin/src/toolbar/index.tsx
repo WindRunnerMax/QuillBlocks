@@ -13,6 +13,7 @@ import { Italic } from "./modules/italic";
 import { LineHeight } from "./modules/line-height";
 import { Link } from "./modules/link";
 import { OrderList } from "./modules/order-list";
+import { Quote } from "./modules/quote";
 import { Strike } from "./modules/strike";
 import { Underline } from "./modules/underline";
 
@@ -23,6 +24,7 @@ export const Mixin = {
   Cut,
   Bold,
   Link,
+  Quote,
   Image,
   Align,
   Italic,

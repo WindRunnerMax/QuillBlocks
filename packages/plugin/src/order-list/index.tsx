@@ -125,7 +125,12 @@ export class OrderListPlugin extends EditorPlugin {
       prevLine &&
       isOrderList(prevLine.attributes)
     ) {
-      const delta = new Delta().retain(startLine.start).insertEOL({ ...prevLine.attributes });
+      const nextAttrs = { ...prevLine.attributes };
+      if (attrs[INDENT_LEVEL_KEY]) {
+        // 缩进层级优先取当前行的缩进层级
+        nextAttrs[INDENT_LEVEL_KEY] = attrs[INDENT_LEVEL_KEY];
+      }
+      const delta = new Delta().retain(startLine.start).insertEOL(nextAttrs);
       this.editor.state.apply(delta);
       applyNewOrderList(this.editor, sel);
       preventContextEvent(event, context);

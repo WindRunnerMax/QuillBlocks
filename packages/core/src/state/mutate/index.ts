@@ -83,7 +83,7 @@ export class Mutate {
         lineDOM && this.editor.model.setLineModel(lineDOM, lineState);
       }
       lineState.updateLeaves();
-      lineState.attributes = newOp.attributes || {};
+      lineState._updateInternalOp(newOp);
       return LineState.create([], {}, this.block);
     }
     if (

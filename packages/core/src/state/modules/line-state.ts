@@ -1,6 +1,6 @@
 import type { AttributeMap } from "block-kit-delta";
 import type { Op } from "block-kit-delta";
-import { Delta, EOL, getOpLength } from "block-kit-delta";
+import { cloneOp, Delta, EOL, getOpLength } from "block-kit-delta";
 import { isInsertOp } from "block-kit-delta";
 import { OpIterator } from "block-kit-delta";
 
@@ -260,6 +260,22 @@ export class LineState {
     }
     this.length = offset;
     this.size = this.leaves.length;
+  }
+
+  /**
+   * 更新内建 op
+   * - 仅应在 Mutate 中使用, 其余场景应保持 immutable
+   * @internal 仅编辑器内部使用
+   */
+  public _updateInternalOp(op: Op) {
+    const newOp = cloneOp(op);
+    this.op = newOp;
+    this.attributes = newOp.attributes || {};
+    if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+      // 在开发模式和测试环境下冻结, 避免 immutable 的对象被修改
+      Object.freeze(this.op);
+      Object.freeze(this.attributes);
+    }
   }
 
   /**

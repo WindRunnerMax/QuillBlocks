@@ -44,6 +44,8 @@ export {
   ORDER_LIST_KEY,
   ORDER_LIST_TYPE,
 } from "./order-list/types";
+export { QuotePlugin } from "./quote";
+export { QUOTE_KEY } from "./quote/types";
 export { SelectionHOC } from "./shared/components/selection";
 export { SelectionPlugin } from "./shared/modules/selection";
 export { getMountDOM, setMountDOM } from "./shared/utils/dom";

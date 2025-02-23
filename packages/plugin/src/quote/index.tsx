@@ -1,22 +1,21 @@
+import "./styles/index.scss";
+
 import type { CMDPayload, Editor } from "block-kit-core";
 import { EDITOR_EVENT, Point, RawPoint } from "block-kit-core";
 import type { AttributeMap } from "block-kit-delta";
 import { Delta } from "block-kit-delta";
-import type { ReactLineContext } from "block-kit-react";
-import { EditorPlugin } from "block-kit-react";
+import type { ReactWrapLineContext } from "block-kit-react";
+import { EditorPlugin, InjectWrapKeys } from "block-kit-react";
 import type { EventContext } from "block-kit-utils";
-import { Bind, KEY_CODE, NIL } from "block-kit-utils";
+import { Bind, KEY_CODE, NIL, TRULY } from "block-kit-utils";
 import type { ReactNode } from "react";
 
-import { INDENT_LEVEL_KEY } from "../indent/types";
 import { preventContextEvent } from "../shared/utils/dom";
 import { isEmptyLine, isKeyCode } from "../shared/utils/is";
-import { BULLET_LIST_KEY, BULLET_LIST_TYPE, LIST_TYPE_KEY } from "./types";
-import { isBulletList } from "./utils/is";
-import { BulletListView } from "./view/list";
+import { QUOTE_KEY } from "./types";
 
-export class BulletListPlugin extends EditorPlugin {
-  public key = BULLET_LIST_KEY;
+export class QuotePlugin extends EditorPlugin {
+  public key = QUOTE_KEY;
 
   constructor(protected editor: Editor) {
     super();
@@ -29,18 +28,15 @@ export class BulletListPlugin extends EditorPlugin {
   }
 
   public match(attrs: AttributeMap): boolean {
-    return isBulletList(attrs);
+    return !!attrs[QUOTE_KEY];
   }
 
-  public renderLine(context: ReactLineContext): ReactNode {
-    const level = Number(context.attributes[INDENT_LEVEL_KEY]) || 0;
-    // 这里需要注意, 必须要将 context.children 作为 React 的子元素
-    // 否则, 在 React 的渲染过程中, 会出现奇怪的 Crash 问题
-    return (
-      <BulletListView level={level} editor={this.editor} context={context}>
-        {context.children}
-      </BulletListView>
-    );
+  @InjectWrapKeys(QUOTE_KEY)
+  public wrapLine(context: ReactWrapLineContext): ReactNode {
+    if (!context.lineState.attributes[QUOTE_KEY]) {
+      return context.children;
+    }
+    return <div className="block-kit-quote">{context.children}</div>;
   }
 
   @Bind
@@ -49,26 +45,23 @@ export class BulletListPlugin extends EditorPlugin {
     const sel = editor.selection.get() || payload.range;
     if (!sel) return void 0;
     const { start, end } = sel;
-    // 先检查当前需要设置/解除列表状态
+    // 先检查当前需要设置/解除引用状态
     const lines = editor.state.block.getLines().slice(start.line, end.line + 1);
-    const isBullet = lines.every(line => isBulletList(line.attributes));
+    const isQuote = lines.every(line => line.attributes[QUOTE_KEY]);
     // 计算需要操作的范围
     const rawPoint = RawPoint.fromPoint(this.editor, Point.from(start.line, 0));
     if (!rawPoint) return void 0;
     const block = this.editor.state.block;
     const delta = new Delta();
     delta.retain(rawPoint.offset);
-    // 根据行的状态, 逐行设置列表状态
+    // 根据行的状态, 逐行设置引用状态
     for (let i = start.line; i <= end.line; i++) {
       const lineState = block.getLine(i);
       if (!lineState) break;
       delta.retain(lineState.length - 1);
       const attrs: AttributeMap = {
-        [LIST_TYPE_KEY]: isBullet ? NIL : BULLET_LIST_TYPE,
+        [QUOTE_KEY]: isQuote ? NIL : TRULY,
       };
-      if (!isBullet && lineState.attributes[INDENT_LEVEL_KEY]) {
-        attrs[INDENT_LEVEL_KEY] = lineState.attributes[INDENT_LEVEL_KEY];
-      }
       delta.retain(1, attrs);
     }
     this.editor.state.apply(delta, { autoCaret: false });
@@ -83,67 +76,56 @@ export class BulletListPlugin extends EditorPlugin {
     if (!startLine) return void 0;
     const prevLine = startLine.prev();
     const attrs = startLine.attributes;
-    // 当前行是列表行, 且按下回车键, 且选区折叠, 且当前行是空行
-    // => 处理列表的缩进等级
+    // 当前行是引用行, 且按下回车键, 且选区折叠, 且当前行是空行
+    // => 删除当前的引用行格式
     if (
       isKeyCode(event, KEY_CODE.ENTER) &&
-      isBulletList(attrs) &&
+      attrs[QUOTE_KEY] &&
       sel.isCollapsed &&
       isEmptyLine(startLine)
     ) {
-      const level = Number(attrs[INDENT_LEVEL_KEY]);
-      const nextAttrs: AttributeMap = {};
-      if (level > 0) {
-        // 缩进等级大于 0, 则减少缩进等级
-        const nextLevel = level - 1 > 0 ? String(level - 1) : NIL;
-        nextAttrs[INDENT_LEVEL_KEY] = nextLevel;
-      } else {
-        // 否则, 取消列表状态
-        nextAttrs[LIST_TYPE_KEY] = NIL;
-      }
+      const nextAttrs: AttributeMap = {
+        [QUOTE_KEY]: NIL,
+      };
       const delta = new Delta().retain(startLine.start + startLine.length - 1).retain(1, nextAttrs);
       this.editor.state.apply(delta, { autoCaret: false });
       preventContextEvent(event, context);
       return void 0;
     }
-    // 当前行是列表行, 且按下回车键, 且选区折叠, 且位于行首, 且上一行是列表行
-    // => 继续列表格式, 避免默认的处理, 保持列表的连续性
+    // 当前行是引用行, 且按下回车键, 且选区折叠, 且位于行首, 且上一行是引用行
+    // => 继续引用格式, 避免默认的处理, 保持引用的连续性
     if (
       isKeyCode(event, KEY_CODE.ENTER) &&
-      isBulletList(attrs) &&
+      attrs[QUOTE_KEY] &&
       sel.isCollapsed &&
       sel.start.offset === 0 &&
       prevLine &&
-      isBulletList(prevLine.attributes)
+      prevLine.attributes[QUOTE_KEY]
     ) {
       const nextAttrs = { ...prevLine.attributes };
-      if (attrs[INDENT_LEVEL_KEY]) {
-        // 缩进层级优先取当前行的缩进层级
-        nextAttrs[INDENT_LEVEL_KEY] = attrs[INDENT_LEVEL_KEY];
-      }
       const delta = new Delta().retain(startLine.start).insertEOL(nextAttrs);
       this.editor.state.apply(delta);
       preventContextEvent(event, context);
       return void 0;
     }
-    // 当前行是列表行, 且按下回车键
-    // => 在列表行内部插入换行符, 且携带列表状态
-    if (isKeyCode(event, KEY_CODE.ENTER) && isBulletList(attrs) && sel.start.offset) {
+    // 当前行是引用行, 且按下回车键, 且非行首
+    // => 在引用行内部插入换行符, 且携带引用状态
+    if (isKeyCode(event, KEY_CODE.ENTER) && attrs[QUOTE_KEY] && sel.start.offset) {
       this.editor.perform.insertBreak(sel, attrs);
       preventContextEvent(event, context);
       return void 0;
     }
-    // 当前行是列表行, 且折叠选区, 且在行首, 且按下退格键
-    // => 将当前行的列表状态移除, 保留缩进的等级
+    // 当前行是引用行, 且折叠选区, 且在行首, 且按下退格键
+    // => 将当前行的引用状态移除
     if (
       isKeyCode(event, KEY_CODE.BACKSPACE) &&
       sel.isCollapsed &&
-      isBulletList(attrs) &&
+      attrs[QUOTE_KEY] &&
       !sel.start.offset
     ) {
       const delta = new Delta()
         .retain(startLine.start + startLine.length - 1)
-        .retain(1, { [LIST_TYPE_KEY]: NIL });
+        .retain(1, { [QUOTE_KEY]: NIL });
       this.editor.state.apply(delta, { autoCaret: false });
       preventContextEvent(event, context);
       return void 0;

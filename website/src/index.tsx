@@ -19,6 +19,7 @@ import {
   LinkPlugin,
   MentionPlugin,
   Mixin,
+  QuotePlugin,
   setMountDOM,
   StrikePlugin,
   Toolbar,
@@ -58,7 +59,8 @@ const App: FC = () => {
       new BulletListPlugin(instance),
       new OrderListPlugin(instance),
       new IndentPlugin(instance),
-      new LinkPlugin(instance)
+      new LinkPlugin(instance),
+      new QuotePlugin(instance)
     );
     return instance;
   }, []);
@@ -92,6 +94,7 @@ const App: FC = () => {
           <Mixin.Align></Mixin.Align>
           <Mixin.LineHeight></Mixin.LineHeight>
           <Mixin.Cut></Mixin.Cut>
+          <Mixin.Quote></Mixin.Quote>
           <Mixin.BulletList></Mixin.BulletList>
           <Mixin.OrderList></Mixin.OrderList>
           <Mixin.Cut></Mixin.Cut>
