@@ -1,6 +1,5 @@
 import { isArray, isNil, isObject } from "./is";
-import type { Array, P } from "./types";
-import type { Object } from "./types";
+import type { Array, O, P } from "./types";
 
 export class Collection {
   /**
@@ -8,17 +7,14 @@ export class Collection {
    * @param {Object.Any} target
    * @param {string} keys
    */
-  public static pick<T extends Object.Any, K extends keyof T>(
-    target: T,
-    keys: K | K[]
-  ): Pick<T, K> {
+  public static pick<T extends O.Any, K extends keyof T>(target: T, keys: K | K[]): Pick<T, K> {
     const set: Set<unknown> = new Set(isArray(keys) ? keys : [keys]);
-    const next = {} as T;
-    for (const key in target) {
+    const next = {} as O.Map<unknown>;
+    for (const key of Object.keys(target)) {
       if (!set.has(key)) continue;
       next[key] = target[key];
     }
-    return next;
+    return next as T;
   }
 
   /**
@@ -27,12 +23,12 @@ export class Collection {
    * @param {Array.Any} keys
    */
   public static omit<T extends Array.Any>(target: T, keys: T): T;
-  public static omit<T extends Object.Any, K extends keyof T>(target: T, keys: K | K[]): Omit<T, K>;
-  public static omit<T extends Array.Any | Object.Any>(target: T, keys: Array.Any): T | Object.Any {
+  public static omit<T extends O.Any, K extends keyof T>(target: T, keys: K | K[]): Omit<T, K>;
+  public static omit<T extends Array.Any | O.Any>(target: T, keys: Array.Any): T | O.Any {
     const set = new Set(isArray(keys) ? keys : [keys]);
     if (isObject(target)) {
-      const next = {} as Object.Unknown;
-      for (const key in target) {
+      const next = {} as O.Unknown;
+      for (const key of Object.keys(target)) {
         if (set.has(key)) continue;
         next[key] = target[key];
       }

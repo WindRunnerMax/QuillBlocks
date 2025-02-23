@@ -13,9 +13,6 @@ import { EOL, OP_TYPES } from "./interface";
 import { iterator } from "./iterator";
 import { getOpLength, isDeleteOp, isInsertOp, isRetainOp } from "./op";
 
-// Placeholder char for embed in diff()
-const NULL_CHARACTER = String.fromCharCode(0);
-
 export class Delta {
   /** 内建 ops */
   public ops: Op[];
@@ -342,9 +339,7 @@ export class Delta {
     const strings = [this, other].map(delta => {
       return delta
         .map(op => {
-          if (op.insert) {
-            return isInsertOp(op) ? op.insert : NULL_CHARACTER;
-          }
+          if (op.insert) return op.insert;
           const prep = delta === other ? "on" : "with";
           throw new Error("diff() called " + prep + " non-document");
         })

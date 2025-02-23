@@ -5,6 +5,10 @@ import { useEditorStatic } from "../hooks/use-editor";
 import { useReadonly } from "../hooks/use-readonly";
 import { BlockModel } from "../model/block";
 
+/**
+ * 编辑节点
+ * @param props
+ */
 export const Editable: React.FC<{
   className?: string;
   autoFocus?: boolean;

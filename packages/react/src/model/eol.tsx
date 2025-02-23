@@ -5,6 +5,10 @@ import React from "react";
 
 import { ZeroSpace } from "../preset/zero";
 
+/**
+ * EOL Model
+ * @param props
+ */
 const EOLView: FC<{
   editor: Editor;
   leafState: LeafState;

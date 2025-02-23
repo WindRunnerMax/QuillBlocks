@@ -1,4 +1,5 @@
 import { isNumber, isString } from "./is";
+import type { O } from "./types";
 
 export class DateTime extends Date {
   /**
@@ -63,7 +64,7 @@ export class DateTime extends Date {
    * @desc yyyy 年 MM 月 dd 日 hh 小时 mm 分 ss 秒 S 毫秒
    */
   public format(fmt = "yyyy-MM-dd"): string {
-    const preset: { [key: string]: string | number } = {
+    const preset: O.Map<string | number> = {
       "M+": this.getMonth() + 1, // 月份
       "d+": this.getDate(), // 日
       "h+": this.getHours(), // 小时
@@ -73,7 +74,7 @@ export class DateTime extends Date {
     if (/(y+)/.test(fmt)) {
       fmt = fmt.replace(RegExp.$1, this.getFullYear().toString().slice(-RegExp.$1.length));
     }
-    for (const k in preset) {
+    for (const k of Object.keys(preset)) {
       if (new RegExp(`(${k})`).test(fmt)) {
         const val = preset[k].toString();
         fmt = fmt.replace(

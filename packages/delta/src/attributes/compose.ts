@@ -17,7 +17,7 @@ export const composeAttributes = (
   if (!isObject(b)) b = {};
   let attributes = { ...b };
   if (!keepEmpty) {
-    // remove empty attributes
+    // Remove empty attributes
     attributes = Object.keys(attributes).reduce<AttributeMap>((copy, key) => {
       if (attributes[key] !== "" && attributes[key] !== null) {
         copy[key] = attributes[key];
@@ -25,8 +25,8 @@ export const composeAttributes = (
       return copy;
     }, {});
   }
-  for (const key in a) {
-    // compose a to b
+  for (const key of Object.keys(a)) {
+    // Compose a to b
     if (a[key] !== undefined && b[key] === undefined) {
       attributes[key] = a[key];
     }

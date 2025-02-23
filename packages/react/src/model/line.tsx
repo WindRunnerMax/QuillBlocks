@@ -14,6 +14,10 @@ import { getWrapSymbol } from "../utils/wrapper";
 import { EOLModel } from "./eol";
 import { LeafModel } from "./leaf";
 
+/**
+ * Line Model
+ * @param props
+ */
 const LineView: FC<{
   editor: Editor;
   index: number;

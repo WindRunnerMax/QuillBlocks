@@ -9,11 +9,7 @@ import type { Op, Ops } from "../delta/interface";
  * @param attrs
  */
 export const cloneAttributes = (attrs: AttributeMap): AttributeMap => {
-  const newAttrs = {} as AttributeMap;
-  for (const [key, value] of Object.entries(attrs)) {
-    newAttrs[key] = value;
-  }
-  return newAttrs;
+  return Object.assign({}, attrs);
 };
 
 /**

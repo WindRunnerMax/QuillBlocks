@@ -15,11 +15,11 @@ export const transformAttributes = (
 ): AttributeMap | undefined => {
   if (!isObject(a)) return b;
   if (!isObject(b)) return undefined;
-  // b simply overwrites us without priority
+  // B simply overwrites us without priority
   if (!priority) return b;
   const attributes = Object.keys(b).reduce<AttributeMap>((attrs, key) => {
     if (a[key] === undefined) {
-      // null is a valid value
+      // Null is a valid value
       attrs[key] = b[key];
     }
     return attrs;

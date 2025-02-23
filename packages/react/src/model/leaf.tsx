@@ -7,6 +7,11 @@ import type { ReactLeafContext } from "../plugin/types";
 import { Text } from "../preset/text";
 import { LEAF_TO_TEXT as LT } from "../utils/weak-map";
 
+/**
+ * Leaf Model
+ * @param props
+ * @returns
+ */
 const LeafView: FC<{
   editor: Editor;
   index: number;

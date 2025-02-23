@@ -6,6 +6,10 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { LineModel } from "./line";
 
+/**
+ * Block Model
+ * @param props
+ */
 const BlockView: FC<{
   editor: Editor;
   state: BlockState;
