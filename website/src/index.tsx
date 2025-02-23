@@ -34,6 +34,7 @@ import { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { GitHubIcon } from "./components/github";
+import { ThemeMode } from "./components/theme";
 import { INIT } from "./config/block";
 import { schema } from "./config/schema";
 
@@ -103,6 +104,7 @@ const App: FC = () => {
           <Mixin.Cut></Mixin.Cut>
           <Mixin.History></Mixin.History>
           <Mixin.Cut></Mixin.Cut>
+          <ThemeMode></ThemeMode>
           <GitHubIcon></GitHubIcon>
         </Toolbar>
         <FloatToolbar width={344} offsetHeight={50}>

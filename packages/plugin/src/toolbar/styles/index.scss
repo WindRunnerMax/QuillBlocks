@@ -36,6 +36,8 @@
 .block-kit-toolbar-dropdown {
   @include frame-region;
 
+  color: var(--color-text-1);
+
   > .kit-toolbar-node {
     align-items: center;
     cursor: pointer;
